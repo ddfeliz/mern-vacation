@@ -192,24 +192,39 @@ const ShowCorrecteur = () => {
     }
   };
 
-  // Filtrage des correcteurs en fonction des critères de recherche
-  const filteredCorrecteurs = correcteurs.filter((correcteur) => {
-    return (
-      correcteur.nom.toLowerCase().includes(searchItem.toLowerCase()) ||
-      correcteur.prenom.toLowerCase().includes(searchItem.toLowerCase()) ||
-      (correcteur.idCorrecteur
-        .toLowerCase()
-        .includes(searchItem.toLowerCase()) &&
-        correcteur.specialite
-          .toLowerCase()
-          .includes(searchSpecialite.toLowerCase()) &&
-        correcteur.secteur
-          .toLowerCase()
-          .includes(searchSecteur.toLowerCase()) &&
-        correcteur.option.toLowerCase().includes(searchOption.toLowerCase()) &&
-        correcteur.matiere.toLowerCase().includes(searchMatiere.toLowerCase()))
-    );
-  });
+ // Filtrage des correcteurs en fonction des critères de recherche
+const filteredCorrecteurs = correcteurs.filter((correcteur) => {
+  const matchesNomOrPrenomOrId =
+    correcteur.nom.toLowerCase().includes(searchItem.toLowerCase()) ||
+    correcteur.prenom.toLowerCase().includes(searchItem.toLowerCase()) ||
+    correcteur.idCorrecteur.toLowerCase().includes(searchItem.toLowerCase());
+
+  const matchesSpecialite = correcteur.specialite
+    .toLowerCase()
+    .includes(searchSpecialite.toLowerCase());
+  
+  const matchesSecteur = correcteur.secteur
+    .toLowerCase()
+    .includes(searchSecteur.toLowerCase());
+
+  const matchesOption = correcteur.option
+    .toLowerCase()
+    .includes(searchOption.toLowerCase());
+
+  const matchesMatiere = correcteur.matiere
+    .toLowerCase()
+    .includes(searchMatiere.toLowerCase());
+
+  // Retourne les résultats qui correspondent aux critères de recherche
+  return (
+    matchesNomOrPrenomOrId &&
+    matchesSpecialite &&
+    matchesSecteur &&
+    matchesOption &&
+    matchesMatiere
+  );
+});
+
 
   // Pagination
   const indexOfLastCorrecteur = currentPage * correcteursPerPage;

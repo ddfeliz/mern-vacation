@@ -7,7 +7,7 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react';
-import { CheckCircleIcon, StopCircleIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, ExclamationTriangleIcon, StopCircleIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 
 const currentSession = new Date().getFullYear();
@@ -33,6 +33,7 @@ const CreateVacation = () => {
   const [open, setOpen] = useState(false);
   const [openVerify, setOpenVerify] = useState(false);
   const [openVerifyVac, setOpenVerifyVac] = useState(false);
+  const [openVerifyCorrecteur, setOpenVerifyCorrecteur] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const [idCorrecteur, setIdCorrecteur] = useState(''); // État pour stocker l'ID
@@ -58,7 +59,6 @@ const CreateVacation = () => {
         `http://localhost:3000/api/correcteur/${idCorrecteur}`,
       );
       const fetchedData = response.data;
-
       // Remplir le formulaire avec les valeurs récupérées
       setFormData({
         idCorrecteur: fetchedData.idCorrecteur,
@@ -78,6 +78,7 @@ const CreateVacation = () => {
       setError('');
     } catch (err) {
       console.error('Erreur lors de la récupération des champs :', err);
+      setOpenVerifyCorrecteur(true);
       setError('Aucun correcteur trouvé avec cet ID.');
     } finally {
       setLoading(false);
@@ -321,6 +322,38 @@ const CreateVacation = () => {
                       </DialogTitle>
                       <p className="mt-2 text-sm text-gray-500">
                         Cette vacation existe déjà! Veuillze verifer vos source.
+                      </p>
+                    </div>
+                  </div>
+                </DialogPanel>
+              </div>
+            </Dialog>
+
+            <Dialog
+              open={openVerifyCorrecteur}
+              onClose={() => setOpenVerifyCorrecteur(false)}
+              className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+            >
+              {/* Arrière-plan grisé */}
+              <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-50" />
+
+              {/* Contenu de la modal */}
+              <div className="flex items-center justify-center min-h-screen">
+                <DialogPanel className="relative mx-auto w-full max-w-md rounded-lg bg-white shadow-lg p-6">
+                  {/* Icône et Message */}
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      <ExclamationTriangleIcon
+                        className="h-12 w-12 text-danger"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-xl font-medium text-danger">
+                        Verification ID Correcteur
+                      </DialogTitle>
+                      <p className="mt-2 text-sm text-gray-500">
+                        Ce Correcteur n'existe pas! Veuillez verifier vos données.
                       </p>
                     </div>
                   </div>

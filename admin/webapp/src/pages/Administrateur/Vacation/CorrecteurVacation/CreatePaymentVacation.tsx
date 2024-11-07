@@ -7,10 +7,13 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react';
-import { CheckCircleIcon } from '@heroicons/react/24/outline';
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  StopCircleIcon,
+} from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { Tarif } from '../../../../types/tarif';
-import { Vacation } from '../../../../types/vacation';
 
 const CreatePaymentVacation = () => {
   const [formData, setFormData] = useState({
@@ -30,30 +33,17 @@ const CreatePaymentVacation = () => {
   const [loading, setLoading] = useState(false); // État pour gérer le chargement
   const [tarifs, setTarifs] = useState<Tarif[]>([]);
   const [idVacation, setIdVacation] = useState<string>(''); // Champ pour entrer idVacation
-  const [selectedVacation, setSelectedVacation] = useState<Vacation | null>(
-    null,
-  );
   const [montantTotal, setMontantTotal] = useState<number | null>(null);
   const [optionTarifChoisi, setOptionTarifChoisi] = useState<string | null>(
     null,
   ); // Nouvel état pour afficher l'option tarif choisi
 
-  const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
+  const [openVerifyVacation, setOpenVerifyVacation] = useState(false);
+  const [openVerify, setOpenVerify] = useState(false);
+  const [openVerifyPayment, setOpenVerifyPayment] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
-  // Utilisation de useEffect pour lancer un timer de 5 secondes
-  useEffect(() => {
-    if (error) {
-      setVisible(true);
-      const timer = setTimeout(() => {
-        setVisible(false);
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
 
   // Fetch all tariffs on component mount
   useEffect(() => {
@@ -103,38 +93,45 @@ const CreatePaymentVacation = () => {
       setError('');
     } catch (err) {
       console.error('Erreur lors de la récupération des champs :', err);
+      setOpenVerifyVacation(true);
       setError('Aucun correcteur trouvé avec cet ID.');
-      setSelectedVacation(null);
     } finally {
       setLoading(false);
     }
   };
 
   const calculatePayement = () => {
-    if (!formData.nbcopie) return;
-
-    let montant = 0;
-    let optionTarif = '';
-
-    if (Number(formData.nbcopie) < 50) {
-      const tarifForfetaire = tarifs.find(
-        (tarif) => tarif.optionTarif === 'Par forfaitaire',
-      );
-      montant = tarifForfetaire ? tarifForfetaire.MontantTarif : 0;
-      optionTarif = 'Par forfaitaire';
+    if (!formData.nbcopie) {
+      setOpenVerify(true);
+      return;
     } else {
-      const tarifParNombre = tarifs.find(
-        (tarif) => tarif.optionTarif === 'Par nombre du copie',
-      );
-      montant = tarifParNombre
-        ? tarifParNombre.MontantTarif * Number(formData.nbcopie)
-        : 0;
-      optionTarif = 'Par nombre du copie';
-    }
+      let montant = 0;
+      let optionTarif = '';
 
-    setMontantTotal(montant);
-    setOptionTarifChoisi(optionTarif); // Met à jour l'option tarif choisi
-    setFormData({ ...formData, optionTarif, montantTotal: montant.toString() });
+      if (Number(formData.nbcopie) < 50) {
+        const tarifForfetaire = tarifs.find(
+          (tarif) => tarif.optionTarif === 'Par forfaitaire',
+        );
+        montant = tarifForfetaire ? tarifForfetaire.MontantTarif : 0;
+        optionTarif = 'Par forfaitaire';
+      } else {
+        const tarifParNombre = tarifs.find(
+          (tarif) => tarif.optionTarif === 'Par nombre du copie',
+        );
+        montant = tarifParNombre
+          ? tarifParNombre.MontantTarif * Number(formData.nbcopie)
+          : 0;
+        optionTarif = 'Par nombre du copie';
+      }
+
+      setMontantTotal(montant);
+      setOptionTarifChoisi(optionTarif); // Met à jour l'option tarif choisi
+      setFormData({
+        ...formData,
+        optionTarif,
+        montantTotal: montant.toString(),
+      });
+    }
   };
 
   const handleChange = (e: { target: { name: any; value: any } }) => {
@@ -188,6 +185,10 @@ const CreatePaymentVacation = () => {
       montantTotal,
     } = formData;
 
+    if (!montantTotal || !idVacation) {
+      setOpenVerify(true);
+    }
+
     try {
       console.log('Data sent to server:', formData); // Vérifier ce qui est envoyé
       const response = await axios.post(
@@ -221,6 +222,7 @@ const CreatePaymentVacation = () => {
           err.response.data.message ||
             'Authentication failed. Please try again.',
         );
+        setOpenVerifyPayment(true);
       } else {
         setError('An error occurred. Please try again.');
       }
@@ -299,6 +301,102 @@ const CreatePaymentVacation = () => {
                       </DialogTitle>
                       <p className="mt-2 text-sm text-gray-500">
                         Le paiement du correcteur a été enregistré!
+                      </p>
+                    </div>
+                  </div>
+                </DialogPanel>
+              </div>
+            </Dialog>
+
+            <Dialog
+              open={openVerify}
+              onClose={() => setOpenVerify(false)}
+              className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+            >
+              {/* Arrière-plan grisé */}
+              <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-50" />
+
+              {/* Contenu de la modal */}
+              <div className="flex items-center justify-center min-h-screen">
+                <DialogPanel className="relative mx-auto w-full max-w-md rounded-lg bg-white shadow-lg p-6">
+                  {/* Icône et Message */}
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      <StopCircleIcon
+                        className="h-12 w-12 text-danger"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-xl font-medium text-danger">
+                        Des erreurs survenus
+                      </DialogTitle>
+                      <p className="mt-2 text-sm text-gray-500">
+                        Veuillez completer les autres champs manquantes!
+                      </p>
+                    </div>
+                  </div>
+                </DialogPanel>
+              </div>
+            </Dialog>
+
+            <Dialog
+              open={openVerifyPayment}
+              onClose={() => setOpenVerifyPayment(false)}
+              className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+            >
+              {/* Arrière-plan grisé */}
+              <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-50" />
+
+              {/* Contenu de la modal */}
+              <div className="flex items-center justify-center min-h-screen">
+                <DialogPanel className="relative mx-auto w-full max-w-md rounded-lg bg-white shadow-lg p-6">
+                  {/* Icône et Message */}
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      <CheckCircleIcon
+                        className="h-12 w-12 text-warning"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-xl font-medium text-danger">
+                        Verification du paiement
+                      </DialogTitle>
+                      <p className="mt-2 text-sm text-gray-500">
+                        Cette paiement existe déjà! Veuillez verifer vos source.
+                      </p>
+                    </div>
+                  </div>
+                </DialogPanel>
+              </div>
+            </Dialog>
+
+            <Dialog
+              open={openVerifyVacation}
+              onClose={() => setOpenVerifyVacation(false)}
+              className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+            >
+              {/* Arrière-plan grisé */}
+              <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-50" />
+
+              {/* Contenu de la modal */}
+              <div className="flex items-center justify-center min-h-screen">
+                <DialogPanel className="relative mx-auto w-full max-w-md rounded-lg bg-white shadow-lg p-6">
+                  {/* Icône et Message */}
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-shrink-0">
+                      <ExclamationTriangleIcon
+                        className="h-12 w-12 text-danger"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div>
+                      <DialogTitle className="text-xl font-medium text-danger">
+                        Verification ID Vacation
+                      </DialogTitle>
+                      <p className="mt-2 text-sm text-gray-500">
+                        Ce vacation n'existe pas! Veuillez verifier vos données.
                       </p>
                     </div>
                   </div>
