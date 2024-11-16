@@ -107,7 +107,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Menu Item Dashboard --> */}
               <SidebarLinkGroup
                 activeCondition={
-                  pathname === 'tableau-de-bord' || pathname.includes('tableau-de-bord')
+                  pathname === 'dashboard' || pathname.includes('dashboard')
                 }
               >
                 {(handleClick, open) => {
@@ -153,7 +153,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6">
                           <li>
                             <NavLink
-                              to="/administrateur/dashboard/*"
+                              to="/administrateur/dashboard"
                               className={({ isActive }) =>
                                 'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-boxdark duration-300 ease-in-out hover:text-black dark:text-white dark:hover:text-white' +
                                 (isActive && '!text-bodydark2')
