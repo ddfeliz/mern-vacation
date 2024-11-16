@@ -125,6 +125,7 @@ const ShowArchivePayment = () => {
     const isYearMatch = archive.session.toString().includes(selectedYear);
     const isNameMatch =
       archive.nom.toLowerCase().includes(searchItem.toLowerCase()) ||
+      archive.prenom.toLowerCase().includes(searchItem.toLowerCase()) ||
       archive.idVacation.toLowerCase().includes(searchItem.toLowerCase()) ||
       archive.idCorrecteur.toLowerCase().includes(searchItem.toLowerCase());
 

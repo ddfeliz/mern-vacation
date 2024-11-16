@@ -133,6 +133,7 @@ const CreateVacation = () => {
 
     if (!cin) {
       setOpenVerify(true);
+      setLoading(false);
     }
 
     // Vérification si le CIN existe déjà
@@ -218,6 +219,7 @@ const CreateVacation = () => {
                     id="id"
                     placeholder="Entrez l'ID du correcteur"
                     value={idCorrecteur}
+                    disabled={loading}
                     onChange={(e) => setIdCorrecteur(e.target.value)}
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
@@ -375,7 +377,7 @@ const CreateVacation = () => {
                       type="text"
                       name="firstName"
                       id="firstName"
-                      placeholder="Entrez votre prénom"
+                      placeholder="..."
                       value={formData.firstName}
                       onChange={handleChange}
                       required
@@ -395,7 +397,7 @@ const CreateVacation = () => {
                       type="text"
                       name="lastName"
                       id="lastName"
-                      placeholder="Entrez votre nom de famille"
+                      placeholder="..."
                       value={formData.lastName}
                       onChange={handleChange}
                       required
@@ -418,7 +420,7 @@ const CreateVacation = () => {
                       type="number"
                       name="cin"
                       id="cin"
-                      placeholder="Entrez votre numéro CIN"
+                      placeholder="..."
                       value={formData.cin}
                       onChange={handleChange}
                       onBlur={() => {
@@ -448,7 +450,7 @@ const CreateVacation = () => {
                       type="tel"
                       name="telephone"
                       id="telephone"
-                      placeholder="Entrez votre numéro de téléphone"
+                      placeholder="..."
                       value={formData.telephone}
                       onChange={handleChange}
                       required
@@ -470,7 +472,7 @@ const CreateVacation = () => {
                       type="text"
                       name="specialite"
                       id="specialite"
-                      placeholder="Entrez votre prénom"
+                      placeholder="..."
                       value={formData.specialite}
                       onChange={handleChange}
                       required
@@ -489,7 +491,7 @@ const CreateVacation = () => {
                       type="text"
                       name="secteur"
                       id="secteur"
-                      placeholder="Entrez le nombre d'années d'expérience"
+                      placeholder="..."
                       value={formData.secteur}
                       onChange={handleChange}
                       required
@@ -511,7 +513,7 @@ const CreateVacation = () => {
                       type="text"
                       name="option"
                       id="option"
-                      placeholder="Entrez votre prénom"
+                      placeholder="..."
                       value={formData.option}
                       onChange={handleChange}
                       required
@@ -530,7 +532,7 @@ const CreateVacation = () => {
                       type="text"
                       name="matiere"
                       id="matiere"
-                      placeholder="Entrez le nombre d'années d'expérience"
+                      placeholder="..."
                       value={formData.matiere}
                       onChange={handleChange}
                       required
@@ -552,7 +554,7 @@ const CreateVacation = () => {
                       type="text"
                       name="idCorrecteur"
                       id="idCorrecteur"
-                      placeholder="Entrez votre prénom"
+                      placeholder="..."
                       value={formData.idCorrecteur}
                       onChange={handleChange}
                       required

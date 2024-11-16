@@ -1,5 +1,5 @@
-const archivePayment = require("../models/archivePaymentModel");
-const Payment = require("../models/paymentModel");
+const archivePayment = require("../models/archivePaiementModel");
+const Payment = require("../models/paiementModel");
 const CreateError = require('../utils/appError'); // Import de la fonction CreateError
 
 // Fonction qui archive les paiements d'une année spécifique

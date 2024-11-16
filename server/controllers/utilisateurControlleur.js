@@ -1,4 +1,4 @@
-const Administrateur = require('../models/adminModel'); // Import du modèle Administrateur
+const Administrateur = require('../models/utilisateurModel'); // Import du modèle Administrateur
 const bcrypt = require('bcryptjs'); // Pour le hachage de mot de passe
 const jwt = require('jsonwebtoken'); // Pour la gestion des tokens JWT
 const CreateError = require('../utils/appError'); // Import de la fonction CreateError

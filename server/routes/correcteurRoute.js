@@ -1,23 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const correcteurController = require('../controllers/correcteurController');
+const correcteurControlleur = require('../controllers/correcteurControlleur');
 
-router.post('/add', correcteurController.addCorrecteur);
+router.post('/add', correcteurControlleur.addCorrecteur);
 
-router.get('/all', correcteurController.getAllCorrecteurs);
+router.get('/all', correcteurControlleur.getAllCorrecteurs);
 
-router.post('/comptage', correcteurController.CompterCorrecteursStatut);
+router.post('/comptage', correcteurControlleur.CompterCorrecteursStatut);
 
-router.get('/count', correcteurController.CountCorrecteur);
+router.get('/count', correcteurControlleur.CountCorrecteur);
 
-router.get('/:idCorrecteur', correcteurController.getCorrecteurById);
+router.get('/:idCorrecteur', correcteurControlleur.getCorrecteurById);
 
-router.get('/check/:cin', correcteurController.getCINCorrecteur);
+router.get('/check/:cin', correcteurControlleur.getCINCorrecteur);
 
-router.put('/updateStatus', correcteurController.UpdateStatutCorrecteur);
+router.put('/updateStatus', correcteurControlleur.UpdateStatutCorrecteur);
 
-router.put('/:idCorrecteur', correcteurController.updateCorrecteur);
+router.put('/:idCorrecteur', correcteurControlleur.updateCorrecteur);
 
-router.delete('/:idCorrecteur', correcteurController.deleteCorrecteur);
+router.delete('/:idCorrecteur', correcteurControlleur.deleteCorrecteur);
 
 module.exports = router;

@@ -7,6 +7,10 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     padding: 30,
   },
+  header: {
+    textAlign: 'center',
+    marginBottom: 20,
+  },
   section: {
     margin: 10,
     padding: 10,
@@ -73,6 +77,18 @@ const ArchivePdf: React.FC<ArchivePdfProps> = ({ archives }) => {
   return (
     <Document>
       <Page size="A1" style={styles.page}>
+        <View style={styles.header}>
+          <Text>REPOBILIKAN'I MADAGASIKARA</Text>
+          <Text>Fitiavana-Tanindrazana-Fandrosoana</Text>
+          <Text>-------------</Text>
+          <Text>MINISTERE DE L'ENSEIGNEMENT SUPPERIEUR</Text>
+          <Text>ET DE LA RECHERCHE SCIENTIFIQUE</Text>
+          <Text>-------------</Text>
+          <Text>UNIVERSITE DE TOLIARA</Text>
+          <Text>-------------</Text>
+          <Text>PRESIDENCE</Text>
+        </View>
+
         <View style={styles.section}>
           <Text>Liste des Archives - session : {session} </Text>
           <View style={styles.table}>
@@ -126,7 +142,7 @@ const ArchivePdf: React.FC<ArchivePdfProps> = ({ archives }) => {
                 <Text style={styles.tableCell}>{archive.matiere}</Text>
                 <Text style={styles.tableCell}>{archive.nbcopie}</Text>
                 <Text style={styles.tableCell}>{archive.optionTarif}</Text>
-                <Text style={styles.tableCell}>{archive.montantTotal} Ar</Text>
+                <Text style={styles.tableCell}>{archive.montantTotal.toFixed(2)} Ar</Text>
                 <Text style={styles.tableCell}>{archive.statut}</Text>
               </View>
             ))}

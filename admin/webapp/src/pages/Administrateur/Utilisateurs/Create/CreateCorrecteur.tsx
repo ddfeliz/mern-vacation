@@ -405,7 +405,7 @@ const CreateCorrecteur = () => {
                         type="text"
                         value={phoneNumber} // Utilise le numéro formaté
                         onChange={handlePhoneChange}
-                        maxLength={10} // Limite à 10 caractères (2 pour le préfixe + 7 pour le numéro)
+                        maxLength={9} // Limite à 10 caractères (2 pour le préfixe + 7 pour le numéro)
                         placeholder="Numéro (7 chiffres)"
                         className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                         required

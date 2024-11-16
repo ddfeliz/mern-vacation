@@ -1,24 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const vacationController = require('../controllers/vacationController');
+const vacationControlleur = require('../controllers/vacationControlleur');
 
 
-router.post('/add', vacationController.addVacation);
+router.post('/add', vacationControlleur.addVacation);
 
-router.get('/all', vacationController.getAllVacations);
+router.get('/all', vacationControlleur.getAllVacations);
 
-router.get('/total-copies', vacationController.getTotalCopies);
+router.get('/total-copies', vacationControlleur.getTotalCopies);
 
-router.get('/total-copies-by-years', vacationController.getTotalCopiesByYear);
+router.get('/total-copies-by-years', vacationControlleur.getTotalCopiesByYear);
 
-router.get('/count', vacationController.getVacationCount);
+router.get('/count', vacationControlleur.getVacationCount);
 
-router.get('/:idVacation', vacationController.getVacationById);
+router.get('/:idVacation', vacationControlleur.getVacationById);
 
-router.get('/check/:idCorrecteur/:session', vacationController.getSession);
+router.get('/check/:idCorrecteur/:session', vacationControlleur.getSession);
 
-router.put('/:idVacation', vacationController.updateVacation);
+router.put('/:idVacation', vacationControlleur.updateVacation);
 
-router.delete('/:idVacation', vacationController.deleteVacation);
+router.delete('/:idVacation', vacationControlleur.deleteVacation);
 
 module.exports = router;

@@ -259,7 +259,7 @@ const CreatePaymentVacation = () => {
                     type="text"
                     name="id"
                     id="id"
-                    placeholder="Entrez l'ID du correcteur"
+                    placeholder="Entrez l'ID du vacation"
                     value={idVacation}
                     onChange={(e) => setIdVacation(e.target.value)}
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -418,7 +418,7 @@ const CreatePaymentVacation = () => {
                       type="text"
                       name="idVacation"
                       id="idVacation"
-                      placeholder="Entrez votre prénom"
+                      placeholder="..."
                       value={formData.idVacation}
                       onChange={handleChange}
                       required
@@ -438,7 +438,7 @@ const CreatePaymentVacation = () => {
                       type="text"
                       name="idCorrecteur"
                       id="idCorrecteur"
-                      placeholder="Entrez votre nom de famille"
+                      placeholder="..."
                       value={formData.idCorrecteur}
                       onChange={handleChange}
                       required
@@ -460,7 +460,7 @@ const CreatePaymentVacation = () => {
                       type="text"
                       name="firstName"
                       id="firstName"
-                      placeholder="Entrez votre prénom"
+                      placeholder="..."
                       value={formData.firstName}
                       onChange={handleChange}
                       required
@@ -480,7 +480,7 @@ const CreatePaymentVacation = () => {
                       type="text"
                       name="lastName"
                       id="lastName"
-                      placeholder="Entrez votre nom de famille"
+                      placeholder="..."
                       value={formData.lastName}
                       onChange={handleChange}
                       required
@@ -503,7 +503,7 @@ const CreatePaymentVacation = () => {
                       type="number"
                       name="cin"
                       id="cin"
-                      placeholder="Entrez votre numéro CIN"
+                      placeholder="..."
                       value={formData.cin}
                       onChange={handleChange}
                       onBlur={() => {
@@ -533,7 +533,7 @@ const CreatePaymentVacation = () => {
                       type="text"
                       name="specialite"
                       id="specialite"
-                      placeholder="Entrez votre prénom"
+                      placeholder="..."
                       value={formData.specialite}
                       onChange={handleChange}
                       required
@@ -555,7 +555,7 @@ const CreatePaymentVacation = () => {
                       type="text"
                       name="secteur"
                       id="secteur"
-                      placeholder="Entrez le nombre d'années d'expérience"
+                      placeholder="..."
                       value={formData.secteur}
                       onChange={handleChange}
                       required
@@ -575,7 +575,7 @@ const CreatePaymentVacation = () => {
                       type="text"
                       name="option"
                       id="option"
-                      placeholder="Entrez votre prénom"
+                      placeholder="..."
                       value={formData.option}
                       onChange={handleChange}
                       required
@@ -597,7 +597,7 @@ const CreatePaymentVacation = () => {
                       type="text"
                       name="matiere"
                       id="matiere"
-                      placeholder="Entrez le nombre d'années d'expérience"
+                      placeholder="..."
                       value={formData.matiere}
                       onChange={handleChange}
                       required
@@ -618,10 +618,11 @@ const CreatePaymentVacation = () => {
                       type="number"
                       name="nbcopie"
                       id="nbcopie"
-                      placeholder="Entrez le nombre des copies corrigées"
+                      placeholder="..."
                       value={formData.nbcopie}
                       onChange={handleChange}
                       required
+                      disabled
                       className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     />
                   </div>
@@ -656,7 +657,7 @@ const CreatePaymentVacation = () => {
                       type="text"
                       name="optionTarif"
                       id="optionTarif"
-                      placeholder="Entrez l'option du tarif"
+                      placeholder="..."
                       value={formData.optionTarif}
                       onChange={handleChange}
                       required
@@ -677,7 +678,7 @@ const CreatePaymentVacation = () => {
                       type="number"
                       name="montantTotal"
                       id="montantTotal"
-                      placeholder="Entrez le nombre du total"
+                      placeholder="..."
                       value={formData.montantTotal}
                       onChange={handleChange}
                       required

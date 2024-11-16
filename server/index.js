@@ -6,12 +6,12 @@ dotenv.config();
 
 // Import des routes
 const correcteurRoutes = require('./routes/correcteurRoute');
-const adminRoutes = require('./routes/adminRoute');
+const utilisateurRoute = require('./routes/utilisateurRoute');
 const baccRoutes = require('./routes/baccRoute'); 
 const tarifRoute = require('./routes/tarifRoute');
 const vacationRoutes = require('./routes/vacationRoute');
-const paymentRoutes = require('./routes/paymentRoute');
-const archivePaymentRoute = require('./routes/archivePaymentRoute');
+const paiementRoute = require('./routes/paiementRoute');
+const archivePaiementRoute = require('./routes/archivePaiementRoute');
 
 const app = express();
 
@@ -21,12 +21,12 @@ app.use(express.json());
 
 // 2) ROUTE DES ACTEURS
 app.use('/api/correcteur', correcteurRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/api/admin', utilisateurRoute);
 app.use('/api/matiere-bacc', baccRoutes);
 app.use('/api/tarif', tarifRoute);
 app.use('/api/vacation', vacationRoutes);
-app.use('/api/payment', paymentRoutes);
-app.use('/api/archive', archivePaymentRoute);
+app.use('/api/payment', paiementRoute);
+app.use('/api/archive', archivePaiementRoute);
 
 // 3) MONGODB CONNECTION
 mongoose

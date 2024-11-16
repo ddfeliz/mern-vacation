@@ -167,6 +167,7 @@ const ShowVacation: React.FC = () => {
     const isYearMatch = vacation.session.toString().includes(selectedYear);
     const isNameMatch =
       vacation.nom.toLowerCase().includes(searchItem.toLowerCase()) ||
+      vacation.prenom.toLowerCase().includes(searchItem.toLowerCase()) ||
       vacation.idVacation.toLowerCase().includes(searchItem.toLowerCase()) ||
       vacation.idCorrecteur.toLowerCase().includes(searchItem.toLowerCase());
 

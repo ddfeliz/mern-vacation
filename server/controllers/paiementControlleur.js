@@ -1,4 +1,4 @@
-const Payment = require('../models/paymentModel');
+const Payment = require('../models/paiementModel');
 const CreateError = require('../utils/appError'); // Import de la fonction CreateError
 
 

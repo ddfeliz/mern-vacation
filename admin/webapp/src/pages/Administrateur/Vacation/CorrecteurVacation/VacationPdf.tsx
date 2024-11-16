@@ -8,6 +8,10 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     padding: 30,
   },
+  header: {
+    textAlign: 'center',
+    marginBottom: 20,
+  },
   section: {
     margin: 10,
     padding: 10,
@@ -49,6 +53,18 @@ const VacationPdf: React.FC<VacationPdfProps> = ({ vacations }) => {
   return (
     <Document>
       <Page size="A2" style={styles.page}>
+        <View style={styles.header}>
+          <Text>REPOBILIKAN'I MADAGASIKARA</Text>
+          <Text>Fitiavana-Tanindrazana-Fandrosoana</Text>
+          <Text>-------------</Text>
+          <Text>MINISTERE DE L'ENSEIGNEMENT SUPPERIEUR</Text>
+          <Text>ET DE LA RECHERCHE SCIENTIFIQUE</Text>
+          <Text>-------------</Text>
+          <Text>UNIVERSITE DE TOLIARA</Text>
+          <Text>-------------</Text>
+          <Text>PRESIDENCE</Text>
+        </View>
+
         <View style={styles.section}>
           <Text>Liste des Vacations - session : {session} </Text>
           <View style={styles.table}>

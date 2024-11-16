@@ -60,14 +60,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
   return (
     <aside
       ref={sidebar}
-      className={`absolute left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      className={`absolute left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-white duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
     >
       {/* <!-- SIDEBAR HEADER --> */}
       <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
         <NavLink className=" flex flex-wrap items-center mt-6" to="">
-          <img className="w-15 mt-4 rounded-lg" src={Logo} alt="Logo" />
-          <h1 className='mx-4 mt-4 text-xl text-white'> Gestion du vacation <br /> des correcteurs </h1>
+          <img className="w-15 mt-4 rounded-lg border" src={Logo} alt="Logo" />
+          <h1 className='mx-4 mt-4 text-xl text-boxdark dark:text-white'> Gestion du vacation <br /> des correcteurs du baccalauréat </h1>
         </NavLink>
 
         <button
@@ -99,7 +99,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
           {/* <!-- Menu Group --> */}
           <div>
-            <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2 flex flex-wrap">
+            <h3 className="mb-4 ml-4 text-sm font-semibold text-boxdark flex flex-wrap dark:text-white">
               <BsMenuAppFill className='mx-2 w-4 h-4' /> MENU
             </h3>
 
@@ -107,7 +107,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Menu Item Dashboard --> */}
               <SidebarLinkGroup
                 activeCondition={
-                  pathname === 'dashboard' || pathname.includes('dashboard')
+                  pathname === 'tableau-de-bord' || pathname.includes('tableau-de-bord')
                 }
               >
                 {(handleClick, open) => {
@@ -115,9 +115,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <React.Fragment>
                       <NavLink
                         to="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${(pathname === 'dashboard' ||
+                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-boxdark duration-300 ease-in-out hover:bg-blue-50 dark:text-white dark:hover:bg-meta-4 ${(pathname === 'dashboard' ||
                           pathname.includes('dashboard')) &&
-                          'bg-graydark dark:bg-meta-4'
+                          'bg-blue-50 dark:bg-meta-4'
                           }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -153,10 +153,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                         <ul className="mt-4 mb-5.5 flex flex-col gap-2.5 pl-6">
                           <li>
                             <NavLink
-                              to="/administrateur/dashboard"
+                              to="/administrateur/dashboard/*"
                               className={({ isActive }) =>
-                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
-                                (isActive && '!text-white')
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-boxdark duration-300 ease-in-out hover:text-black dark:text-white dark:hover:text-white' +
+                                (isActive && '!text-bodydark2')
                               }
                             >
                               Vue ensemble 
@@ -182,9 +182,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <React.Fragment>
                       <NavLink
                         to="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${(pathname === 'forms' ||
+                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-boxdark duration-300 ease-in-out hover:bg-blue-50 dark:text-white dark:hover:bg-meta-4 ${(pathname === 'forms' ||
                           pathname.includes('correcteur')) &&
-                          'bg-graydark dark:bg-meta-4'
+                          'bg-blue-50 dark:bg-meta-4'
                           }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -222,8 +222,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             <NavLink
                               to="correcteur"
                               className={({ isActive }) =>
-                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
-                                (isActive && '!text-white')
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-boxdark duration-300 ease-in-out hover:text-black dark:text-white ' +
+                                (isActive && '!text-bodydark2')
                               }
                             >
                               Vue ensemble
@@ -233,8 +233,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             <NavLink
                               to="nouveau-correcteur"
                               className={({ isActive }) =>
-                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
-                                (isActive && '!text-white')
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-boxdark duration-300 ease-in-out hover:text-black dark:text-white ' +
+                                (isActive && '!text-bodydark2')
                               }
                             >
                               Nouveau
@@ -260,9 +260,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <React.Fragment>
                       <NavLink
                         to="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${(pathname === 'forms' ||
+                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-boxdark duration-300 ease-in-out hover:bg-blue-50 dark:text-white dark:hover:bg-meta-4 ${(pathname === 'forms' ||
                           pathname.includes('tarif')) &&
-                          'bg-graydark dark:bg-meta-4'
+                          'bg-blue-50 dark:bg-meta-4'
                           }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -300,8 +300,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             <NavLink
                               to="tarif"
                               className={({ isActive }) =>
-                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
-                                (isActive && '!text-white')
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-boxdark duration-300 ease-in-out hover:text-black dark:text-white ' +
+                                (isActive && '!text-bodydark2')
                               }
                             >
                               Vue ensemble
@@ -311,8 +311,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             <NavLink
                               to="nouveau-tarif"
                               className={({ isActive }) =>
-                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
-                                (isActive && '!text-white')
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-boxdark duration-300 ease-in-out hover:text-black dark:text-white ' +
+                                (isActive && '!text-bodydark2')
                               }
                             >
                               Nouveau
@@ -331,7 +331,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Menu Item Vacation --> */}
               <SidebarLinkGroup
                 activeCondition={
-                  pathname === 'vacations' || pathname.includes('vacations')
+                  pathname === 'vacation' || pathname.includes('vacation')
                 }
               >
                 {(handleClick, open) => {
@@ -339,9 +339,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <React.Fragment>
                       <NavLink
                         to="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${(pathname === 'forms' ||
-                          pathname.includes('vacations')) &&
-                          'bg-graydark dark:bg-meta-4'
+                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-boxdark duration-300 ease-in-out hover:bg-blue-50 dark:text-white dark:hover:bg-meta-4 ${(pathname === 'forms' ||
+                          pathname.includes('vacation')) &&
+                          'bg-blue-50 dark:bg-meta-4'
                           }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -379,8 +379,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             <NavLink
                               to="vacation"
                               className={({ isActive }) =>
-                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
-                                (isActive && '!text-white')
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-boxdark duration-300 ease-in-out hover:text-black dark:text-white ' +
+                                (isActive && '!text-bodydark2')
                               }
                             >
                               Vue ensemble
@@ -390,8 +390,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             <NavLink
                               to="nouveau-vacation"
                               className={({ isActive }) =>
-                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
-                                (isActive && '!text-white')
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-boxdark duration-300 ease-in-out hover:text-black dark:text-white ' +
+                                (isActive && '!text-bodydark2')
                               }
                             >
                               Nouveau
@@ -410,7 +410,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               {/* <!-- Menu Item Payement --> */}
               <SidebarLinkGroup
                 activeCondition={
-                  pathname === 'payments' || pathname.includes('payments')
+                  pathname === 'paiement' || pathname.includes('paiement')
                 }
               >
                 {(handleClick, open) => {
@@ -418,9 +418,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                     <React.Fragment>
                       <NavLink
                         to="#"
-                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${(pathname === 'forms' ||
-                          pathname.includes('payments')) &&
-                          'bg-graydark dark:bg-meta-4'
+                        className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-boxdark duration-300 ease-in-out hover:bg-blue-50 dark:text-white dark:hover:bg-meta-4 ${(pathname === 'forms' ||
+                          pathname.includes('paiement')) &&
+                          'bg-blue-50 dark:bg-meta-4'
                           }`}
                         onClick={(e) => {
                           e.preventDefault();
@@ -458,8 +458,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             <NavLink
                               to="paiement-liste"
                               className={({ isActive }) =>
-                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
-                                (isActive && '!text-white')
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-boxdark duration-300 ease-in-out hover:text-black dark:text-white ' +
+                                (isActive && '!text-bodydark2')
                               }
                             >
                               Vue ensemble
@@ -469,8 +469,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             <NavLink
                               to="nouveau-paiement"
                               className={({ isActive }) =>
-                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
-                                (isActive && '!text-white')
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-boxdark duration-300 ease-in-out hover:text-black dark:text-white ' +
+                                (isActive && '!text-bodydark2')
                               }
                             >
                               Nouveau
@@ -480,8 +480,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             <NavLink
                               to="archivage-paiement"
                               className={({ isActive }) =>
-                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-bodydark2 duration-300 ease-in-out hover:text-white ' +
-                                (isActive && '!text-white')
+                                'group relative flex items-center gap-2.5 rounded-md px-4 font-medium text-boxdark duration-300 ease-in-out hover:text-black dark:text-white ' +
+                                (isActive && '!text-bodydark2')
                               }
                             >
                               Archive
