@@ -30,8 +30,8 @@ app.use('/api/archive', archivePaiementRoute);
 
 // 3) MONGODB CONNECTION
 mongoose
-    .connect('mongodb://127.0.0.1:27017/vacation')
-    .then(() => console.log('Le serveur est connecté!'))
+    .connect('mongodb+srv://sambatratahirindrazana:sami2003..@mycluster.gg52g.mongodb.net/gestion_vacation?')
+    .then(() => console.log('Le serveur est connecté à MongoDB Atlas!'))
     .catch((error) => console.error('Le serveur a racontré des erreurs:', error));
 
 // 4) GLOBAL ERROR HANDLER
