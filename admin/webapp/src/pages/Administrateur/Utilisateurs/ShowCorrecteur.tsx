@@ -28,7 +28,6 @@ const ShowCorrecteur = () => {
 
   const [correcteurs, setCorrecteurs] = useState<Correcteur[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [open, setOpen] = useState(false); // État pour le Dialog
   const [open2, setOpen2] = useState(false); // État pour le Dialog
   const [currentPage, setCurrentPage] = useState(1);
@@ -249,7 +248,6 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
 
   const handleDeleting = () => {
     setOpen(true);
-    setDropdownOpen(false);
   };
 
   const cancelDelete = () => {

@@ -26,26 +26,13 @@ const CreateCorrecteur = () => {
   const [secteurs, setSecteurs] = useState<string[]>([]); // État pour stocker les secteurs
   const [options, setOptions] = useState<string[]>([]); // État pour stocker les options
   const [matieres, setMatieres] = useState<string[]>([]); // État pour stocker les matières
-  const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const [openVerify, setOpenVerify] = useState(false);
   const [openCIN, setOpenCIN] = useState(false);
-  const [error, setError] = useState('');
   const [prefix, setPrefix] = useState("033"); // Préfixe par défaut
   const [phoneNumber, setPhoneNumber] = useState(formData.telephone.slice(3));
   const navigate = useNavigate();
 
-  // Utilisation de useEffect pour lancer un timer de 5 secondes
-  useEffect(() => {
-    if (error) {
-      setVisible(true);
-      const timer = setTimeout(() => {
-        setVisible(false);
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
 
   // Récupérer les spécialités depuis le backend au montage du composant
   useEffect(() => {
@@ -217,9 +204,10 @@ const CreateCorrecteur = () => {
       }
     } catch (err: any) {
       if (err.response) {
-        setError(err.response.data.message || 'Authentication failed. Please try again.');
+        console.log(err);
+        
       } else {
-        setError('An error occurred. Please try again.');
+        console.log(err);
       }
     } finally {
       setLoading(false); // Arrêter le chargement

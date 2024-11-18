@@ -38,7 +38,6 @@ const ShowPaymentVacation = () => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [selectedStatus, setSelectedStatus] = useState(''); // État pour le statut de paiement
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [open, setOpen] = useState(false); // État pour le Dialog
   const [open2, setOpen2] = useState(false); // État pour le Dialog
   const [openUpdatePayment, setOpenUpdatePayment] = useState(false); // État pour le Dialog
@@ -267,7 +266,6 @@ const ShowPaymentVacation = () => {
 
   const handleDeleting = () => {
     setOpen(true);
-    setDropdownOpen(false);
   };
 
   const cancelDelete = () => {

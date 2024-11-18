@@ -13,7 +13,6 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
     const [correcteurs, setCorrecteurs] = useState<Correcteur[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [dropdownOpen, setDropdownOpen] = useState(false);
     const [open, setOpen] = useState(false); // État pour le Dialog
     const [open1, setOpen1] = useState(false); // État pour le Dialog
     const navigate = useNavigate();
@@ -24,7 +23,6 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
 
     const handleDeleting = () => {
         setOpen(true);
-        setDropdownOpen(false);
     };
 
 

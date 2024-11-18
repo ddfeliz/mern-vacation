@@ -3,7 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import SidebarLinkGroup from './SidebarLinkGroup';
 import Logo from '../../images/logo/UnivTol-Logo.png';
 import { BsMenuAppFill } from 'react-icons/bs';
-import { DocumentArrowUpIcon, DocumentCurrencyEuroIcon, PresentationChartLineIcon, ShoppingCartIcon, UserGroupIcon, WrenchScrewdriverIcon } from '@heroicons/react/24/outline';
+import { DocumentArrowUpIcon, DocumentCurrencyEuroIcon, PresentationChartLineIcon, ShoppingCartIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
   sidebarOpen: boolean;

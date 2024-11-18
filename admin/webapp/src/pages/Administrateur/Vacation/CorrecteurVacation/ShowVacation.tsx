@@ -31,7 +31,6 @@ const ShowVacation: React.FC = () => {
   const [vacations, setVacations] = useState<Vacation[]>([]);
   const [totalCopies, setTotalCopies] = useState('0');
   const [loading, setLoading] = useState(true);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [open, setOpen] = useState(false); // État pour le Dialog
   const [open2, setOpen2] = useState(false); // État pour le Dialog
   const [openEdit, setOpenEdit] = useState(false); // État pour le Dialog de mise à jour
@@ -253,7 +252,6 @@ const ShowVacation: React.FC = () => {
 
   const handleDeleting = () => {
     setOpen(true);
-    setDropdownOpen(false);
   };
 
   const cancelDelete = () => {
@@ -313,7 +311,7 @@ const ShowVacation: React.FC = () => {
   return (
     <>
       <Breadcrumb pageName="Vacations" />
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-2 2xl:gap-7.5 mb-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 mb-4">
         <CardDataStats
           title="Total des correcteurs vacataires"
           titleColor="#007BFF"
@@ -339,9 +337,29 @@ const ShowVacation: React.FC = () => {
           </svg>
         </CardDataStats>
         <CardDataStats
-          title="Totale des copies corrigées"
+          title="Totale des copies selon le recherche spécifié"
           titleColor="#007BFF"
           total={totalCopiesFiltered.toString()}
+        >
+          <svg
+            className="fill-primary dark:fill-white"
+            width="30"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M17 0H7C4.8 0 3 1.8 3 4v16c0 2.2 1.8 4 4 4h10c2.2 0 4-1.8 4-4V7l-6-7zM7 2h10l5 5h-5c-1.1 0-2 .9-2 2v12H7V2zm6 14h-4v-2h4v2zm0-4h-4v-2h4v2z"
+              fill=""
+            />
+            <path d="M11 14h2v2h-2z" fill="" />
+          </svg>
+        </CardDataStats>
+        <CardDataStats
+          title="Totale des copies corrigées"
+          titleColor="#007BFF"
+          total={totalCopies.toString()}
         >
           <svg
             className="fill-primary dark:fill-white"

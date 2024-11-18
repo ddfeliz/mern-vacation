@@ -6,7 +6,7 @@ import {
 } from '@headlessui/react';
 import { CheckCircleIcon, CheckIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Breadcrumb from '../../../../components/Breadcrumbs/Breadcrumb';
 
@@ -18,23 +18,10 @@ const CreateTarif = () => {
   });
   const [loading, setLoading] = useState(false); // État pour gérer le chargement
 
-  const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const [openVerify, setOpenVerify] = useState(false);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // Utilisation de useEffect pour lancer un timer de 5 secondes
-  useEffect(() => {
-    if (error) {
-      setVisible(true);
-      const timer = setTimeout(() => {
-        setVisible(false);
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
 
   const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
@@ -116,12 +103,11 @@ const CreateTarif = () => {
       }
     } catch (err: any) {
       if (err.response) {
-        setError(
-          err.response.data.message ||
-            'Authentication failed. Please try again.',
-        );
+        console.log(err);
+        
       } else {
-        setError('An error occurred. Please try again.');
+        console.log(err);
+        
       }
     } finally {
       setLoading(false); // Arrêter le chargement

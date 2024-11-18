@@ -23,7 +23,6 @@ const DetailVacation = () => {
   const [vacations, setVacations] = useState<Vacation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [open, setOpen] = useState(false); // État pour le Dialog
   const [open1, setOpen1] = useState(false); // État pour le Dialog
   const navigate = useNavigate();
@@ -34,7 +33,6 @@ const DetailVacation = () => {
 
   const handleDeleting = () => {
     setOpen(true);
-    setDropdownOpen(false);
   };
 
   const cancelDelete = () => {
