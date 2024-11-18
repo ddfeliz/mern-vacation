@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const path = require('path');
 dotenv.config();
 
 // Import des routes
@@ -13,22 +12,12 @@ const tarifRoute = require('./routes/tarifRoute');
 const vacationRoutes = require('./routes/vacationRoute');
 const paiementRoute = require('./routes/paiementRoute');
 const archivePaiementRoute = require('./routes/archivePaiementRoute');
-const authenticateToken = require('./middlewares/middlaware');
 
 const app = express();
-
 
 // 1) MIDDLEWARE
 app.use(cors());
 app.use(express.json());
-
-// Servir les fichiers statiques de Vite build (dist)
-app.use(express.static(path.join(__dirname, '../admin/webapp/dist'))); // Mettre à jour le chemin vers 'dist' dans le dossier webapp
-
-// Rediriger toutes les requêtes vers index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../admin/webapp/dist', 'index.html')); // Redirection vers index.html
-});
 
 // 2) ROUTE DES ACTEURS
 app.use('/api/correcteur', correcteurRoutes);
@@ -38,11 +27,6 @@ app.use('/api/tarif', tarifRoute);
 app.use('/api/vacation', vacationRoutes);
 app.use('/api/payment', paiementRoute);
 app.use('/api/archive', archivePaiementRoute);
-// Appliquer ce middleware aux routes sécurisées
-app.use('/api/protected', authenticateToken, (req, res) => {
-    // Cette route est protégée par l'authentification JWT
-    res.json({ message: 'Welcome to the protected route', user: req.user });
-  });
 
 // 3) MONGODB CONNECTION
 mongoose
