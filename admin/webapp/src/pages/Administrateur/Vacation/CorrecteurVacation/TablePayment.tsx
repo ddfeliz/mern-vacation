@@ -13,7 +13,7 @@ const TablePayment = () => {
 
   const fetchTarifs = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/payment/all');
+      const response = await axios.get('https://gestion-vacation.onrender.com/api/payment/all');
       setPayments(response.data);
       setFilteredPayments(response.data); // Initialiser avec tous les paiements
     } catch (err) {

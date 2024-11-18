@@ -23,7 +23,7 @@ const EditTarif = () => {
     const fetchTarif = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://localhost:3000/api/tarif/${idTarif}`);
+        const response = await axios.get(`https://gestion-vacation.onrender.com/api/tarif/${idTarif}`);
         const tarif = response.data;
 
         setFormData({
@@ -70,7 +70,7 @@ const EditTarif = () => {
     const { optionTarif, nombreTarif, MontantTarif } = formData;
 
     try {
-      const response = await axios.put(`http://localhost:3000/api/tarif/${idTarif}`, {
+      const response = await axios.put(`https://gestion-vacation.onrender.com/api/tarif/${idTarif}`, {
         optionTarif,
         nombreTarif,
         MontantTarif

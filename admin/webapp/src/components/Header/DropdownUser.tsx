@@ -42,7 +42,7 @@ const DropdownUser = () => {
         }
 
         const response = await axios.get(
-          'http://localhost:3000/api/admin/profile',
+          'https://gestion-vacation.onrender.com/api/admin/profile',
           {
             headers: {
               Authorization: `Bearer ${token}`,

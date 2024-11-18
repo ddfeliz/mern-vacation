@@ -86,7 +86,7 @@ const CreateTarif = () => {
     try {
       // Vérifier si le tarif existe déjà
       const responseCheck = await axios.get(
-        `http://localhost:3000/api/tarif/check`,
+        `https://gestion-vacation.onrender.com/api/tarif/check`,
         {
           params: { optionTarif, nombreTarif, MontantTarif },
         },
@@ -98,7 +98,7 @@ const CreateTarif = () => {
         return; // Ne pas continuer si le tarif existe
       } else {
         const response = await axios.post(
-          'http://localhost:3000/api/tarif/add',
+          'https://gestion-vacation.onrender.com/api/tarif/add',
           {
             optionTarif,
             nombreTarif,

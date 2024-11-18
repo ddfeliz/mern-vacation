@@ -56,7 +56,7 @@ const CreateVacation = () => {
       setLoading(true);
       // Appel à l'API pour récupérer les informations du correcteur par ID
       const response = await axios.get(
-        `http://localhost:3000/api/correcteur/${idCorrecteur}`,
+        `https://gestion-vacation.onrender.com/api/correcteur/${idCorrecteur}`,
       );
       const fetchedData = response.data;
       // Remplir le formulaire avec les valeurs récupérées
@@ -139,7 +139,7 @@ const CreateVacation = () => {
     // Vérification si le CIN existe déjà
     const currentSession = new Date().getFullYear(); // Utilisation de l'année actuelle
     const checkResponse = await axios.get(
-      `http://localhost:3000/api/vacation/check/${idCorrecteur}/${currentSession}`,
+      `https://gestion-vacation.onrender.com/api/vacation/check/${idCorrecteur}/${currentSession}`,
     );
 
     try {
@@ -152,7 +152,7 @@ const CreateVacation = () => {
         setLoading(false);
       } else {
         const response = await axios.post(
-          'http://localhost:3000/api/vacation/add',
+          'https://gestion-vacation.onrender.com/api/vacation/add',
           {
             idCorrecteur,
             nom: lastName,

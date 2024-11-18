@@ -62,7 +62,7 @@ const ShowVacation: React.FC = () => {
     try {
       // Faire la requête GET vers l'endpoint de l'API
       const response = await axios.get(
-        'http://localhost:3000/api/vacation/total-copies',
+        'https://gestion-vacation.onrender.com/api/vacation/total-copies',
       );
 
       // Stocker le total des copies dans l'état
@@ -76,7 +76,7 @@ const ShowVacation: React.FC = () => {
   const fetchVacationCount = async () => {
     try {
       const responseVacation = await axios.get(
-        'http://localhost:3000/api/vacation/count',
+        'https://gestion-vacation.onrender.com/api/vacation/count',
       );
       setTotalVacations(responseVacation.data.totalVacation.toString());
     } catch (err) {
@@ -92,7 +92,7 @@ const ShowVacation: React.FC = () => {
     const fetchVacations = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:3000/api/vacation/all',
+          'https://gestion-vacation.onrender.com/api/vacation/all',
         );
         setVacations(response.data);
       } catch (err) {
@@ -111,7 +111,7 @@ const ShowVacation: React.FC = () => {
     const fetchSpecialites = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:3000/api/matiere-bacc/specialiste',
+          'https://gestion-vacation.onrender.com/api/matiere-bacc/specialiste',
         );
         const fetchedSpecialites = response.data.specialites;
         console.log('Specialites fetched:', fetchedSpecialites);
@@ -128,7 +128,7 @@ const ShowVacation: React.FC = () => {
   const fetchSecteurs = async (specialite: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/secteurs?specialite=${specialite}`,
+        `https://gestion-vacation.onrender.com/api/matiere-bacc/secteurs?specialite=${specialite}`,
       );
       setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
       setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
@@ -142,7 +142,7 @@ const ShowVacation: React.FC = () => {
   const fetchOption = async (secteur: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/options?secteur=${secteur}`,
+        `https://gestion-vacation.onrender.com/api/matiere-bacc/options?secteur=${secteur}`,
       );
       setOptions(response.data.options); // Mettre à jour les matières
     } catch (err) {
@@ -154,7 +154,7 @@ const ShowVacation: React.FC = () => {
   const fetchMatieres = async (option: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/matieres?option=${option}`,
+        `https://gestion-vacation.onrender.com/api/matiere-bacc/matieres?option=${option}`,
       );
       setMatieres(response.data.matieres); // Mettre à jour les matières
     } catch (err) {
@@ -229,7 +229,7 @@ const ShowVacation: React.FC = () => {
 
       // Mise à jour dans le backend
       await axios.put(
-        `http://localhost:3000/api/vacation/${selectedVacation.idVacation}`,
+        `https://gestion-vacation.onrender.com/api/vacation/${selectedVacation.idVacation}`,
         updatedVacation,
       );
 
@@ -263,7 +263,7 @@ const ShowVacation: React.FC = () => {
   // Fonction pour supprimer un correcteur
   const confirmDelete = async (idVacation: string) => {
     try {
-      await axios.delete(`http://localhost:3000/api/vacation/${idVacation}`);
+      await axios.delete(`https://gestion-vacation.onrender.com/api/vacation/${idVacation}`);
       setVacations(
         vacations.filter((vacation) => vacation.idVacation !== idVacation),
       );

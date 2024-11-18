@@ -4,7 +4,6 @@ import axios from "axios"; // Importer Axios
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
 import { CheckCircleIcon, CheckIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
-import PhoneInput, { CountryData } from "react-phone-input-2";
 
 const CreateCorrecteur = () => {
   const [formData, setFormData] = useState({
@@ -53,7 +52,7 @@ const CreateCorrecteur = () => {
     console.log("Fetching specialites...");
     const fetchSpecialites = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/matiere-bacc/specialiste');
+        const response = await axios.get('https://gestion-vacation.onrender.com/api/matiere-bacc/specialiste');
         const fetchedSpecialites = response.data.specialites;
         console.log("Specialites fetched:", fetchedSpecialites);
         setSpecialites(fetchedSpecialites); // Mettre à jour les spécialités avec la réponse de l'API
@@ -68,7 +67,7 @@ const CreateCorrecteur = () => {
   // Récupérer les secteurs en fonction de la spécialité sélectionnée
   const fetchSecteurs = async (specialite: string) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/matiere-bacc/secteurs?specialite=${specialite}`);
+      const response = await axios.get(`https://gestion-vacation.onrender.com/api/matiere-bacc/secteurs?specialite=${specialite}`);
       setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
       setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
       setMatieres([]); // Réinitialiser les matières
@@ -80,7 +79,7 @@ const CreateCorrecteur = () => {
   // Récupérer les options en fonction du secteur sélectionné
   const fetchOption = async (secteur: string) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/matiere-bacc/options?secteur=${secteur}`);
+      const response = await axios.get(`https://gestion-vacation.onrender.com/api/matiere-bacc/options?secteur=${secteur}`);
       setOptions(response.data.options); // Mettre à jour les matières
     } catch (err) {
       console.error("Erreur lors de la récupération des matières :", err);
@@ -90,7 +89,7 @@ const CreateCorrecteur = () => {
   // Récupérer les matières en fonction du secteur sélectionné
   const fetchMatieres = async (option: string) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/matiere-bacc/matieres?option=${option}`);
+      const response = await axios.get(`https://gestion-vacation.onrender.com/api/matiere-bacc/matieres?option=${option}`);
       setMatieres(response.data.matieres); // Mettre à jour les matières
     } catch (err) {
       console.error("Erreur lors de la récupération des matières :", err);
@@ -187,13 +186,13 @@ const CreateCorrecteur = () => {
 
 
       // Vérification si le CIN existe déjà
-      const checkResponse = await axios.get(`http://localhost:3000/api/correcteur/check/${cin}`);
+      const checkResponse = await axios.get(`https://gestion-vacation.onrender.com/api/correcteur/check/${cin}`);
       if (checkResponse.data.exists) {
         setOpenVerify(true);
         setLoading(false);
         return; // Arrêter la soumission
       } else {
-        const response = await axios.post('http://localhost:3000/api/correcteur/add', {
+        const response = await axios.post('https://gestion-vacation.onrender.com/api/correcteur/add', {
           nom: lastName,
           prenom: firstName,
           cin,

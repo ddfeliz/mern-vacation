@@ -15,7 +15,7 @@ const TableauDeBord: React.FC = () => {
   const fetchCorrecteursCount = async () => {
     try {
       const response = await axios.get(
-        'http://localhost:3000/api/correcteur/count',
+        'https://gestion-vacation.onrender.com/api/correcteur/count',
       );
       setTotalCorrecteurs(response.data.totalCorrecteurs.toString());
     } catch (err) {
@@ -26,7 +26,7 @@ const TableauDeBord: React.FC = () => {
   const fetchPaymentsCount = async () => {
     try {
       const responsePayment = await axios.get(
-        'http://localhost:3000/api/payment/count',
+        'https://gestion-vacation.onrender.com/api/payment/count',
       );
       setTotalPayments(responsePayment.data.totalPayments.toString());
     } catch (err) {
@@ -37,7 +37,7 @@ const TableauDeBord: React.FC = () => {
   const fetchArchiveCount = async () => {
     try {
       const responseArchive = await axios.get(
-        'http://localhost:3000/api/archive/count',
+        'https://gestion-vacation.onrender.com/api/archive/count',
       );
       setTotalArchives(responseArchive.data.totalArchives.toString());
     } catch (err) {
@@ -48,7 +48,7 @@ const TableauDeBord: React.FC = () => {
   const fetchVacationCount = async () => {
     try {
       const responseVacation = await axios.get(
-        'http://localhost:3000/api/vacation/count',
+        'https://gestion-vacation.onrender.com/api/vacation/count',
       );
       setTotalVacations(responseVacation.data.totalVacation.toString());
     } catch (err) {

@@ -50,7 +50,7 @@ const ShowArchivePayment = () => {
     const fetchTarifs = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:3000/api/archive/all',
+          'https://gestion-vacation.onrender.com/api/archive/all',
         );
         setArchives(response.data);
       } catch (err) {
@@ -69,7 +69,7 @@ const ShowArchivePayment = () => {
     const fetchSpecialites = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:3000/api/matiere-bacc/specialiste',
+          'https://gestion-vacation.onrender.com/api/matiere-bacc/specialiste',
         );
         const fetchedSpecialites = response.data.specialites;
         console.log('Specialites fetched:', fetchedSpecialites);
@@ -86,7 +86,7 @@ const ShowArchivePayment = () => {
   const fetchSecteurs = async (specialite: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/secteurs?specialite=${specialite}`,
+        `https://gestion-vacation.onrender.com/api/matiere-bacc/secteurs?specialite=${specialite}`,
       );
       setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
       setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
@@ -100,7 +100,7 @@ const ShowArchivePayment = () => {
   const fetchOption = async (secteur: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/options?secteur=${secteur}`,
+        `https://gestion-vacation.onrender.com/api/matiere-bacc/options?secteur=${secteur}`,
       );
       setOptions(response.data.options); // Mettre à jour les matières
     } catch (err) {
@@ -112,7 +112,7 @@ const ShowArchivePayment = () => {
   const fetchMatieres = async (option: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/matieres?option=${option}`,
+        `https://gestion-vacation.onrender.com/api/matiere-bacc/matieres?option=${option}`,
       );
       setMatieres(response.data.matieres); // Mettre à jour les matières
     } catch (err) {
@@ -169,7 +169,7 @@ const ShowArchivePayment = () => {
   const confirmDelete = async (idPayment: string) => {
     try {
       // Suppression du paiement par son identifiant MongoDB (_id)
-      await axios.delete(`http://localhost:3000/api/archive/${idPayment}`);
+      await axios.delete(`https://gestion-vacation.onrender.com/api/archive/${idPayment}`);
 
       // Mettre à jour l'état en supprimant le paiement localement de la liste
       setArchives(

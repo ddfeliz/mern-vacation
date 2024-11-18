@@ -35,7 +35,7 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
     // Fonction pour supprimer un correcteur
     const confirmDelete = async (idCorrecteur: string) => {
             try {
-                await axios.delete(`http://localhost:3000/api/correcteur/${idCorrecteur}`);
+                await axios.delete(`https://gestion-vacation.onrender.com/api/correcteur/${idCorrecteur}`);
                 setCorrecteurs(correcteurs.filter((correcteur) => correcteur.idCorrecteur !== idCorrecteur));
                 setOpen1(true); // Afficher le message de succès
                 setTimeout(() => {
@@ -51,7 +51,7 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
         const fetchCorrecteur = async () => {
             try {
                 // Inclure idCorrecteur dans l'URL de la requête
-                const response = await axios.get(`http://localhost:3000/api/correcteur/${idCorrecteur}`);
+                const response = await axios.get(`https://gestion-vacation.onrender.com/api/correcteur/${idCorrecteur}`);
                 setCorrecteur(response.data);
             } catch (err) {
                 setError('Erreur lors de la récupération des détails du correcteur');

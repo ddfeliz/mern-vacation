@@ -50,7 +50,7 @@ const CreatePaymentVacation = () => {
     const fetchTarifs = async () => {
       try {
         const tarifResponse = await axios.get(
-          'http://localhost:3000/api/tarif/all',
+          'https://gestion-vacation.onrender.com/api/tarif/all',
         );
         setTarifs(tarifResponse.data);
       } catch (err) {
@@ -67,7 +67,7 @@ const CreatePaymentVacation = () => {
       setLoading(true);
       // Appel à l'API pour récupérer les informations du correcteur par ID
       const response = await axios.get(
-        `http://localhost:3000/api/vacation/${idVacation}`,
+        `https://gestion-vacation.onrender.com/api/vacation/${idVacation}`,
       );
       const fetchedData = response.data;
 
@@ -192,7 +192,7 @@ const CreatePaymentVacation = () => {
     try {
       console.log('Data sent to server:', formData); // Vérifier ce qui est envoyé
       const response = await axios.post(
-        'http://localhost:3000/api/payment/add',
+        'https://gestion-vacation.onrender.com/api/payment/add',
         {
           idVacation,
           idCorrecteur,

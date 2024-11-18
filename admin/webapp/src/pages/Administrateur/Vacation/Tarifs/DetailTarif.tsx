@@ -44,7 +44,7 @@ const DetailTarif = () => {
   // Fonction pour supprimer un correcteur
   const confirmDelete = async (idTarif: string) => {
     try {
-      await axios.delete(`http://localhost:3000/api/tarif/${idTarif}`);
+      await axios.delete(`https://gestion-vacation.onrender.com/api/tarif/${idTarif}`);
       setTarifs(tarifs.filter((tarif) => tarif.idTarif !== idTarif));
       setOpen1(true); // Afficher le message de succès
       setOpen(false);
@@ -61,7 +61,7 @@ const DetailTarif = () => {
       try {
         // Inclure idCorrecteur dans l'URL de la requête
         const response = await axios.get(
-          `http://localhost:3000/api/tarif/${idTarif}`,
+          `https://gestion-vacation.onrender.com/api/tarif/${idTarif}`,
         );
         setTarif(response.data);
       } catch (err) {

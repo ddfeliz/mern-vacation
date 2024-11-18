@@ -44,7 +44,7 @@ const DetailVacation = () => {
   // Fonction pour supprimer un correcteur
   const confirmDelete = async (idVacation: string) => {
     try {
-      await axios.delete(`http://localhost:3000/api/vacation/${idVacation}`);
+      await axios.delete(`https://gestion-vacation.onrender.com/api/vacation/${idVacation}`);
       setVacations(
         vacations.filter((vacation) => vacation.idVacation !== idVacation),
       );
@@ -62,7 +62,7 @@ const DetailVacation = () => {
       try {
         // Inclure idCorrecteur dans l'URL de la requête
         const response = await axios.get(
-          `http://localhost:3000/api/vacation/${idVacation}`,
+          `https://gestion-vacation.onrender.com/api/vacation/${idVacation}`,
         );
         setVacation(response.data);
       } catch (err) {

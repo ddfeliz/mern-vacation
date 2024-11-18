@@ -8,3 +8,5 @@ dist/
 # Environnement variables
 .env
 
+# Le backend est déployer vers
+https://gestion-vacation.onrender.com

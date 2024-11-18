@@ -67,7 +67,7 @@ const ShowPaymentVacation = () => {
     try {
       // Faire la requête GET vers l'endpoint de l'API
       const response = await axios.get(
-        'http://localhost:3000/api/payment/total-copie',
+        'https://gestion-vacation.onrender.com/api/payment/total-copie',
       );
 
       // Stocker le total des copies dans l'état
@@ -82,7 +82,7 @@ const ShowPaymentVacation = () => {
     try {
       // Faire la requête GET vers l'endpoint de l'API
       const response = await axios.get(
-        'http://localhost:3000/api/payment/total-montant',
+        'https://gestion-vacation.onrender.com/api/payment/total-montant',
       );
 
       // Formatage du montant total en tant qu'argent en ariary malgache
@@ -103,7 +103,7 @@ const ShowPaymentVacation = () => {
 
   const fetchTarifs = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/payment/all');
+      const response = await axios.get('https://gestion-vacation.onrender.com/api/payment/all');
       setPayments(response.data);
       setFilteredPayments(response.data); // Initialiser avec tous les paiements
 
@@ -159,7 +159,7 @@ const ShowPaymentVacation = () => {
     const fetchSpecialites = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:3000/api/matiere-bacc/specialiste',
+          'https://gestion-vacation.onrender.com/api/matiere-bacc/specialiste',
         );
         const fetchedSpecialites = response.data.specialites;
         console.log('Specialites fetched:', fetchedSpecialites);
@@ -176,7 +176,7 @@ const ShowPaymentVacation = () => {
   const fetchSecteurs = async (specialite: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/secteurs?specialite=${specialite}`,
+        `https://gestion-vacation.onrender.com/api/matiere-bacc/secteurs?specialite=${specialite}`,
       );
       setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
       setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
@@ -190,7 +190,7 @@ const ShowPaymentVacation = () => {
   const fetchOption = async (secteur: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/options?secteur=${secteur}`,
+        `https://gestion-vacation.onrender.com/api/matiere-bacc/options?secteur=${secteur}`,
       );
       setOptions(response.data.options); // Mettre à jour les matières
     } catch (err) {
@@ -202,7 +202,7 @@ const ShowPaymentVacation = () => {
   const fetchMatieres = async (option: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/matieres?option=${option}`,
+        `https://gestion-vacation.onrender.com/api/matiere-bacc/matieres?option=${option}`,
       );
       setMatieres(response.data.matieres); // Mettre à jour les matières
     } catch (err) {
@@ -289,7 +289,7 @@ const ShowPaymentVacation = () => {
 
       // Mise à jour dans le backend
       await axios.put(
-        `http://localhost:3000/api/payment/${selectedPayment.idPayment}`,
+        `https://gestion-vacation.onrender.com/api/payment/${selectedPayment.idPayment}`,
         updatedPayment,
       );
 
@@ -314,7 +314,7 @@ const ShowPaymentVacation = () => {
   // Fonction pour supprimer un correcteur
   const confirmDelete = async (idPayment: string) => {
     try {
-      await axios.delete(`http://localhost:3000/api/payment/${idPayment}`);
+      await axios.delete(`https://gestion-vacation.onrender.com/api/payment/${idPayment}`);
       setPayments(
         payments.filter((payment) => payment.idPayment !== idPayment),
       );
@@ -332,7 +332,7 @@ const ShowPaymentVacation = () => {
     setLoading(true);
     try {
       const currentYear = new Date().getFullYear();
-      await axios.post('http://localhost:3000/api/archive/archive-payments', {
+      await axios.post('https://gestion-vacation.onrender.com/api/archive/archive-payments', {
         session: currentYear,
       });
       setOpenArchiveSuccess(true);
