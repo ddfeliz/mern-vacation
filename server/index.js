@@ -20,6 +20,8 @@ const app = express();
 
 // 1) MIDDLEWARE
 app.use(cors());
+app.use(express.json());
+
 // Servir les fichiers statiques de Vite build (dist)
 app.use(express.static(path.join(__dirname, '../admin/webapp/dist'))); // Mettre à jour le chemin vers 'dist' dans le dossier webapp
 
