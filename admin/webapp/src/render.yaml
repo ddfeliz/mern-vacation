@@ -1,0 +1,9 @@
+services:
+  - type: static
+    name: frontend
+    env: static
+    staticPublishPath: dist # Remplacez 'dist' par le dossier de sortie de votre projet Vite
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
