@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ClickOutside from '../ClickOutside';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { CheckCircleIcon, UserCircleIcon } from '@heroicons/react/24/outline';
@@ -14,6 +14,7 @@ const DropdownUser = () => {
   const [open, setOpen] = useState(false); // État pour le Dialog
   const [openUtilisateur, setOpenUtilisateur] = useState(false); // État pour le Dialog
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const dispatch = useDispatch();
 
@@ -26,6 +27,7 @@ const DropdownUser = () => {
     console.log('Logged out');
     setOpen(false);
     dispatch(logout());
+    navigate('/'); 
   };
 
   const cancelLogout = () => {

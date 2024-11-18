@@ -43,8 +43,6 @@ const SignIn: React.FC = () => {
   useEffect(() => {
     if (isAuthenticated) {
       navigate('/administrateur/dashboard', {replace : true})
-    } else {
-      navigate('/', {replace : true})
     }
   }, [isAuthenticated])
 
