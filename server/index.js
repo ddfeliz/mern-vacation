@@ -22,13 +22,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Servir les fichiers statiques de Vite build (dist)
+app.use(express.static(path.join(__dirname, '../admin/webapp/dist'))); // Mettre à jour le chemin vers 'dist' dans le dossier webapp
 
-// Serve static files (if you use create-react-app or another build tool)
-app.use(express.static(path.join(__dirname, 'dist')));
-
-// Redirect all non-API routes to index.html for React Router
+// Rediriger toutes les requêtes vers index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, 'dist', 'index.html'));
+  res.sendFile(path.join(__dirname, '../admin/webapp/dist', 'index.html')); // Redirection vers index.html
 });
 
 // 2) ROUTE DES ACTEURS
