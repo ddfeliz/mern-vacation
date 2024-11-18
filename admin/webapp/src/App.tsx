@@ -45,7 +45,7 @@ function App() {
       {/* Tableau de bord - accès seulement si authentifié */}
       <Route element={<PrivateRoute />}>
         <Route
-          path="/administrateur/dashboard"
+          path="/administrateur/dashboard/*"
           element={
             <>
               <PageTitle title="Tableau de bord | Système de vacation des correcteurs du baccalauréat" />
