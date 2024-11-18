@@ -9,7 +9,7 @@ const PrivateRoute = () => {
   
   // Si l'utilisateur est authentifié, on rend le contenu via <Outlet /> (les composants enfants).
   // Sinon, on redirige vers la page de connexion.
-  return isAuthenticated ? <Outlet /> : <Navigate to="/" />;
+  return isAuthenticated ? <Outlet /> : <Navigate to="/" replace/>;
 };
 
 export default PrivateRoute;

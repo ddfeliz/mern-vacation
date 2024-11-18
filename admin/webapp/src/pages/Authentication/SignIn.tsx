@@ -6,8 +6,9 @@ import axios from 'axios';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import DarkModeSwitcher from '../../components/Header/DarkModeSwitcher';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { login, setAuthenticationStatus } from '../../slices/authSlice';
+import { RootState } from '../../store';
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -18,7 +19,7 @@ const SignIn: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   // Utilisation de useEffect pour lancer un timer de 5 secondes
   useEffect(() => {
     if (error) {
@@ -38,6 +39,12 @@ const SignIn: React.FC = () => {
       dispatch(setAuthenticationStatus(true)); // Mettre à jour l'état de l'authentification
     }
   }, [dispatch]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/administrateur/dashboard', {replace : true})
+    }
+  }, [isAuthenticated])
 
   // Fonction pour gérer la soumission du formulaire
   const handleSubmit = async (event: React.FormEvent) => {
