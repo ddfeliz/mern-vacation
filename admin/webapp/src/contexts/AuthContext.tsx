@@ -1,5 +1,4 @@
-// AuthContext.tsx
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -10,10 +9,26 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    // Récupérer l'état depuis localStorage au chargement
+    const savedAuthState = localStorage.getItem('isAuthenticated');
+    return savedAuthState ? JSON.parse(savedAuthState) : false;
+  });
 
-  const login = () => setIsAuthenticated(true);
-  const logout = () => setIsAuthenticated(false);
+  const login = () => {
+    setIsAuthenticated(true);
+    localStorage.setItem('isAuthenticated', 'true'); // Sauvegarder dans localStorage
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('isAuthenticated'); // Supprimer de localStorage
+  };
+
+  useEffect(() => {
+    // Mettre à jour localStorage si isAuthenticated change
+    localStorage.setItem('isAuthenticated', JSON.stringify(isAuthenticated));
+  }, [isAuthenticated]);
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, login, logout }}>

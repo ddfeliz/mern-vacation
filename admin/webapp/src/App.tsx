@@ -10,27 +10,32 @@ import { useAuth } from './contexts/AuthContext';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
-  const { pathname } = useLocation();
-  const { isAuthenticated } = useAuth(); // Utiliser le contexte d'authentification
+  const location = useLocation(); // Récupérer la localisation actuelle
+  const { isAuthenticated } = useAuth(); // Utilisation du contexte d'authentification
 
+  // Remettre la page en haut lors de la navigation
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [pathname]);
+  }, [location.pathname]);
 
+  // Simuler un chargement initial
   useEffect(() => {
     setTimeout(() => setLoading(false), 1000);
   }, []);
 
-  return loading ? (
-    <Loader />
-  ) : (
+  // Affichage du loader si l'application est en cours de chargement
+  if (loading) {
+    return <Loader />;
+  }
+
+  return (
     <Routes>
-      {/* Route pour la page d'enregistrement */}
+      {/* Page d'enregistrement */}
       <Route path="/register" element={<SignUp />} />
 
-      {/* Route pour la page de connexion */}
+      {/* Page de connexion */}
       <Route
-        index
+        path="/"
         element={
           <>
             <PageTitle title="Connexion | Système de vacation des correcteurs du baccalauréat" />
@@ -39,17 +44,19 @@ function App() {
         }
       />
 
-      {/* Route pour le dashboard, redirige si non authentifié */}
+      {/* Tableau de bord - accès seulement si authentifié */}
       <Route
         path="/administrateur/dashboard/*"
-        element={isAuthenticated ? (
-          <>
-            <PageTitle title="Tableau de bord | Système de vacation des correcteurs du baccalauréat" />
-            <Mydash />
-          </>
-        ) : (
-          <Navigate to="/" /> // Rediriger vers la page de connexion si non authentifié
-        )}
+        element={
+          isAuthenticated ? (
+            <>
+              <PageTitle title="Tableau de bord | Système de vacation des correcteurs du baccalauréat" />
+              <Mydash />
+            </>
+          ) : (
+            <Navigate to="/" replace state={{ from: location }} />
+          )
+        }
       />
     </Routes>
   );
