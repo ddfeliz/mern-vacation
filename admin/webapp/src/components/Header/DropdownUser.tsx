@@ -6,7 +6,7 @@ import { CheckCircleIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { Admin } from '../../types/admin';
 import { useDispatch } from 'react-redux';
-import { logout } from '../../slices/authSlice';
+import { logout, setAuthenticationStatus } from '../../slices/authSlice';
 
 const DropdownUser = () => {
   const [admin, setAdmin] = useState<Admin | null>(null);
@@ -24,10 +24,15 @@ const DropdownUser = () => {
   };
 
   const confirmLogout = () => {
-    console.log('Logged out');
     setOpen(false);
+    // Supprimer le token du localStorage
+    localStorage.removeItem('token');
+
+    // Réinitialiser l'état de l'authentification dans Redux
     dispatch(logout());
-    navigate('/'); 
+    dispatch(setAuthenticationStatus(false));
+
+    navigate('/', {replace: true}); 
   };
 
   const cancelLogout = () => {
