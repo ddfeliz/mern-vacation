@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 3000",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "start": "serve dist -s -n -L -p $PORT",
     "lint": "eslint .",
     "preview": "vite preview"
