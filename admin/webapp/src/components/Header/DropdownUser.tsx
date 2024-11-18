@@ -5,7 +5,8 @@ import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { CheckCircleIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { Admin } from '../../types/admin';
-import { useAuth } from '../../contexts/AuthContext';
+import { useDispatch } from 'react-redux';
+import { logout } from '../../slices/authSlice';
 
 const DropdownUser = () => {
   const [admin, setAdmin] = useState<Admin | null>(null);
@@ -15,7 +16,7 @@ const DropdownUser = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const {logout} = useAuth();
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
     setOpen(true);
@@ -25,7 +26,7 @@ const DropdownUser = () => {
   const confirmLogout = () => {
     console.log('Logged out');
     setOpen(false);
-    logout();
+    dispatch(logout());
     navigate('/');
   };
 

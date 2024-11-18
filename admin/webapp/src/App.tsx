@@ -1,17 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-
+import { Route, Routes, useLocation } from 'react-router-dom';
 import Loader from './common/Loader';
 import PageTitle from './components/PageTitle';
 import SignIn from './pages/Authentication/SignIn';
 import SignUp from './pages/Authentication/SignUp';
 import Mydash from './Mydash';
-import { useAuth } from './contexts/AuthContext';
+import PrivateRoute from './components/PrivateRoutes'; // Importer le composant PrivateRoute
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
   const location = useLocation(); // Récupérer la localisation actuelle
-  const { isAuthenticated } = useAuth(); // Utilisation du contexte d'authentification
 
   // Remettre la page en haut lors de la navigation
   useEffect(() => {
@@ -45,19 +43,17 @@ function App() {
       />
 
       {/* Tableau de bord - accès seulement si authentifié */}
-      <Route
-        path="/administrateur/dashboard/*"
-        element={
-          isAuthenticated ? (
+      <Route element={<PrivateRoute />}>
+        <Route
+          path="/administrateur/dashboard"
+          element={
             <>
               <PageTitle title="Tableau de bord | Système de vacation des correcteurs du baccalauréat" />
               <Mydash />
             </>
-          ) : (
-            <Navigate to="/" replace state={{ from: location }} />
-          )
-        }
-      />
+          }
+        />
+      </Route>
     </Routes>
   );
 }

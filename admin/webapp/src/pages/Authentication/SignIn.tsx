@@ -6,7 +6,8 @@ import axios from 'axios';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import DarkModeSwitcher from '../../components/Header/DarkModeSwitcher';
-import { useAuth } from '../../contexts/AuthContext';
+import { useDispatch } from 'react-redux';
+import { login, setAuthenticationStatus } from '../../slices/authSlice';
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -16,7 +17,7 @@ const SignIn: React.FC = () => {
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const dispatch = useDispatch();
 
   // Utilisation de useEffect pour lancer un timer de 5 secondes
   useEffect(() => {
@@ -29,6 +30,14 @@ const SignIn: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  // Vérification de l'authentification depuis le localStorage au démarrage
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      dispatch(setAuthenticationStatus(true)); // Mettre à jour l'état de l'authentification
+    }
+  }, [dispatch]);
 
   // Fonction pour gérer la soumission du formulaire
   const handleSubmit = async (event: React.FormEvent) => {
@@ -44,7 +53,8 @@ const SignIn: React.FC = () => {
       // Vérifier si le token existe avant de naviguer
       if (response.data && response.data.token) {
         localStorage.setItem('token', response.data.token);
-        login();
+        dispatch(login());
+        dispatch(setAuthenticationStatus(true));
         setOpen(true); // Afficher le message de succès
         setTimeout(() => {
           navigate('/administrateur/dashboard'); // Naviguer après un délai
