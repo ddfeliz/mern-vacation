@@ -334,7 +334,7 @@ const SignIn: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="mt-6 text-center">
+                <div className="mt-8 mb-8 text-center">
                   <p>
                     Vous n'avez pas de compte ?{' '}
                     <Link to="/register" className="text-primary">
