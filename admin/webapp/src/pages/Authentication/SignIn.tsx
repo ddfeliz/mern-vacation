@@ -87,7 +87,7 @@ const SignIn: React.FC = () => {
             <div className="py-17.5 px-26 text-center">
               <Link className="mb-5.5 flex flex-wrap items-center" to="/">
                 <img className="hidden border-black rounded-lg dark:block" src={Logo} alt="Logo" />
-                <img className="dark:hidden border-black rounded-lg" src={LogoDark} alt="Logo" /> <br />
+                <img className="dark:hidden border-black rounded-lg" src={LogoDark} alt="Logo" />
                 <h1 className='mx-7 dark:text-white text-xl'> Système de gestion du vacation <br />des correcteurs au baccalauréat </h1>
               </Link>
 
