@@ -65,7 +65,7 @@ const SignIn: React.FC = () => {
         setOpen(true); // Afficher le message de succès
         setTimeout(() => {
           setOpen(false);
-          navigate('/tableau-de-bord'); // Naviguer après un délai
+          navigate('/présidence-service-finance/tableau-de-bord'); // Naviguer après un délai
         }, 2000); // Délai de 2 secondes avant de naviguer
       }
     } catch (err: any) {
