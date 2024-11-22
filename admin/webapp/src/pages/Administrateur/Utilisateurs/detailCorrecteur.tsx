@@ -18,7 +18,7 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
     const navigate = useNavigate();
 
     const handleRetour = () => {
-        navigate('/administrateur/dashboard/correcteur');
+        navigate('/présidence-service-finance/correcteur');
     };
 
     const handleDeleting = () => {
@@ -37,7 +37,7 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
                 setCorrecteurs(correcteurs.filter((correcteur) => correcteur.idCorrecteur !== idCorrecteur));
                 setOpen1(true); // Afficher le message de succès
                 setTimeout(() => {
-                    navigate('/administrateur/dashboard/correcteur'); // Naviguer après un délai
+                    navigate('/présidence-service-finance/correcteur'); // Naviguer après un délai
                 }, 3000); // Délai de 2 secondes avant de naviguer
             } catch (err) {
                 alert("Erreur lors de la suppression du correcteur.");
@@ -266,7 +266,7 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
                                         >
                                             <TrashIcon className='h-auto w-5 text-danger'/>
                                         </button>
-                                        <Link to={`/administrateur/dashboard/modifier-correcteur/${correcteur.idCorrecteur}`}>
+                                        <Link to={`/présidence-service-finance/modifier-correcteur/${correcteur.idCorrecteur}`}>
                                             <button
                                                 type="button"
                                                 disabled={loading}

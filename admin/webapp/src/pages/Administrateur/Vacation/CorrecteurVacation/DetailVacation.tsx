@@ -28,7 +28,7 @@ const DetailVacation = () => {
   const navigate = useNavigate();
 
   const handleRetour = () => {
-    navigate('/administrateur/dashboard/vacation');
+    navigate('/présidence-service-finance/vacation');
   };
 
   const handleDeleting = () => {
@@ -48,7 +48,7 @@ const DetailVacation = () => {
       );
       setOpen1(true); // Afficher le message de succès
       setTimeout(() => {
-        navigate('/administrateur/dashboard/correcteur'); // Naviguer après un délai
+        navigate('/présidence-service-finance/correcteur'); // Naviguer après un délai
       }, 3000); // Délai de 2 secondes avant de naviguer
     } catch (err) {
       alert('Erreur lors de la suppression du correcteur.');

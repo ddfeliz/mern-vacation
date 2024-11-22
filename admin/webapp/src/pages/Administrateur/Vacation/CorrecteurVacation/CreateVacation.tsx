@@ -94,7 +94,7 @@ const CreateVacation = () => {
   };
 
   const handleView = () => {
-    navigate('/administrateur/dashboard/vacation');
+    navigate('/présidence-service-finance/vacation');
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -160,7 +160,7 @@ const CreateVacation = () => {
 
         setOpen(true); // Afficher le message de succès
         setTimeout(() => {
-          navigate('/administrateur/dashboard/vacation'); // Naviguer après un délai
+          navigate('/présidence-service-finance/vacation'); // Naviguer après un délai
         }, 3000); // Délai de 2 secondes avant de naviguer
       }
     } catch (err: any) {

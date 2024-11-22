@@ -501,7 +501,7 @@ const ShowVacation: React.FC = () => {
             </PDFDownloadLink>
 
             <Link
-              to="/administrateur/dashboard/nouveau-vacation"
+              to="/présidence-service-finance/nouveau-vacation"
               className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
             >
               <span>
@@ -804,7 +804,7 @@ const ShowVacation: React.FC = () => {
                             <PlusIcon className="h-auto w-5 text-green-600" />
                           </button>
                           <Link
-                            to={`/administrateur/dashboard/vacation/${vacation.idVacation}`}
+                            to={`/présidence-service-finance/vacation/${vacation.idVacation}`}
                             className="hover:text-primary"
                           >
                             <EyeIcon className="h-auto w-5 text-secondary" />

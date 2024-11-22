@@ -46,7 +46,7 @@ const TablePayment = () => {
         <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
           <div className="mb-2 flex flex-wrap gap-5 xl:gap-7.5 justify-start">
             <Link
-              to="/administrateur/dashboard/paiement-liste"
+              to="/présidence-service-finance/paiement-liste"
               className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
             >
               <span>

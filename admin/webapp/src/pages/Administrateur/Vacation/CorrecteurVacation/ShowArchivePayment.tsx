@@ -560,7 +560,7 @@ const ShowArchivePayment = () => {
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                         <div className="flex items-center justify-center space-x-3.5">
                           <Link
-                            to={`/administrateur/dashboard/archivage-detail/${payment.idPayment}`}
+                            to={`/présidence-service-finance/archivage-detail/${payment.idPayment}`}
                             className="hover:text-primary"
                           >
                             <EyeIcon className="h-auto w-5 text-secondary" />

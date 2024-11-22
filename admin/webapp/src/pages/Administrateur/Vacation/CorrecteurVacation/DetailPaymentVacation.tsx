@@ -28,7 +28,7 @@ const DetailPaymentVacation = () => {
   const navigate = useNavigate();
 
   const handleRetour = () => {
-    navigate('/administrateur/dashboard/paiement-liste');
+    navigate('/présidence-service-finance/paiement-liste');
   };
 
   const handleDeleting = () => {
@@ -48,7 +48,7 @@ const DetailPaymentVacation = () => {
       );
       setOpen1(true); // Afficher le message de succès
       setTimeout(() => {
-        navigate('/administrateur/dashboard/paiement-liste'); // Naviguer après un délai
+        navigate('/présidence-service-finance/paiement-liste'); // Naviguer après un délai
       }, 3000); // Délai de 2 secondes avant de naviguer
     } catch (err) {
       alert('Erreur lors de la suppression du correcteur.');

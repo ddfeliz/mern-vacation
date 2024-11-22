@@ -319,7 +319,7 @@ const ShowPaymentVacation = () => {
       setOpen2(true); // Afficher le message de succès
       setOpen(false);
       setTimeout(() => {
-        navigate('/administrateur/dashboard/nouveau-paiement');
+        navigate('/présidence-service-finance/nouveau-paiement');
       }, 2000); // Délai de 2 secondes avant de naviguer
     } catch (err) {
       alert('Erreur lors de la suppression du tarif.');
@@ -336,7 +336,7 @@ const ShowPaymentVacation = () => {
       setOpenArchiveSuccess(true);
       setOpenArchive(false);
       setTimeout(() => {
-        navigate('/administrateur/dashboard/nouveau-paiement');
+        navigate('/présidence-service-finance/nouveau-paiement');
       }, 2000); // Délai de 2 secondes avant de naviguer
     } catch (error) {
       setMessage('Erreur lors de la réinitialisation des paiements.');
@@ -760,7 +760,7 @@ const ShowPaymentVacation = () => {
             </PDFDownloadLink>
 
             <Link
-              to="/administrateur/dashboard/nouveau-paiement"
+              to="/présidence-service-finance/nouveau-paiement"
               className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
             >
               <span>
@@ -1062,7 +1062,7 @@ const ShowPaymentVacation = () => {
                             </button>
                           )}
                           <Link
-                            to={`/administrateur/dashboard/paiement/${payment.idPayment}`}
+                            to={`/présidence-service-finance/paiement/${payment.idPayment}`}
                             className="hover:text-primary"
                           >
                             <EyeIcon className="h-auto w-5 text-secondary" />

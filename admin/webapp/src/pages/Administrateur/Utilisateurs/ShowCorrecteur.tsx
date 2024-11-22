@@ -444,7 +444,7 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
             </div>
 
             <Link
-              to="/administrateur/dashboard/nouveau-correcteur"
+              to="/présidence-service-finance/nouveau-correcteur"
               className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
             >
               <span>
@@ -722,13 +722,13 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                         <div className="flex items-center justify-center space-x-3.5">
                           <Link
-                            to={`/administrateur/dashboard/correcteur/${correcteur.idCorrecteur}`}
+                            to={`/présidence-service-finance/correcteur/${correcteur.idCorrecteur}`}
                             className="hover:text-primary"
                           >
                             <EyeIcon className="h-auto w-5 text-secondary" />
                           </Link>
                           <Link
-                            to={`/administrateur/dashboard/modifier-correcteur/${correcteur.idCorrecteur}`}
+                            to={`/présidence-service-finance/modifier-correcteur/${correcteur.idCorrecteur}`}
                             className="hover:text-primary"
                           >
                             <PencilSquareIcon className="h-auto w-5 text-primary" />

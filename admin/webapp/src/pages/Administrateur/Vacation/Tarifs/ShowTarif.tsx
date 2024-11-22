@@ -45,7 +45,7 @@ const ShowTarif = () => {
         {error} ou cliquez ici
 
         <Link
-            to="/administrateur/dashboard/nouveau-tarif"
+            to="/présidence-service-finance/nouveau-tarif"
             className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 mx-2 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
         >
             <span>
@@ -87,7 +87,7 @@ const ShowTarif = () => {
             <Breadcrumb pageName="Tarifs" />
             <div className="mb-2 flex flex-wrap gap-5 xl:gap-7.5 justify-end">
                 <Link
-                    to="/administrateur/dashboard/nouveau-tarif"
+                    to="/présidence-service-finance/nouveau-tarif"
                     className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
                 >
                     <span>
@@ -167,10 +167,10 @@ const ShowTarif = () => {
                                         </td>
                                         <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                                             <div className="flex items-center justify-center space-x-3.5">
-                                                <Link to={`/administrateur/dashboard/detail-tarif/${tarif.idTarif}`} className="hover:text-primary">
+                                                <Link to={`/présidence-service-finance/detail-tarif/${tarif.idTarif}`} className="hover:text-primary">
                                                     <EyeIcon className='h-auto w-5 text-secondary' />
                                                 </Link>
-                                                <Link to={`/administrateur/dashboard/modifier-tarif/${tarif.idTarif}`} className="hover:text-primary">
+                                                <Link to={`/présidence-service-finance/modifier-tarif/${tarif.idTarif}`} className="hover:text-primary">
                                                     <PencilSquareIcon className='h-auto w-5 text-primary' />
                                                 </Link>
                                                 <button

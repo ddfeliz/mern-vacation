@@ -56,7 +56,7 @@ const EditCorrecteur = () => {
     };
 
     const handleRetour = () => {
-        navigate('/administrateur/dashboard/correcteur');
+        navigate('/présidence-service-finance/correcteur');
     };
 
     const handleSubmit = async (e: { preventDefault: () => void; }) => {
@@ -81,7 +81,7 @@ const EditCorrecteur = () => {
 
             setOpen(true); // Afficher le message de succès
             setTimeout(() => {
-                navigate('/administrateur/dashboard/correcteur'); // Naviguer après un délai
+                navigate('/présidence-service-finance/correcteur'); // Naviguer après un délai
             }, 3000); // Délai de 2 secondes avant de naviguer
 
         } catch (error) {

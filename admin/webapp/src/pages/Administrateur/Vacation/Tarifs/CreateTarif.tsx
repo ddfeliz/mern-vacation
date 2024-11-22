@@ -60,7 +60,7 @@ const CreateTarif = () => {
     });
   };
   const handleView = () => {
-    navigate('/administrateur/dashboard/tarif');
+    navigate('/présidence-service-finance/tarif');
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -98,7 +98,7 @@ const CreateTarif = () => {
 
         setOpen(true); // Afficher le message de succès
         setTimeout(() => {
-          navigate('/administrateur/dashboard/tarif'); // Naviguer après un délai
+          navigate('/présidence-service-finance/tarif'); // Naviguer après un délai
         }, 3000); // Délai de 2 secondes avant de naviguer
       }
     } catch (err: any) {

@@ -162,7 +162,7 @@ const CreatePaymentVacation = () => {
   };
 
   const handleView = () => {
-    navigate('/administrateur/dashboard/paiement-liste');
+    navigate('/présidence-service-finance/paiement-liste');
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -214,7 +214,7 @@ const CreatePaymentVacation = () => {
 
       setOpen(true); // Afficher le message de succès
       setTimeout(() => {
-        navigate('/administrateur/dashboard/paiement-liste'); // Naviguer après un délai
+        navigate('/présidence-service-finance/paiement-liste'); // Naviguer après un délai
       }, 3000); // Délai de 2 secondes avant de naviguer
     } catch (err: any) {
       if (err.response) {

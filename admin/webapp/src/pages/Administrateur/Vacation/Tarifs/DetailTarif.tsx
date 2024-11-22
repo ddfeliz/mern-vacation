@@ -28,7 +28,7 @@ const DetailTarif = () => {
   const navigate = useNavigate();
 
   const handleRetour = () => {
-    navigate('/administrateur/dashboard/tarif');
+    navigate('/présidence-service-finance/tarif');
   };
 
   const handleDeleting = () => {
@@ -47,7 +47,7 @@ const DetailTarif = () => {
       setOpen1(true); // Afficher le message de succès
       setOpen(false);
       setTimeout(() => {
-        navigate('/administrateur/dashboard/tarif'); // Naviguer après un délai
+        navigate('/présidence-service-finance/tarif'); // Naviguer après un délai
       }, 3000); // Délai de 2 secondes avant de naviguer
     } catch (err) {
       alert('Erreur lors de la suppression du correcteur.');
