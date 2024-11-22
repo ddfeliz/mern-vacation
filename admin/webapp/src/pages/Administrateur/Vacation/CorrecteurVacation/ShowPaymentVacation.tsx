@@ -730,7 +730,7 @@ const ShowPaymentVacation = () => {
                   Suppression avec succès
                 </DialogTitle>
                 <p className="mt-2 text-sm text-gray-500">
-                  Le Tarif a été supprimé!
+                  Le paiement a été supprimé!
                 </p>
               </div>
             </div>

@@ -308,9 +308,9 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
                                                         <button
                                                             type='button'
                                                             onClick={() => confirmDelete(correcteur.idCorrecteur)}
-                                                            className="mr-2 bg-blue-500 text-white px-4 py-2 rounded dark:bg-blue-600"
+                                                            className="mr-2 bg-red-500 text-white px-4 py-2 rounded dark:bg-red-600"
                                                         >
-                                                            Oui
+                                                            Oui, supprimer
                                                         </button>
                                                         <button
                                                             onClick={cancelDelete}
