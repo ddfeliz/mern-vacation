@@ -64,7 +64,8 @@ const SignIn: React.FC = () => {
         dispatch(setAuthenticationStatus(true));
         setOpen(true); // Afficher le message de succès
         setTimeout(() => {
-          navigate('/administrateur/dashboard'); // Naviguer après un délai
+          setOpen(false);
+          navigate('/tableau-de-bord'); // Naviguer après un délai
         }, 2000); // Délai de 2 secondes avant de naviguer
       }
     } catch (err: any) {
@@ -193,7 +194,7 @@ const SignIn: React.FC = () => {
 
 
 
-              <Dialog open={open} onClose={() => setOpen(false)} className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
+              <Dialog open={open} onClose={() => {}} className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
                 {/* Arrière-plan grisé */}
                 <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-50" />
 

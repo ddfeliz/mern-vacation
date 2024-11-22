@@ -29,7 +29,7 @@ function App() {
   return (
     <Routes>
       {/* Page d'enregistrement */}
-      <Route path="/register" element={<SignUp />} />
+      <Route path="/registre" element={<SignUp />} />
 
       {/* Page de connexion */}
       <Route
@@ -45,7 +45,7 @@ function App() {
       {/* Tableau de bord - accès seulement si authentifié */}
       <Route element={<PrivateRoute />}>
         <Route
-          path="/administrateur/dashboard/*"
+          path="/tableau-de-bord/*"
           element={
             <>
               <PageTitle title="Tableau de bord | Système de vacation des correcteurs du baccalauréat" />
