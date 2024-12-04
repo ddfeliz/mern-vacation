@@ -10,49 +10,25 @@ import {
 } from '@headlessui/react';
 import {
   CheckCircleIcon,
-  EyeIcon,
-  PlusIcon,
+  EyeIcon
 } from '@heroicons/react/24/outline';
 import { TrashIcon } from '@heroicons/react/24/outline';
-import { Vacation } from '../../../../types/vacation';
 import CardDataStats from '../../../../components/CardDataStats';
-import VacationPdf from './VacationPdf';
-import { PDFDownloadLink } from '@react-pdf/renderer';
-import { BsFilePdfFill, BsSearch } from 'react-icons/bs';
+import { BsSearch } from 'react-icons/bs';
+import { VacationGroupe } from '../../../../types/vacationGroupe';
 
 const ShowVacation: React.FC = () => {
-  const [formData, setFormData] = useState({
-    specialite: '',
-    secteur: '',
-    option: '',
-    matiere: '',
-  });
 
-  const [vacations, setVacations] = useState<Vacation[]>([]);
+  const [vacations, setVacations] = useState<VacationGroupe[]>([]);
   const [totalCopies, setTotalCopies] = useState('0');
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false); // État pour le Dialog
   const [open2, setOpen2] = useState(false); // État pour le Dialog
-  const [openEdit, setOpenEdit] = useState(false); // État pour le Dialog de mise à jour
   const [openSuccess, setOpenSuccess] = useState(false);
-  const [selectedVacation, setSelectedVacation] = useState<Vacation | null>(
-    null,
-  ); // Vacation sélectionnée pour mise à jour
-  const [newNbCopie, setNewNbCopie] = useState(0); // État pour stocker le nouveau nombre de copie
   const [selectedYear, setSelectedYear] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalVacations, setTotalVacations] = useState('0');
-  const [vacationsPerPage] = useState(5); // Modifier cette valeur pour ajuster le nombre de vacation par page
-
-  const [specialites, setSpecialites] = useState<string[]>([]); // État pour stocker les spécialités
-  const [secteurs, setSecteurs] = useState<string[]>([]); // État pour stocker les secteurs
-  const [options, setOptions] = useState<string[]>([]); // État pour stocker les options
-  const [matieres, setMatieres] = useState<string[]>([]); // État pour stocker les matières
-
-  const [searchSpecialite, setSearchSpecialite] = useState('');
-  const [searchSecteur, setSearchSecteur] = useState('');
-  const [searchOption, setSearchOption] = useState('');
-  const [searchMatiere, setSearchMatiere] = useState('');
+  const [vacationsPerPage] = useState(5); 
   const [searchItem, setSearchItem] = useState('');
 
   // Utiliser useEffect pour faire la requête à l'API au chargement du composant
@@ -61,7 +37,7 @@ const ShowVacation: React.FC = () => {
     try {
       // Faire la requête GET vers l'endpoint de l'API
       const response = await axios.get(
-        'https://gestion-vacation.onrender.com/api/vacation/total-copies',
+        'http://localhost:3000/api/vacation/totales-copies',
       );
 
       // Stocker le total des copies dans l'état
@@ -75,7 +51,7 @@ const ShowVacation: React.FC = () => {
   const fetchVacationCount = async () => {
     try {
       const responseVacation = await axios.get(
-        'https://gestion-vacation.onrender.com/api/vacation/count',
+        'http://localhost:3000/api/vacation/compte',
       );
       setTotalVacations(responseVacation.data.totalVacation.toString());
     } catch (err) {
@@ -90,8 +66,8 @@ const ShowVacation: React.FC = () => {
   useEffect(() => {
     const fetchVacations = async () => {
       try {
-        const response = await axios.get(
-          'https://gestion-vacation.onrender.com/api/vacation/all',
+        const response = await axios.get<VacationGroupe[]>(
+          'http://localhost:3000/api/vacation/compte-vacation',
         );
         setVacations(response.data);
       } catch (err) {
@@ -104,93 +80,11 @@ const ShowVacation: React.FC = () => {
     fetchVacations();
   }, []);
 
-  // Récupérer les spécialités depuis le backend au montage du composant
-  useEffect(() => {
-    console.log('Fetching specialites...');
-    const fetchSpecialites = async () => {
-      try {
-        const response = await axios.get(
-          'https://gestion-vacation.onrender.com/api/matiere-bacc/specialiste',
-        );
-        const fetchedSpecialites = response.data.specialites;
-        console.log('Specialites fetched:', fetchedSpecialites);
-        setSpecialites(fetchedSpecialites); // Mettre à jour les spécialités avec la réponse de l'API
-      } catch (err) {
-        console.error('Erreur lors de la récupération des spécialités :', err);
-      }
-    };
-
-    fetchSpecialites();
-  }, []);
-
-  // Récupérer les secteurs en fonction de la spécialité sélectionnée
-  const fetchSecteurs = async (specialite: string) => {
-    try {
-      const response = await axios.get(
-        `https://gestion-vacation.onrender.com/api/matiere-bacc/secteurs?specialite=${specialite}`,
-      );
-      setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
-      setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
-      setMatieres([]); // Réinitialiser les matières
-    } catch (err) {
-      console.error('Erreur lors de la récupération des secteurs :', err);
-    }
-  };
-
-  // Récupérer les options en fonction du secteur sélectionné
-  const fetchOption = async (secteur: string) => {
-    try {
-      const response = await axios.get(
-        `https://gestion-vacation.onrender.com/api/matiere-bacc/options?secteur=${secteur}`,
-      );
-      setOptions(response.data.options); // Mettre à jour les matières
-    } catch (err) {
-      console.error('Erreur lors de la récupération des matières :', err);
-    }
-  };
-
-  // Récupérer les matières en fonction du secteur sélectionné
-  const fetchMatieres = async (option: string) => {
-    try {
-      const response = await axios.get(
-        `https://gestion-vacation.onrender.com/api/matiere-bacc/matieres?option=${option}`,
-      );
-      setMatieres(response.data.matieres); // Mettre à jour les matières
-    } catch (err) {
-      console.error('Erreur lors de la récupération des matières :', err);
-    }
-  };
-
-  // Filtrer les vacations par année
-  const filteredVacations = vacations.filter((vacation) => {
-    const isYearMatch = vacation.session.toString().includes(selectedYear);
-    const isNameMatch =
-      vacation.nom.toLowerCase().includes(searchItem.toLowerCase()) ||
-      vacation.prenom.toLowerCase().includes(searchItem.toLowerCase()) ||
-      vacation.idVacation.toLowerCase().includes(searchItem.toLowerCase()) ||
-      vacation.idCorrecteur.toLowerCase().includes(searchItem.toLowerCase());
-
-    const isCorrecteurMatch =
-      vacation.specialite
-        .toLowerCase()
-        .includes(searchSpecialite.toLowerCase()) &&
-      vacation.secteur.toLowerCase().includes(searchSecteur.toLowerCase()) &&
-      vacation.option.toLowerCase().includes(searchOption.toLowerCase()) &&
-      vacation.matiere.toLowerCase().includes(searchMatiere.toLowerCase());
-
-    return isYearMatch && isNameMatch && isCorrecteurMatch;
-  });
-
-  // Calculer le total des copies pour les vacances filtrées
-  const totalCopiesFiltered = filteredVacations.reduce(
-    (total, vacation) => total + vacation.nbcopie,
-    0,
-  );
 
   // Calculer les indices de début et de fin pour les correcteurs affichés
   const indexOfLastVacation = currentPage * vacationsPerPage;
   const indexOfFirstVacation = indexOfLastVacation - vacationsPerPage;
-  const currentVacations = filteredVacations.slice(
+  const currentVacations = vacations.slice(
     indexOfFirstVacation,
     indexOfLastVacation,
   );
@@ -208,48 +102,6 @@ const ShowVacation: React.FC = () => {
   // Calculer le nombre total de pages
   const totalPages = Math.ceil(vacations.length / vacationsPerPage);
 
-  // Fonction pour ouvrir le modal d'édition avec les données du vacation sélectionné
-  const openEditModal = (vacation: Vacation) => {
-    setSelectedVacation(vacation);
-    setNewNbCopie(0); // Réinitialiser le nombre de copie
-    setOpenEdit(true);
-  };
-
-  // Fonction pour confirmer la mise à jour
-  const handleUpdateNbCopie = async () => {
-    if (!selectedVacation) return;
-
-    try {
-      const updatedVacation = {
-        ...selectedVacation,
-        nbcopie: selectedVacation.nbcopie + newNbCopie,
-        session: new Date().getFullYear(),
-      };
-
-      // Mise à jour dans le backend
-      await axios.put(
-        `https://gestion-vacation.onrender.com/api/vacation/${selectedVacation.idVacation}`,
-        updatedVacation,
-      );
-
-      // Mettre à jour le tableau des vacations
-      setVacations((prev) =>
-        prev.map((vac) =>
-          vac.idVacation === selectedVacation.idVacation
-            ? updatedVacation
-            : vac,
-        ),
-      );
-
-      setOpenEdit(false); // Fermer le modal
-      setOpenSuccess(true);
-      fetchTotalCopies();
-      setTimeout(() => {}, 2000); // Délai de 2 secondes avant de naviguer
-    } catch (err) {
-      alert('Erreur lors de la mise à jour du nombre de copies.');
-    }
-  };
-
   const handleDeleting = () => {
     setOpen(true);
   };
@@ -261,50 +113,13 @@ const ShowVacation: React.FC = () => {
   // Fonction pour supprimer un correcteur
   const confirmDelete = async (idVacation: string) => {
     try {
-      await axios.delete(`https://gestion-vacation.onrender.com/api/vacation/${idVacation}`);
+      await axios.delete(`http://localhost:3000/api/vacation/${idVacation}`);
       setVacations(
         vacations.filter((vacation) => vacation.idVacation !== idVacation),
       );
       setOpen2(true); // Afficher le message de succès
     } catch (err) {
       alert('Erreur lors de la suppression du vacation.');
-    }
-  };
-
-  const handleChange = (e: { target: { name: any; value: any } }) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-
-    if (name === 'specialite') {
-      fetchSecteurs(value);
-      setFormData((prevData) => ({
-        ...prevData,
-        secteur: '',
-        option: '',
-        matiere: '',
-      }));
-      setOptions([]);
-      setSearchSpecialite(value);
-    }
-
-    if (name === 'secteur') {
-      fetchOption(value);
-      setFormData((prevData) => ({
-        ...prevData,
-        option: '',
-        matiere: '',
-      }));
-      setMatieres([]);
-      setSearchSecteur(value);
-    }
-
-    if (name === 'option') {
-      fetchMatieres(value);
-      setSearchOption(value);
-    }
-
-    if (name === 'matiere') {
-      setSearchMatiere(value);
     }
   };
 
@@ -337,26 +152,6 @@ const ShowVacation: React.FC = () => {
           </svg>
         </CardDataStats>
         <CardDataStats
-          title="Totale des copies selon le recherche spécifié"
-          titleColor="#007BFF"
-          total={totalCopiesFiltered.toString()}
-        >
-          <svg
-            className="fill-primary dark:fill-white"
-            width="30"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M17 0H7C4.8 0 3 1.8 3 4v16c0 2.2 1.8 4 4 4h10c2.2 0 4-1.8 4-4V7l-6-7zM7 2h10l5 5h-5c-1.1 0-2 .9-2 2v12H7V2zm6 14h-4v-2h4v2zm0-4h-4v-2h4v2z"
-              fill=""
-            />
-            <path d="M11 14h2v2h-2z" fill="" />
-          </svg>
-        </CardDataStats>
-        <CardDataStats
           title="Totale des copies corrigées"
           titleColor="#007BFF"
           total={totalCopies.toString()}
@@ -378,50 +173,6 @@ const ShowVacation: React.FC = () => {
         </CardDataStats>
       </div>
 
-      {/* Modal de mise à jour du nombre de copies */}
-      <Dialog
-        open={openEdit}
-        onClose={() => setOpenEdit(false)}
-        className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
-      >
-        <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-50" />
-        <div className="flex items-center justify-center min-h-screen">
-          <DialogPanel className="relative mx-auto w-full max-w-md rounded-lg bg-white shadow-lg p-6">
-            <DialogTitle className="text-xl font-medium text-gray-900">
-              Mettre à jour le nombre de copies
-            </DialogTitle>
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700">
-                Ajouter le nombre de copies
-              </label>
-              <input
-                type="number"
-                value={newNbCopie}
-                onChange={(e) => setNewNbCopie(parseInt(e.target.value))}
-                required
-                className="mt-1 py-2 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary sm:text-sm"
-              />
-            </div>
-            <div className="mt-6 flex justify-end">
-              <button
-                onClick={handleUpdateNbCopie}
-                className={`mr-2 bg-blue-500 text-white px-4 py-2 rounded ${
-                  newNbCopie <= 0 ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-                disabled={newNbCopie <= 0} // Désactiver le bouton si la valeur est nulle ou négative
-              >
-                Mise à jour
-              </button>
-              <button
-                onClick={() => setOpenEdit(false)}
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded"
-              >
-                Annuler
-              </button>
-            </div>
-          </DialogPanel>
-        </div>
-      </Dialog>
 
       <Dialog
         open={open2}
@@ -490,16 +241,6 @@ const ShowVacation: React.FC = () => {
       <div className="flex flex-col gap-10">
         <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
           <div className="mb-4 flex flex-wrap gap-5 xl:gap-7.5 justify-end">
-            <PDFDownloadLink
-              document={<VacationPdf vacations={filteredVacations} />}
-              fileName="vacations.pdf"
-              className="rounded border-[1.5px] border-stroke bg-transparent py-4 px-10 text-black outline-none transition hover:border-primary hover:text-primary focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary dark:hover:border-primary dark:hover:text-primary"
-            >
-              <span className="flex flex-wrap items-center justify-center">
-                <BsFilePdfFill className="w-8 h-5" /> Créer en PDF
-              </span>
-            </PDFDownloadLink>
-
             <Link
               to="/présidence-service-finance/nouveau-vacation"
               className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10"
@@ -577,163 +318,20 @@ const ShowVacation: React.FC = () => {
             </div>
           </div>
 
-          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-            <span className="text-secondary text-sm mt-5">Filtré par:</span>
-            <div className="w-full xl:w-1/4">
-              <label
-                htmlFor="specialite"
-                className="mb-2.5 block text-black dark:text-white"
-              >
-                Spécialité <span className="text-meta-1">*</span>
-              </label>
-              <select
-                name="specialite"
-                id="specialite"
-                value={formData.specialite}
-                onChange={handleChange}
-                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none 
-                                transition focus:border-primary active:border-primary disabled:cursor-default 
-                                disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-              >
-                <option value="">Sélectionnez une spécialité</option>
-                {specialites && specialites.length > 0 ? (
-                  specialites.map((specialite, index) => (
-                    <option key={index} value={specialite}>
-                      {specialite}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>Chargement...</option>
-                )}
-              </select>
-            </div>
-
-            <div className="w-full xl:w-1/4">
-              <label
-                htmlFor="secteur"
-                className="mb-2.5 block text-black dark:text-white"
-              >
-                Secteur <span className="text-meta-1">*</span>
-              </label>
-              <select
-                name="secteur"
-                id="secteur"
-                value={formData.secteur}
-                onChange={handleChange}
-                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-              >
-                <option value="">Sélectionnez un secteur</option>
-                {secteurs && secteurs.length > 0 ? (
-                  secteurs.map((secteur, index) => (
-                    <option key={index} value={secteur}>
-                      {secteur}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>
-                    Veuillez sélectionner une spécialité d'abord
-                  </option>
-                )}
-              </select>
-            </div>
-            <div className="w-full xl:w-1/4">
-              <label
-                htmlFor="option"
-                className="mb-2.5 block text-black dark:text-white"
-              >
-                Option <span className="text-meta-1">*</span>
-              </label>
-              <select
-                name="option"
-                id="option"
-                value={formData.option}
-                onChange={handleChange}
-                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-              >
-                <option value="">Sélectionnez une option</option>
-                {options && options.length > 0 ? (
-                  options.map((option, index) => (
-                    <option key={index} value={option}>
-                      {option}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>
-                    Veuillez sélectionner un secteur d'abord
-                  </option>
-                )}
-              </select>
-            </div>
-
-            <div className="w-full xl:w-1/4">
-              <label
-                htmlFor="matiere"
-                className="mb-2.5 block text-black dark:text-white"
-              >
-                Matière <span className="text-meta-1">*</span>
-              </label>
-              <select
-                name="matiere"
-                id="matiere"
-                value={formData.matiere}
-                onChange={handleChange}
-                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-              >
-                <option value="">
-                  Sélectionnez une matière
-                  {formData.option && (
-                    <p className="mt-2 text-black dark:text-white">
-                      selon l'option selectionné :{' '}
-                      <strong>{formData.option}</strong>
-                    </p>
-                  )}
-                </option>
-                {matieres && matieres.length > 0 ? (
-                  matieres.map((matiere, index) => (
-                    <option key={index} value={matiere}>
-                      {matiere}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>
-                    Veuillez sélectionner une option d'abord
-                  </option>
-                )}
-              </select>
-            </div>
-          </div>
           <div className="max-w-full overflow-x-auto">
             <table className="w-full table-auto">
               <thead>
-                <tr className="bg-gray text-left dark:bg-meta-4">
+                <tr className="bg-gray text-center dark:bg-meta-4">
                   <th className="min-w-[180px] py-4 px-4 font-medium text-black dark:text-white">
-                    ID Vacation
-                  </th>
-                  <th className="min-w-[180px] py-4 px-4 font-medium text-black dark:text-white">
-                    ID Correcteur
+                    N° immatricule
                   </th>
                   <th className="min-w-[300px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
                     Nom complet
                   </th>
+                  <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
+                    Nombre des vacations
+                  </th>
                   <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                    CIN
-                  </th>
-                  <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
-                    Bacc specialité
-                  </th>
-                  <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
-                    Secteur
-                  </th>
-                  <th className="min-w-[250px] py-4 px-4 font-medium text-black dark:text-white">
-                    Option
-                  </th>
-                  <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
-                    Matière specialisé
-                  </th>
-                  <th className="min-w-[160px] py-4 px-4 font-medium text-black dark:text-white">
-                    Nombre du copie corrigé
-                  </th>
-                  <th className="min-w-[250px] py-4 px-4 font-medium text-black dark:text-white">
                     Session
                   </th>
                   <th className="py-4 px-4 font-medium text-black dark:text-white">
@@ -744,67 +342,36 @@ const ShowVacation: React.FC = () => {
               <tbody>
                 {currentVacations.length > 0 ? (
                   currentVacations.map((vacation) => (
-                    <tr key={vacation.idVacation}>
-                      <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                    <tr key={vacation.idVacation} className='text-center'>
+                      <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {vacation.idVacation}
+                          {vacation.immatricule}
                         </h5>
                       </td>
-                      <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {vacation.idCorrecteur}
-                        </h5>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                      <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
                           {vacation.nom} {vacation.prenom}
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                         <p className="text-black dark:text-white">
-                          {vacation.cin}
+                          <Link
+                            to={`/présidence-service-finance/vacation/correcteur/${vacation.immatricule}`}
+                            className="hover:text-primary"
+                          >
+                            {vacation.totalVacations}
+                          </Link>
                         </p>
                       </td>
-                      <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                        <p className="text-black dark:text-white">
-                          {vacation.specialite}
-                        </p>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                        <p className="text-black dark:text-white">
-                          {vacation.secteur}
-                        </p>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                        <p className="text-black dark:text-white">
-                          {vacation.option}
-                        </p>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                        <p className="text-black dark:text-white">
-                          {vacation.matiere}
-                        </p>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
+                      <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {vacation.nbcopie}
-                        </h5>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {vacation.session}
+                          {new Date().getFullYear()}
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                         <div className="flex items-center justify-center space-x-3.5">
-                          <button
-                            onClick={() => openEditModal(vacation)}
-                            className="hover:text-primary"
-                          >
-                            <PlusIcon className="h-auto w-5 text-green-600" />
-                          </button>
                           <Link
-                            to={`/présidence-service-finance/vacation/${vacation.idVacation}`}
+                            to={`/présidence-service-finance/vacation/correcteur/${vacation.immatricule}`}
                             className="hover:text-primary"
                           >
                             <EyeIcon className="h-auto w-5 text-secondary" />

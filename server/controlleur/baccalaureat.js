@@ -1,18 +1,15 @@
-const Bacc = require('../models/baccModel');
-const CreateError = require('../utils/appError'); // Assurez-vous que l'import est correct
+const Baccalaureat = require('../modelisation/baccalaureat');
+const CreateError = require('../utils/appError');
 
 
-// Fonction pour ajouter une ou plusieurs matières baccalauréat
-exports.createBacc = async (req, res, next) => {
+exports.ajoutBaccalaureat = async (req, res, next) => {
     try {
-        let matières = req.body; // Récupérer les données
+        let matières = req.body; 
 
-        // Si ce n'est pas un tableau, le convertir en tableau contenant un seul objet
         if (!Array.isArray(matières)) {
             matières = [matières];
         }
 
-        // Vérifier que le tableau de matières n'est pas vide
         if (matières.length === 0) {
             return next(new CreateError(400, 'Un tableau de matières doit être fourni.'));
         }
@@ -30,7 +27,6 @@ exports.createBacc = async (req, res, next) => {
                 nomMatiere
             } = matière;
 
-            // Vérifier que les champs obligatoires sont fournis
             if (!libelleSpecialite ||
                 !libelleSecteur ||
                 !codeSerieOption ||
@@ -41,14 +37,12 @@ exports.createBacc = async (req, res, next) => {
                 return next(new CreateError(400, 'Tous les champs obligatoires doivent être fournis pour chaque matière.'));
             }
 
-            // Vérifier si un matière baccalauréat avec cet code et nom de matière existe déjà
-            const matiereBaccExist = await Bacc.findOne({ codeSerieOption, nomMatiere });
+            const matiereBaccExist = await Baccalaureat.findOne({ codeSerieOption, nomMatiere });
             if (matiereBaccExist) {
                 return next(new CreateError(409, `Un matière baccalauréat avec le code ${codeSerieOption} et le nom ${nomMatiere} existe déjà.`));
             }
 
-            // Créer un nouvel objet matière baccalauréat avec les informations fournies
-            const newBacc = new Bacc({
+            const newBaccalaureat = new Baccalaureat({
                 libelleSpecialite,
                 libelleSecteur,
                 codeSerieOption,
@@ -59,9 +53,8 @@ exports.createBacc = async (req, res, next) => {
                 idMatiere: `LBMAT-${Math.floor(1000 + Math.random() * 9000)}` // Générer un identifiant unique
             });
 
-            // Enregistrer le matière baccalauréat dans la base de données
-            await newBacc.save();
-            addedMatieres.push(newBacc); // Ajouter à la liste des matières ajoutées
+            await newBaccalaureat.save();
+            addedMatieres.push(newBaccalaureat); // Ajouter à la liste des matières ajoutées
         }
 
         res.status(201).json({
@@ -84,30 +77,28 @@ exports.createBacc = async (req, res, next) => {
 };
 
 
-// Fonction pour obtenir la liste de tous les matière baccalauréat
-exports.getAllPBaccs = async (req, res, next) => {
+exports.avoirTousBaccalaureats = async (req, res, next) => {
     try {
-        // Chercher tous les matière baccalauréat dans la base de données
-        const baccs = await Bacc.find();
 
-        // Vérifier si des matières existent
-        if (!baccs || baccs.length === 0) {
+        const baccalaureats = await Baccalaureat.find();
+
+        if (!baccalaureats || baccalaureats.length === 0) {
             return next(new CreateError(404, 'Aucun matière baccalauréat trouvé.'));
         }
 
-        res.status(200).json(baccs);
+        res.status(200).json(baccalaureats);
     } catch (error) {
         next(new CreateError(500, 'Erreur lors de la récupération de la liste des matières baccalauréats.', error));
     }
 };
 
-// Fonction pour obtenir les informations d'un matière baccalauréat par son identifiant
-exports.getBaccById = async (req, res, next) => {
+
+
+exports.avoirIdBaccalaureat = async (req, res, next) => {
     try {
         const { idMatiere } = req.params;
 
-        // Rechercher le matière par son idPersonnel
-        const matiere = await Bacc.findOne({ idMatiere });
+        const matiere = await Baccalaureat.findOne({ idMatiere });
         if (!matiere) {
             return next(new CreateError(404, 'Matière baccalauréat non trouvé.'));
         }
@@ -118,14 +109,12 @@ exports.getBaccById = async (req, res, next) => {
     }
 };
 
-// Fonction pour mettre à jour les informations d'un matière baccalauréat
-exports.updateBacc = async (req, res, next) => {
+
+exports.modificationBaccalaureat = async (req, res, next) => {
     try {
         const { idMatiere } = req.params;
         const updates = req.body;
-
-        // Trouver le matière baccalauréat et mettre à jour ses informations
-        const matiere = await Bacc.findOneAndUpdate(
+        const matiere = await Baccalaureat.findOneAndUpdate(
             { idMatiere },
             updates,
             { new: true, runValidators: true }
@@ -143,13 +132,13 @@ exports.updateBacc = async (req, res, next) => {
     }
 };
 
-// Fonction pour supprimer un matière baccalauréat par son identifiant
-exports.deleteBacc = async (req, res, next) => {
+
+exports.suppressionBaccalaureat = async (req, res, next) => {
     try {
         const { idMatiere } = req.params;
 
-        // Supprimer le matière baccalauréat de la base de données
-        const matiere = await Bacc.findOneAndDelete({ idMatiere });
+        
+        const matiere = await Baccalaureat.findOneAndDelete({ idMatiere });
         if (!matiere) {
             return next(new CreateError(404, 'Matière baccalauréat non trouvé.'));
         }
@@ -162,11 +151,10 @@ exports.deleteBacc = async (req, res, next) => {
     }
 };
 
-// Fonction pour récupérer les spécialités
-exports.getLibelleSpecialite = async (req, res, next) => {
+exports.avoirLibelleSpecialite = async (req, res, next) => {
     try {
-        // Récupère toutes les spécialités distinctes depuis la collection Bacc
-        const specialites = await Bacc.distinct('libelleSpecialite');
+        
+        const specialites = await Baccalaureat.distinct('libelleSpecialite');
 
         res.status(200).json({
             message: 'Spécialités récupérées avec succès.',
@@ -178,8 +166,7 @@ exports.getLibelleSpecialite = async (req, res, next) => {
 };
 
 
-// Récupérer les secteurs basés sur la spécialité choisie
-exports.getSecteurs = async (req, res, next) => {
+exports.avoirSecteurs = async (req, res, next) => {
     const { specialite } = req.query;
 
     if (!specialite) {
@@ -187,8 +174,8 @@ exports.getSecteurs = async (req, res, next) => {
     }
 
     try {
-        // Rechercher tous les secteurs uniques correspondant à la spécialité
-        const secteurs = await Bacc.find({ libelleSpecialite: specialite }).distinct('libelleSecteur');
+        
+        const secteurs = await Baccalaureat.find({ libelleSpecialite: specialite }).distinct('libelleSecteur');
         res.status(200).json({
             message: `Secteurs pour la spécialité ${specialite} récupérés avec succès.`,
             secteurs
@@ -198,8 +185,8 @@ exports.getSecteurs = async (req, res, next) => {
     }
 };
 
-// Récupérer les options basées sur le secteur choisi
-exports.getLibelleOption = async (req, res, next) => {
+
+exports.avoirLibelleOption = async (req, res, next) => {
     const { secteur } = req.query;
 
     if (!secteur) {
@@ -207,8 +194,8 @@ exports.getLibelleOption = async (req, res, next) => {
     }
 
     try {
-        // Rechercher toutes les matières uniques correspondant au secteur
-        const options = await Bacc.find({ libelleSecteur: secteur }).distinct('libelleOption');
+        
+        const options = await Baccalaureat.find({ libelleSecteur: secteur }).distinct('libelleOption');
         res.status(200).json({
             message: `Matières pour le secteur ${secteur} récupérées avec succès.`,
             options
@@ -219,8 +206,7 @@ exports.getLibelleOption = async (req, res, next) => {
 };
 
 
-// Récupérer les matières basées sur l'option choisi
-exports.getMatieres = async (req, res, next) => {
+exports.avoirMatieres = async (req, res, next) => {
     const { option } = req.query;
 
     if (!option) {
@@ -228,8 +214,8 @@ exports.getMatieres = async (req, res, next) => {
     }
 
     try {
-        // Rechercher toutes les matières uniques correspondant au secteur
-        const matieres = await Bacc.find({ libelleOption: option }).distinct('nomMatiere');
+        
+        const matieres = await Baccalaureat.find({ libelleOption: option }).distinct('nomMatiere');
         res.status(200).json({
             message: `Matières pour le secteur ${option} récupérées avec succès.`,
             matieres

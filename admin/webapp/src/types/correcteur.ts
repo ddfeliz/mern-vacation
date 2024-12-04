@@ -1,7 +1,8 @@
 export interface Correcteur {
-    idCorrecteur: string;       // Assurez-vous que l'identifiant est défini
+    idCorrecteur: string;
     nom: string;
     prenom: string;
+    immatricule: string;
     cin: string;
     adresse: string;
     adresseProfession: string;

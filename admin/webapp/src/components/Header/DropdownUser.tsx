@@ -4,12 +4,12 @@ import ClickOutside from '../ClickOutside';
 import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react';
 import { CheckCircleIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
-import { Admin } from '../../types/admin';
+import { Utilisateur } from '../../types/utilisateur';
 import { useDispatch } from 'react-redux';
 import { logout, setAuthenticationStatus } from '../../slices/authSlice';
 
 const DropdownUser = () => {
-  const [admin, setAdmin] = useState<Admin | null>(null);
+  const [utilisateur, setUtilisateur] = useState<Utilisateur | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [open, setOpen] = useState(false); // État pour le Dialog
   const [openUtilisateur, setOpenUtilisateur] = useState(false); // État pour le Dialog
@@ -40,37 +40,37 @@ const DropdownUser = () => {
   };
 
   useEffect(() => {
-    const fetchAdminProfile = async () => {
+    const fetchUtilisateurProfile = async () => {
       try {
         const token = localStorage.getItem('token');
         if (!token) {
           throw new Error('Token JWT manquant');
         }
 
-        const response = await axios.get(
-          'https://gestion-vacation.onrender.com/api/admin/profile',
+        const response = await axios.get<Utilisateur>(
+          'http://localhost:3000/api/utilisateur/profile',
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          },
+          }
         );
 
-        setAdmin(response.data); // Ajustez en fonction de la structure de la réponse
-      } catch (err) {
-        setError('Erreur lors de la récupération du profil admin');
+        setUtilisateur(response.data); // Ajustez en fonction de la structure de la réponse
+      } catch (err: any) {
+        setError('Erreur lors de la récupération du profil utilisateur');
         console.error(err);
       }
     };
 
-    fetchAdminProfile();
+    fetchUtilisateurProfile();
   }, []);
 
   if (error) {
     return <div>{error}</div>; // Affiche l'erreur si elle existe
   }
 
-  if (!admin) {
+  if (!utilisateur) {
     return null; // Aucun admin n'est trouvé
   }
   return (
@@ -82,9 +82,9 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            {admin.nom} {admin.prenom}
+            {utilisateur.nom} {utilisateur.prenom}
           </span>
-          <span className="block text-xs">{admin.email}</span>
+          <span className="block text-xs">{utilisateur.email}</span>
         </span>
 
         <span className="h-12 w-12 rounded-full">
@@ -252,7 +252,7 @@ const DropdownUser = () => {
                               </label>
                               <input
                                 type="text"
-                                value={admin.idAdmin}
+                                value={utilisateur.idUtilisateur}
                                 disabled
                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                               />
@@ -264,7 +264,7 @@ const DropdownUser = () => {
                               </label>
                               <input
                                 type="text"
-                                value={admin.nom}
+                                value={utilisateur.nom}
                                 disabled
                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                               />
@@ -277,7 +277,7 @@ const DropdownUser = () => {
                               </label>
                               <input
                                 type="text"
-                                value={admin.prenom}
+                                value={utilisateur.prenom}
                                 disabled
                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                               />
@@ -289,7 +289,7 @@ const DropdownUser = () => {
                               </label>
                               <input
                                 type="text"
-                                value={admin.telephone}
+                                value={utilisateur.telephone}
                                 disabled
                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                               />
@@ -302,7 +302,7 @@ const DropdownUser = () => {
                               </label>
                               <input
                                 type="text"
-                                value={admin.adresse}
+                                value={utilisateur.adresse}
                                 disabled
                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                               />
@@ -313,7 +313,7 @@ const DropdownUser = () => {
                               </label>
                               <input
                                 type="text"
-                                value={admin.email}
+                                value={utilisateur.email}
                                 disabled
                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                               />

@@ -42,7 +42,7 @@ const DetailArchivePayment = () => {
   // Fonction pour supprimer un correcteur
   const confirmDelete = async (idPayment: string) => {
     try {
-      await axios.delete(`https://gestion-vacation.onrender.com/api/archive/${idPayment}`);
+      await axios.delete(`http://localhost:3000/api/archive/${idPayment}`);
       setPayments(
         payments.filter((payment) => payment.idPayment !== idPayment),
       );
@@ -60,7 +60,7 @@ const DetailArchivePayment = () => {
       try {
         // Inclure idCorrecteur dans l'URL de la requête
         const response = await axios.get(
-          `https://gestion-vacation.onrender.com/api/archive/${idPayment}`,
+          `http://localhost:3000/api/archive/${idPayment}`,
         );
         setPayment(response.data);
       } catch (err) {

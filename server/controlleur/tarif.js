@@ -1,26 +1,21 @@
-const Tarif = require('../models/tarifModel'); // Assurez-vous que le chemin vers le modèle est correct
-const CreateError = require('../utils/appError'); // Assurez-vous que l'import est correct
+const Tarif = require('../modelisation/tarif'); 
+const CreateError = require('../utils/appError'); 
 
-
-// Créer un nouveau tarif
-exports.createTarif = async (req, res, next) => {
+exports.ajoutTarif = async (req, res, next) => {
     try {
         const { optionTarif, nombreTarif, MontantTarif } = req.body;
 
-        // Vérification des données d'entrée
         if (!optionTarif || !nombreTarif || !MontantTarif) {
             return next(new CreateError(400, 'Tous les champs sont requis.'));
         }
 
-        // Création d'une nouvelle instance de tarif
         const newTarif = new Tarif({
             optionTarif,
             nombreTarif,
             MontantTarif,
-            idTarif: `TARF-${Math.floor(1000 + Math.random() * 9000)}` // Générer un identifiant unique
+            idTarif: `TARF-${Math.floor(1000 + Math.random() * 9000)}` 
         });
 
-        // Sauvegarde dans la base de données
         const savedTarif = await newTarif.save();
         res.status(201).json(savedTarif);
     } catch (error) {
@@ -28,12 +23,10 @@ exports.createTarif = async (req, res, next) => {
     }
 };
 
-// Récupérer tous les tarifs
-exports.getAllTarifs = async (req, res, next) => {
+exports.avoirTousTarifs = async (req, res, next) => {
     try {
         const tarifs = await Tarif.find();
 
-        // Vérifier si des matières existent
         if (!tarifs || tarifs.length === 0) {
             return next(new CreateError(404, 'Aucun matière baccalauréat trouvé.'));
         }
@@ -43,8 +36,7 @@ exports.getAllTarifs = async (req, res, next) => {
     }
 };
 
-// Récupérer un tarif par son ID
-exports.getTarifById = async (req, res, next) => {
+exports.avoirIdTarif = async (req, res, next) => {
     try {
         const { idTarif } = req.params;
         const tarif = await Tarif.findOne({idTarif});
@@ -59,12 +51,11 @@ exports.getTarifById = async (req, res, next) => {
     }
 };
 
-// Contrôleur pour vérifier l'existence d'un tarif
-exports.checkTarif = async (req, res) => {
+exports.varificationTarif = async (req, res) => {
     const { optionTarif, nombreTarif, MontantTarif } = req.query;
   
     try {
-      // Rechercher un tarif existant avec les mêmes critères
+
       const existingTarif = await Tarif.findOne({
         optionTarif,
         nombreTarif,
@@ -82,30 +73,25 @@ exports.checkTarif = async (req, res) => {
     }
   };
 
-// Mettre à jour un tarif par son ID
-exports.updateTarif = async (req, res, next) => {
+exports.modificationTarif = async (req, res, next) => {
     try {
         const { idTarif } = req.params;
         const { optionTarif, nombreTarif, MontantTarif } = req.body;
 
-        // Vérification des données d'entrée
         if (!optionTarif || !nombreTarif || !MontantTarif) {
             return res.status(400).json({ message: 'Tous les champs sont requis.' });
         }
 
-        // Utilisation de findOneAndUpdate pour mettre à jour le tarif
         const updatedTarif = await Tarif.findOneAndUpdate(
-            { idTarif }, // Condition pour trouver le tarif par ID
+            { idTarif }, 
             { optionTarif, nombreTarif, MontantTarif },
             { new: true, runValidators: true }
         );
 
-        // Vérification si le tarif a été trouvé et mis à jour
         if (!updatedTarif) {
             return next(new CreateError(404, 'Tarif non trouvé.'));
         }
 
-        // Retourner le tarif mis à jour
         res.status(200).json(updatedTarif);
     } catch (error) {
         next(new CreateError(500, 'Erreur lors de la mise à jour du tarif.', error));
@@ -114,9 +100,7 @@ exports.updateTarif = async (req, res, next) => {
     }
 };
 
-
-// Supprimer un tarif par son ID
-exports.deleteTarif = async (req, res, next) => {
+exports.suppressionTarif = async (req, res, next) => {
     try {
         const { idTarif } = req.params;
 

@@ -51,7 +51,7 @@ const ChartThree: React.FC = () => {
 
   const fetchStats = async (session: number) => {
     try {
-      const response = await axios.post('https://gestion-vacation.onrender.com/api/correcteur/comptage', {
+      const response = await axios.post('http://localhost:3000/api/correcteur/comptage', {
         session: session,
       });
       setSeries([response.data.actifs, response.data.nonActifs]); // Mettre à jour les séries

@@ -84,7 +84,7 @@ const ChartTwo: React.FC = () => {
   // Récupérer les données des copies corrigées par année
   const fetchData = async () => {
     try {
-      const response = await axios.get('https://gestion-vacation.onrender.com/api/vacation/total-copies-by-years'); // Mettez à jour l'URL de l'API si nécessaire
+      const response = await axios.get('http://localhost:3000/api/vacation/totales-copies-en-annee'); // Mettez à jour l'URL de l'API si nécessaire
       const data = response.data.data;
 
       const copiesByYear = [0, 0, 0]; // [2022, 2023, 2024]

@@ -1,10 +1,13 @@
 const mongoose = require('mongoose');
 
-// Définition du schéma pour le correcteur
 const correcteurSchema = new mongoose.Schema({
     idCorrecteur: {
         type: String,
         required: true,
+        unique: true
+    },
+    immatricule: {
+        type: String,
         unique: true
     },
     nom: {
@@ -55,17 +58,15 @@ const correcteurSchema = new mongoose.Schema({
     statut: {
         type: String,
         enum: ['Actif', 'Non actif'],
-        default: 'Non actif' // Défaut "nonactifs"
+        default: 'Non actif' 
     },
 }, {
-    timestamps: true // Pour garder la trace des dates de création et de mise à jour
+    timestamps: true
 });
 
-// Middlaware pour générer automatiquement l'idCorrecteur avant la sauvegarde
 correcteurSchema.pre('save', async function(next) {
     const correcteur = this;
 
-    // Si l'idCorrecteur n'est pas défini (cas d'ajout d'un nouveau correcteur)
     if (!correcteur.idCorrecteur) {
         const lastCorrecteur = await Correcteur.findOne().sort({_id: -1});
 
@@ -78,11 +79,19 @@ correcteurSchema.pre('save', async function(next) {
         correcteur.idCorrecteur = `COR-${newIdNumber.toString().padStart(3, '0')}`;
     }
 
+    if (!correcteur.immatricule) {
+        
+        const entier = Math.floor(Math.random() * 900) + 100; 
+        const decimal = Math.floor(Math.random() * 900) + 100; 
+        const nombreDecimal = `${entier}.${decimal}`; 
+
+        correcteur.immatricule = nombreDecimal;
+    }
+
     next();
 });
 
 
-// Création du modèle à partir du schéma
 const Correcteur = mongoose.model('Correcteur', correcteurSchema);
 
 module.exports = Correcteur;

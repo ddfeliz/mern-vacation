@@ -1,9 +1,8 @@
-const Correcteur = require("../models/correcteurModel"); // Import du modèle Correcteur
-const Vacation = require('../models/vacationModel');
-const CreateError = require("../utils/appError"); // Import de la fonction CreateError
+const Correcteur = require("../modelisation/correcteur"); 
+const Vacation = require('../modelisation/vacation');
+const CreateError = require("../utils/appError"); 
 
-// Fonction pour ajouter un nouveau correcteur
-exports.addCorrecteur = async (req, res, next) => {
+exports.ajoutCorrecteur = async (req, res, next) => {
   try {
     const {
       nom,
@@ -19,7 +18,6 @@ exports.addCorrecteur = async (req, res, next) => {
       matiere,
     } = req.body;
 
-    // Vérifier que les champs obligatoires sont fournis
     if (
       !nom ||
       !prenom ||
@@ -36,15 +34,13 @@ exports.addCorrecteur = async (req, res, next) => {
       return next(new CreateError(400, "Tous les champs obligatoires doivent être fournis."));
     }
 
-    // Vérifier si un correcteur avec le cin existe déjà
     const correcteurExist = await Correcteur.findOne({ cin });
     if (correcteurExist) {
       return next(new CreateError(409, "Un correcteur avec ce CIN existe déjà."));
     }
 
-    // Créer un nouvel objet correcteur avec les informations fournies
     const newCorrecteur = new Correcteur({
-      idCorrecteur: `COR-${Math.floor(1000 + Math.random() * 9000)}`, // Générer un identifiant unique
+      idCorrecteur: `COR-${Math.floor(1000 + Math.random() * 9000)}`, 
       nom,
       prenom,
       cin,
@@ -57,14 +53,13 @@ exports.addCorrecteur = async (req, res, next) => {
       option,
       matiere,
     });
-
-    // Enregistrer le correcteur dans la base de données
     await newCorrecteur.save();
 
     res.status(201).json({
       message: "Correcteur ajouté avec succès.",
       correcteur: {
-        idCorrecteur: newCorrecteur.idCorrecteur, // Généré par le middleware
+        idCorrecteur: newCorrecteur.idCorrecteur, 
+        immatricule: newCorrecteur.immatricule,
         nom: newCorrecteur.nom,
         prenom: newCorrecteur.prenom,
         cin: newCorrecteur.cin,
@@ -75,7 +70,7 @@ exports.addCorrecteur = async (req, res, next) => {
         secteur: newCorrecteur.secteur,
         option: newCorrecteur.option,
         matiere: newCorrecteur.matiere,
-        statut: newCorrecteur.statut, // Le statut par défaut "Non actif"
+        statut: newCorrecteur.statut, 
       },
     });
   } catch (error) {
@@ -84,14 +79,9 @@ exports.addCorrecteur = async (req, res, next) => {
   }
 };
 
-
-// Fonction pour obtenir la liste de tous les correcteurs
-exports.getAllCorrecteurs = async (req, res, next) => {
+exports.avoirTousCorrecteurs = async (req, res, next) => {
   try {
-    // Chercher tous les correcteurs dans la base de données
     const correcteurs = await Correcteur.find();
-
-    // Vérifier si des correcteurs existent
     if (!correcteurs || correcteurs.length === 0) {
       return next(new CreateError(404, "Aucun correcteur trouvé.")); // Ajout de 'new'
     }
@@ -104,22 +94,17 @@ exports.getAllCorrecteurs = async (req, res, next) => {
         "Erreur lors de la récupération de la liste des correcteurs.",
         error
       )
-    ); // Ajout de 'new'
+    ); 
   }
 };
 
-// Fonction pour obtenir le CIN d'un correcteur
-exports.getCINCorrecteur = async (req, res) => {
+exports.avoirCINCorrecteur = async (req, res) => {
   try {
     const cin = req.params.cin;
     const correcteur = await Correcteur.findOne({ cin });
-
-    // Si le correcteur avec ce CIN existe déjà, renvoyer un objet avec exists: true
     if (correcteur) {
       return res.json({ exists: true });
     }
-
-    // Sinon, renvoyer exists: false
     res.json({ exists: false });
   } catch (error) {
     next(
@@ -132,15 +117,26 @@ exports.getCINCorrecteur = async (req, res) => {
   }
 };
 
-// Fonction pour obtenir les informations d'un correcteur par son identifiant
-exports.getCorrecteurById = async (req, res, next) => {
+exports.avoirIMCorrecteur = async (req, res, next) => {
   try {
-    const { idCorrecteur } = req.params;
+    const { identifiant } = req.params;
 
-    // Rechercher le correcteur par son idCorrecteur
-    const correcteur = await Correcteur.findOne({ idCorrecteur });
+    // Vérifie si c'est un immatricule ou un CIN
+    let query = {};
+    if (/^\d{3}\.\d{3}$/.test(identifiant)) {
+      // Si l'identifiant correspond au format "453.163" (immatricule)
+      query = { immatricule: identifiant };
+    } else if (/^\d{12}$/.test(identifiant)) {
+      // Si l'identifiant correspond à un numéro de 12 chiffres (CIN)
+      query = { cin: identifiant };
+    } else {
+      return res.status(400).json({ error: "Identifiant invalide. Fournissez un immatricule ou un CIN." });
+    }
+
+    // Recherche dans la base de données
+    const correcteur = await Correcteur.findOne(query);
     if (!correcteur) {
-      return next(new CreateError(404, "Correcteur non trouvé.")); // Ajout de 'new'
+      return res.status(404).json({ error: "Aucune Correcteur trouvée pour cet identifiant." });
     }
 
     res.status(200).json(correcteur);
@@ -151,19 +147,18 @@ exports.getCorrecteurById = async (req, res, next) => {
         "Erreur lors de la récupération du correcteur.",
         error
       )
-    ); // Ajout de 'new'
+    );
   }
 };
 
 exports.CompterCorrecteursStatut = async (req, res, next) => {
-  const { session } = req.body; // Supposons que tu envoies l'année via le corps de la requête
+  const { session } = req.body; 
 
   try {
-    // Compter les correcteurs actifs et non actifs pour la session donnée
     const correcteursStatut = await Correcteur.aggregate([
       {
         $lookup: {
-          from: 'vacations', // Nom de la collection des vacations
+          from: 'vacations', 
           localField: 'idCorrecteur',
           foreignField: 'idCorrecteur',
           as: 'vacations'
@@ -198,21 +193,17 @@ exports.CompterCorrecteursStatut = async (req, res, next) => {
   }
 };
 
-
-// Fonction pour mettre à jour les informations d'un correcteur
-exports.updateCorrecteur = async (req, res, next) => {
+exports.modificationCorrecteur = async (req, res, next) => {
   try {
     const { idCorrecteur } = req.params;
     const updates = req.body;
-
-    // Trouver le correcteur et mettre à jour ses informations
     const correcteur = await Correcteur.findOneAndUpdate(
       { idCorrecteur },
       updates,
       { new: true, runValidators: true }
     );
     if (!correcteur) {
-      return next(new CreateError(404, "Correcteur non trouvé.")); // Ajout de 'new'
+      return next(new CreateError(404, "Correcteur non trouvé."));
     }
 
     res.status(200).json({
@@ -226,37 +217,32 @@ exports.updateCorrecteur = async (req, res, next) => {
         "Erreur lors de la mise à jour du correcteur.",
         error
       )
-    ); // Ajout de 'new'
+    );
   }
 };
 
-// Mise à jour des statuts des correcteurs pour une année spécifiée
-exports.UpdateStatutCorrecteur = async (req, res, next) => {
-  const { session } = req.body; // Récupérer l'année de la requête
+exports.modificationStatutCorrecteur = async (req, res, next) => {
+  const { session } = req.body; 
 
-  // Vérifier que la session est fournie
   if (!session) {
     return next(new CreateError(400, "L'année de la session doit être spécifiée."));
   }
 
   try {
-    const correcteurs = await Correcteur.find(); // Récupère tous les correcteurs
+    const correcteurs = await Correcteur.find();
 
     for (const correcteur of correcteurs) {
-      // Compte le nombre de vacations associées au correcteur pour la session spécifiée
       const vacationCount = await Vacation.countDocuments({
         idCorrecteur: correcteur.idCorrecteur,
-        session: session, // Filtrer par session
+        session: session,
       });
 
       if (vacationCount > 0) {
-        // Met à jour le statut à 'Actif' si des vacations existent pour la session
         await Correcteur.findOneAndUpdate(
           { idCorrecteur: correcteur.idCorrecteur }, 
           { statut: 'Actif' } 
         );
       } else {
-        // Met à jour le statut à 'Non actif' si aucune vacation n'existe pour la session
         await Correcteur.findOneAndUpdate(
           { idCorrecteur: correcteur.idCorrecteur }, 
           { statut: 'Non actif' } 
@@ -270,12 +256,7 @@ exports.UpdateStatutCorrecteur = async (req, res, next) => {
   }
 };
 
-
-
-
-
-// Fonction pour compter les totales des correcteurs
-exports.CountCorrecteur = async (req, res, next) => {
+exports.CompterCorrecteur = async (req, res, next) => {
   try {
     const correcteursCount = await Correcteur.countDocuments();
     res.status(200).json({ totalCorrecteurs: correcteursCount });
@@ -286,12 +267,10 @@ exports.CountCorrecteur = async (req, res, next) => {
   }
 };
 
-// Fonction pour supprimer un correcteur par son identifiant
-exports.deleteCorrecteur = async (req, res, next) => {
+exports.suppressionCorrecteur = async (req, res, next) => {
   try {
     const { idCorrecteur } = req.params;
 
-    // Supprimer le correcteur de la base de données
     const correcteur = await Correcteur.findOneAndDelete({ idCorrecteur });
     if (!correcteur) {
       return next(new CreateError(404, "Correcteur non trouvé.")); // Ajout de 'new'
@@ -307,6 +286,6 @@ exports.deleteCorrecteur = async (req, res, next) => {
         "Erreur lors de la suppression du correcteur.",
         error
       )
-    ); // Ajout de 'new'
+    ); 
   }
 };

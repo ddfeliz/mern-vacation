@@ -5,13 +5,13 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 // Import des routes
-const correcteurRoutes = require('./routes/correcteurRoute');
-const utilisateurRoute = require('./routes/utilisateurRoute');
-const baccRoutes = require('./routes/baccRoute'); 
-const tarifRoute = require('./routes/tarifRoute');
-const vacationRoutes = require('./routes/vacationRoute');
-const paiementRoute = require('./routes/paiementRoute');
-const archivePaiementRoute = require('./routes/archivePaiementRoute');
+const UtilisateurRoutage = require('./routage/utilisateur');
+const BaccalaureatRoutage = require('./routage/baccalaureat');
+const TarifRoutage = require('./routage/tarif');
+const CorrecteurRoutage = require('./routage/correcteur');
+const VacationRoutage = require('./routage/vacation');
+const PaiementRoutage = require('./routage/paiement');
+const ArchiveRoutage = require('./routage/archivage');
 
 const app = express();
 
@@ -20,23 +20,23 @@ app.use(cors());
 app.use(express.json());
 
 // 2) ROUTE DES ACTEURS
-app.use('/api/correcteur', correcteurRoutes);
-app.use('/api/admin', utilisateurRoute);
-app.use('/api/matiere-bacc', baccRoutes);
-app.use('/api/tarif', tarifRoute);
-app.use('/api/vacation', vacationRoutes);
-app.use('/api/payment', paiementRoute);
-app.use('/api/archive', archivePaiementRoute);
+app.use('/api/utilisateur', UtilisateurRoutage);
+app.use('/api/correcteur', CorrecteurRoutage);
+app.use('/api/matiere-bacc', BaccalaureatRoutage);
+app.use('/api/tarif', TarifRoutage);
+app.use('/api/vacation', VacationRoutage);
+app.use('/api/paiement', PaiementRoutage);
+app.use('/api/archive', ArchiveRoutage);
 
 // 3) MONGODB CONNECTION
 mongoose
-    .connect('mongodb+srv://sambatratahirindrazana:sami2003..@mycluster.gg52g.mongodb.net/gestion_vacation?')
+    .connect(process.env.MONGO_URI)
     .then(() => console.log('Le serveur est connecté à MongoDB Atlas!'))
     .catch((error) => console.error('Le serveur a racontré des erreurs:', error));
 
 // 4) GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
-    err.statusCode = err.statusCode || 500; // Correction from statuCode to statusCode
+    err.statusCode = err.statusCode || 500; 
     err.status = err.status || 'error';
 
     res.status(err.statusCode).json({
@@ -46,7 +46,7 @@ app.use((err, req, res, next) => {
 });
 
 // 5) SERVER
-const PORT = process.env.PORT || 3000; // Utiliser le port depuis .env, ou 3000 par défaut
+const PORT = process.env.PORT || 3000; 
 app.listen(PORT, () => {
     console.log(`App running on port ${PORT}`);
 });

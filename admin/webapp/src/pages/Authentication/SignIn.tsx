@@ -16,7 +16,7 @@ const SignIn: React.FC = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [openSuccess, setOpenSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
@@ -42,7 +42,10 @@ const SignIn: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/administrateur/dashboard', {replace : true})
+      setOpenSuccess(true); // Afficher le message de succès
+      setTimeout(() => {
+        navigate('/présidence-service-finance/', {replace : true}); // Naviguer après un délai
+      }, 2000); // Délai de 2 secondes avant de naviguer
     }
   }, [isAuthenticated])
 
@@ -52,7 +55,7 @@ const SignIn: React.FC = () => {
     setLoading(true); // Démarrer le chargement
 
     try {
-      const response = await axios.post('https://gestion-vacation.onrender.com/api/admin/login', {
+      const response = await axios.post('http://localhost:3000/api/utilisateur/connexion', {
         email,
         motDePasse, // Changement ici également
       });
@@ -62,9 +65,8 @@ const SignIn: React.FC = () => {
         localStorage.setItem('token', response.data.token);
         dispatch(login());
         dispatch(setAuthenticationStatus(true));
-        setOpen(true); // Afficher le message de succès
+        setOpenSuccess(true); // Afficher le message de succès
         setTimeout(() => {
-          setOpen(false);
           navigate('/présidence-service-finance/'); // Naviguer après un délai
         }, 2000); // Délai de 2 secondes avant de naviguer
       }
@@ -194,7 +196,7 @@ const SignIn: React.FC = () => {
 
 
 
-              <Dialog open={open} onClose={() => {}} className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
+              <Dialog open={openSuccess} onClose={() => {setOpenSuccess(false)}} className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
                 {/* Arrière-plan grisé */}
                 <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-50" />
 

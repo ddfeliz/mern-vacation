@@ -1,0 +1,48 @@
+POST http://localhost:3000/api/utilisateur/ajout
+Content-Type: application/json
+
+{
+    "nom": "xxxx",
+    "prenom": "yyyy",
+    "email": "xy@example.com",
+    "telephone": "0987654321",
+    "motDePasse": "12345678",
+    "adresse": "45 rue de la République, Lyon",
+    "dateDeNaissance": "1985-11-22"
+}
+
+###
+
+POST http://localhost:3000/api/utilisateur/connexion
+Content-Type: application/json
+
+{
+    
+    "email": "xy@example.com",
+    "motDePasse": "12345678"
+}
+
+###
+
+POST http://localhost:3000/api/correcteur/ajout
+Content-Type: application/json
+
+{
+  "nom": "Lemoine",
+  "prenom": "Marie",
+  "cin": "159753258456",
+  "adresse": "123 Rue de l'Éducation, Toliara",
+  "adresseProfession": "Université de Toliara, Bureau 204",
+  "telephone": "0341234567",
+  "specialite": "Mathématiques",
+  "secteur": "Science",
+  "option": "Informatique",
+  "matiere": "Algèbre",
+  "grade": "Professeur"
+}
+
+####
+GET   http://localhost:3000/api/correcteur/tous
+
+
+

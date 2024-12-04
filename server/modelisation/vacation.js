@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// Définition du schéma pour le correcteur
 const vacationSchema = new mongoose.Schema({
     idVacation: {
         type: String,
@@ -8,6 +7,10 @@ const vacationSchema = new mongoose.Schema({
         unique: true
     },
     idCorrecteur: {
+        type: String,
+        required: true
+    },
+    immatricule: {
         type: String,
         required: true
     },
@@ -24,6 +27,10 @@ const vacationSchema = new mongoose.Schema({
         required: true
     },
     telephone: {
+        type: String,
+        required: true,
+    },
+    pochette: {
         type: String,
         required: true,
     },
@@ -51,17 +58,20 @@ const vacationSchema = new mongoose.Schema({
     nbcopie: {
         type: Number,
         required: true,
-        min: 0 // Le nombre des copies ne peut pas être négative
-    }
+        min: 0 
+    },
+    statut_paiement: {
+        type: String,
+        enum: ['Disponible', 'Indisponible'],
+        default: 'Indisponible'
+    },
 }, {
-    timestamps: true // Pour garder la trace des dates de création et de mise à jour
+    timestamps: true 
 });
 
-// Middlaware pour générer automatiquement l'idCorrecteur avant la sauvegarde
 vacationSchema.pre('save', async function(next) {
     const vacation = this;
 
-    // Si l'idCorrecteur n'est pas défini (cas d'ajout d'un nouveau correcteur)
     if (!vacation.idVacation) {
         const lastVacation = await Vacation.findOne().sort({_id: -1});
 
@@ -77,8 +87,6 @@ vacationSchema.pre('save', async function(next) {
     next();
 });
 
-
-// Création du modèle à partir du schéma
 const Vacation = mongoose.model('Vacation', vacationSchema);
 
 module.exports = Vacation;

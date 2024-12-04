@@ -50,7 +50,7 @@ const CreatePaymentVacation = () => {
     const fetchTarifs = async () => {
       try {
         const tarifResponse = await axios.get(
-          'https://gestion-vacation.onrender.com/api/tarif/all',
+          'http://localhost:3000/api/tarif/tous',
         );
         setTarifs(tarifResponse.data);
       } catch (err) {
@@ -67,7 +67,7 @@ const CreatePaymentVacation = () => {
       setLoading(true);
       // Appel à l'API pour récupérer les informations du correcteur par ID
       const response = await axios.get(
-        `https://gestion-vacation.onrender.com/api/vacation/${idVacation}`,
+        `http://localhost:3000/api/vacation/${idVacation}`,
       );
       const fetchedData = response.data;
 
@@ -192,7 +192,7 @@ const CreatePaymentVacation = () => {
     try {
       console.log('Data sent to server:', formData); // Vérifier ce qui est envoyé
       const response = await axios.post(
-        'https://gestion-vacation.onrender.com/api/payment/add',
+        'http://localhost:3000/api/paiement/ajout',
         {
           idVacation,
           idCorrecteur,
@@ -242,10 +242,6 @@ const CreatePaymentVacation = () => {
           {/* Formulaire de création de correcteur */}
           <div className="w-full rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-              {/*  <h3 className="font-medium text-black dark:text-white">
-                                Formulaire du vacation
-                            </h3>
-                            */}
               {/* Champ d'ID et bouton de recherche */}
               <div className="mb-4.5 flex gap-6 items-center">
                 <div className="w-full xl:w-1/2">
@@ -692,9 +688,9 @@ const CreatePaymentVacation = () => {
                   <button
                     type="button"
                     className="mr-auto inline-flex h-11 items-center justify-center rounded-md border
-                                         border-warning bg-transparent text-black transition hover:bg-transparent
-                                         hover:border-warning hover:text-warning dark:border-strokedark 
-                                          dark:bg-transparent dark:text-white dark:hover:border-warning dark:hover:text-warning"
+                                         border-primary bg-transparent text-black transition hover:bg-transparent
+                                         hover:border-primary hover:text-primary dark:border-strokedark 
+                                          dark:bg-transparent dark:text-white dark:hover:border-primary dark:hover:text-primary"
                     style={{ width: '200px' }} // Ajustez la largeur selon vos besoins
                     onClick={handleView}
                   >

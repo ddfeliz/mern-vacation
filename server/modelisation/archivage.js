@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
-// Définition du schéma pour le correcteur
-const paymentSchema = new mongoose.Schema(
+// Créer un schéma similaire à celui du modèle Payment
+const archivePaiementSchema = new mongoose.Schema(
   {
-    idPayment: {
+    idPaiement: {
       type: String,
       required: true,
       unique: true,
@@ -15,8 +15,11 @@ const paymentSchema = new mongoose.Schema(
     },
     idCorrecteur: {
       type: String,
-      required: true,
-      unique: true,
+      required: true
+    },
+    immatricule: {
+        type: String,
+        required: true
     },
     nom: {
       type: String,
@@ -28,8 +31,7 @@ const paymentSchema = new mongoose.Schema(
     },
     cin: {
       type: String,
-      required: true,
-      unique: true,
+      required: true
     },
     specialite: {
       type: String,
@@ -46,6 +48,10 @@ const paymentSchema = new mongoose.Schema(
     matiere: {
       type: String,
       required: true,
+    },
+    pochette: {
+        type: String,
+        required: true,
     },
     nbcopie: {
       type: Number,
@@ -67,9 +73,8 @@ const paymentSchema = new mongoose.Schema(
       min: 0,
     },
     statut: {
-        type: String,
-        enum: ['Payé', 'Non payé'],
-        default: 'Non payé' // Défaut "Non payé"
+      type: String,
+      required: true,
     },
   },
   {
@@ -77,27 +82,5 @@ const paymentSchema = new mongoose.Schema(
   }
 );
 
-// Middlaware pour générer automatiquement l'idCorrecteur avant la sauvegarde
-paymentSchema.pre("save", async function (next) {
-  const payment = this;
-
-  // Si l'idCorrecteur n'est pas défini (cas d'ajout d'un nouveau correcteur)
-  if (!payment.idPayment) {
-    const lastPayment = await Payment.findOne().sort({ _id: -1 });
-
-    let newIdNumber = 1;
-    if (lastPayment && lastPayment.idPayment) {
-      const lastIdNumber = parseInt(lastPayment.idPayment.split("-")[1], 10);
-      newIdNumber = lastIdNumber + 1;
-    }
-
-    payment.idPayment = `PAYM-${newIdNumber.toString().padStart(3, "0")}`;
-  }
-
-  next();
-});
-
-// Création du modèle à partir du schéma
-const Payment = mongoose.model("Payment", paymentSchema);
-
-module.exports = Payment;
+const archivePaiement = mongoose.model("ArchivePaiement", archivePaiementSchema);
+module.exports = archivePaiement;

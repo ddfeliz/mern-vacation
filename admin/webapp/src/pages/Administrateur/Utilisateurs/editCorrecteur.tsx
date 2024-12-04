@@ -27,7 +27,7 @@ const EditCorrecteur = () => {
         const fetchCorrecteur = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`https://gestion-vacation.onrender.com/api/correcteur/${idCorrecteur}`);
+                const response = await axios.get(`http://localhost:3000/api/correcteur/${idCorrecteur}`);
                 const correcteur = response.data;
 
                 setFormData({
@@ -67,7 +67,7 @@ const EditCorrecteur = () => {
         const { firstName, lastName, cin, adresse, adresseProfession, telephone, grade } = formData;
 
         try {
-            const response = await axios.put(`https://gestion-vacation.onrender.com/api/correcteur/${idCorrecteur}`, {
+            const response = await axios.put(`http://localhost:3000/api/correcteur/${idCorrecteur}`, {
                 nom: lastName,
                 prenom: firstName,
                 cin,

@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// Définir le schéma pour la collection Bacc
-const BaccSchema = new Schema({
+const BaccalaureatSchema = new Schema({
     idMatiere: {
         type: String,
         unique: true,
@@ -40,16 +39,13 @@ const BaccSchema = new Schema({
     timestamps: true
 });
 
-// Middleware pour générer automatiquement l'idMatiere avant la sauvegarde
-BaccSchema.pre('save', async function (next) {
+BaccalaureatSchema.pre('save', async function (next) {
     const matiere = this;
     
-    // Utilisation de mongoose.model pour accéder au modèle Bacc
-    const Bacc = mongoose.model('Bacc');
+    const Baccalaureat = mongoose.model('Baccalaureat');
 
-    // Si l'idMatiere n'est pas défini (cas d'ajout d'une nouvelle matière)
     if (!matiere.idMatiere) {
-        const lastMatiere = await Bacc.findOne().sort({ _id: -1 });
+        const lastMatiere = await Baccalaureat.findOne().sort({ _id: -1 });
 
         let newIdNumber = 1;
         if (lastMatiere && lastMatiere.idMatiere) {
@@ -63,7 +59,6 @@ BaccSchema.pre('save', async function (next) {
     next();
 });
 
-// Créer le modèle Mongoose pour Bac
-const Bacc = mongoose.model('Bacc', BaccSchema);
+const Baccalaureat = mongoose.model('Baccalaureat', BaccalaureatSchema);
 
-module.exports = Bacc;
+module.exports = Baccalaureat;

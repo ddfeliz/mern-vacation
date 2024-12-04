@@ -33,7 +33,7 @@ const EditTarif = () => {
       setLoading(true);
       try {
         const response = await axios.get(
-          `https://gestion-vacation.onrender.com/api/tarif/${idTarif}`,
+          `http://localhost:3000/api/tarif/${idTarif}`,
         );
         const tarif = response.data;
 
@@ -84,7 +84,7 @@ const EditTarif = () => {
 
     try {
       const response = await axios.put(
-        `https://gestion-vacation.onrender.com/api/tarif/${idTarif}`,
+        `http://localhost:3000/api/tarif/${idTarif}`,
         {
           optionTarif,
           nombreTarif,

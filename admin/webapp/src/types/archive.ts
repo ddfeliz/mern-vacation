@@ -1,5 +1,5 @@
 export interface Archive {
-    idPayment: string,
+    idPaiement: string,
     idVacation: string,
     idCorrecteur: string,
     nom: string,

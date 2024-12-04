@@ -50,7 +50,7 @@ const ShowArchivePayment = () => {
     const fetchTarifs = async () => {
       try {
         const response = await axios.get(
-          'https://gestion-vacation.onrender.com/api/archive/all',
+          'http://localhost:3000/api/archive/tous',
         );
         setArchives(response.data);
       } catch (err) {
@@ -69,7 +69,7 @@ const ShowArchivePayment = () => {
     const fetchSpecialites = async () => {
       try {
         const response = await axios.get(
-          'https://gestion-vacation.onrender.com/api/matiere-bacc/specialiste',
+          'http://localhost:3000/api/matiere-bacc/specialiste',
         );
         const fetchedSpecialites = response.data.specialites;
         console.log('Specialites fetched:', fetchedSpecialites);
@@ -86,7 +86,7 @@ const ShowArchivePayment = () => {
   const fetchSecteurs = async (specialite: string) => {
     try {
       const response = await axios.get(
-        `https://gestion-vacation.onrender.com/api/matiere-bacc/secteurs?specialite=${specialite}`,
+        `http://localhost:3000/api/matiere-bacc/secteurs?specialite=${specialite}`,
       );
       setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
       setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
@@ -100,7 +100,7 @@ const ShowArchivePayment = () => {
   const fetchOption = async (secteur: string) => {
     try {
       const response = await axios.get(
-        `https://gestion-vacation.onrender.com/api/matiere-bacc/options?secteur=${secteur}`,
+        `http://localhost:3000/api/matiere-bacc/options?secteur=${secteur}`,
       );
       setOptions(response.data.options); // Mettre à jour les matières
     } catch (err) {
@@ -112,7 +112,7 @@ const ShowArchivePayment = () => {
   const fetchMatieres = async (option: string) => {
     try {
       const response = await axios.get(
-        `https://gestion-vacation.onrender.com/api/matiere-bacc/matieres?option=${option}`,
+        `http://localhost:3000/api/matiere-bacc/matieres?option=${option}`,
       );
       setMatieres(response.data.matieres); // Mettre à jour les matières
     } catch (err) {
@@ -166,14 +166,14 @@ const ShowArchivePayment = () => {
   };
 
   // Fonction pour supprimer un paiement
-  const confirmDelete = async (idPayment: string) => {
+  const confirmDelete = async (idPaiement: string) => {
     try {
       // Suppression du paiement par son identifiant MongoDB (_id)
-      await axios.delete(`https://gestion-vacation.onrender.com/api/archive/${idPayment}`);
+      await axios.delete(`http://localhost:3000/api/archive/${idPaiement}`);
 
       // Mettre à jour l'état en supprimant le paiement localement de la liste
       setArchives(
-        archives.filter((archive) => archive.idPayment !== idPayment),
+        archives.filter((archive) => archive.idPaiement !== idPaiement),
       );
 
       setOpen2(true); // Afficher le message de succès
@@ -486,10 +486,10 @@ const ShowArchivePayment = () => {
               <tbody>
                 {currentTarifs.length > 0 ? (
                   currentTarifs.map((payment) => (
-                    <tr key={payment.idPayment}>
+                    <tr key={payment.idPaiement}>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {payment.idPayment}
+                          {payment.idPaiement}
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
@@ -560,7 +560,7 @@ const ShowArchivePayment = () => {
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                         <div className="flex items-center justify-center space-x-3.5">
                           <Link
-                            to={`/présidence-service-finance/archivage-detail/${payment.idPayment}`}
+                            to={`/présidence-service-finance/archivage-detail/${payment.idPaiement}`}
                             className="hover:text-primary"
                           >
                             <EyeIcon className="h-auto w-5 text-secondary" />
@@ -602,7 +602,7 @@ const ShowArchivePayment = () => {
                                         <p className="text-sm text-gray-500 dark:text-gray-300">
                                           Voulez-vous vraiment supprimer ce
                                           correcteur <br /> dont l'ID est:{' '}
-                                          {payment.idPayment} ?
+                                          {payment.idPaiement} ?
                                           <span className="mx-2 text-danger">
                                             Cette action est irreversible!
                                           </span>
@@ -615,7 +615,7 @@ const ShowArchivePayment = () => {
                                   <button
                                     type="button"
                                     onClick={() =>
-                                      confirmDelete(payment.idPayment)
+                                      confirmDelete(payment.idPaiement)
                                     }
                                     className="mr-2 bg-red-500 text-white px-4 py-2 rounded dark:bg-red-600"
                                   >

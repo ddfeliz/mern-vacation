@@ -1,7 +1,8 @@
 export interface Payment {
-    idPayment: string,
+    idPaiement: string,
     idVacation: string,
     idCorrecteur: string,
+    immatricule: string;
     nom: string,
     prenom: string,
     cin: string,
@@ -9,6 +10,7 @@ export interface Payment {
     secteur: string,
     option: string,
     matiere: string,
+    pochette: string,
     nbcopie: number,
     optionTarif: string,
     montantTotal: number,

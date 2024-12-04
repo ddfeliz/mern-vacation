@@ -73,7 +73,7 @@ const CreateTarif = () => {
     try {
       // Vérifier si le tarif existe déjà
       const responseCheck = await axios.get(
-        `https://gestion-vacation.onrender.com/api/tarif/check`,
+        `http://localhost:3000/api/tarif/verification`,
         {
           params: { optionTarif, nombreTarif, MontantTarif },
         },
@@ -85,7 +85,7 @@ const CreateTarif = () => {
         return; // Ne pas continuer si le tarif existe
       } else {
         const response = await axios.post(
-          'https://gestion-vacation.onrender.com/api/tarif/add',
+          'http://localhost:3000/api/tarif/ajout',
           {
             optionTarif,
             nombreTarif,
@@ -265,9 +265,9 @@ const CreateTarif = () => {
                   <button
                     type="button"
                     className="mr-auto inline-flex h-11 items-center justify-center rounded-md border
-                                           border-warning bg-transparent text-black transition hover:bg-transparent
-                                           hover:border-warning hover:text-warning dark:border-strokedark 
-                                            dark:bg-transparent dark:text-white dark:hover:border-warning dark:hover:text-warning"
+                                           border-primary bg-transparent text-black transition hover:bg-transparent
+                                           hover:border-primary hover:text-primary dark:border-strokedark 
+                                            dark:bg-transparent dark:text-white dark:hover:border-primary dark:hover:text-primary"
                     style={{ width: '200px' }} // Ajustez la largeur selon vos besoins
                     onClick={handleView}
                   >

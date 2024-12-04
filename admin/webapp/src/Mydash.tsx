@@ -149,7 +149,7 @@ function Mydash() {
           }
         />
         <Route
-          path="/vacation/:idVacation"
+          path="/vacation/correcteur/:immatricule"
           element={
             <>
               <PageTitle title="Detail-Vacation | Système de vacation des correcteurs du baccalauréat" />
@@ -179,7 +179,7 @@ function Mydash() {
           }
         />
         <Route
-          path="/paiement/:idPayment"
+          path="/paiement/correcteur/:idCorrecteur"
           element={
             <>
               <PageTitle title="Detail-Vacation | Système de vacation des correcteurs du baccalauréat" />
@@ -197,7 +197,7 @@ function Mydash() {
           }
         />
         <Route
-          path= "/archivage-detail/:idPayment"
+          path= "/archivage-detail/:idPaiement"
           element={
             <>
               <PageTitle title= "Archivage-Paiement-Vacation | Système de vacation des correcteurs du baccalauréat " />

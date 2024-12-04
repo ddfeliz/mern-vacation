@@ -52,7 +52,7 @@ const ShowCorrecteur = () => {
   const updateCorrecteurStatus = async (session: number) => {
     try {
       // Envoie une requête PUT pour mettre à jour les statuts des correcteurs
-      await axios.put('https://gestion-vacation.onrender.com/api/correcteur/updateStatus', {
+      await axios.put('http://localhost:3000/api/correcteur/modificationStatus', {
         session: session,
       });
     } catch (error) {
@@ -63,7 +63,7 @@ const ShowCorrecteur = () => {
   const fetchCorrecteurs = async () => {
     try {
       const response = await axios.get(
-        'https://gestion-vacation.onrender.com/api/correcteur/all',
+        'http://localhost:3000/api/correcteur/tous',
       );
       setCorrecteurs(response.data);
     } catch (err) {
@@ -76,7 +76,7 @@ const ShowCorrecteur = () => {
   const fetchStats = async (session: number) => {
     try {
       const response = await axios.post(
-        'https://gestion-vacation.onrender.com/api/correcteur/comptage',
+        'http://localhost:3000/api/correcteur/comptage',
         {
           session: session,
         },
@@ -106,7 +106,7 @@ const ShowCorrecteur = () => {
     const fetchCorrecteursCount = async () => {
       try {
         const response = await axios.get(
-          'https://gestion-vacation.onrender.com/api/correcteur/count',
+          'http://localhost:3000/api/correcteur/compter',
         );
         setTotalCorrecteurs(response.data.totalCorrecteurs.toString());
       } catch (err) {
@@ -125,7 +125,7 @@ const ShowCorrecteur = () => {
     const fetchSpecialites = async () => {
       try {
         const response = await axios.get(
-          'https://gestion-vacation.onrender.com/api/matiere-bacc/specialiste',
+          'http://localhost:3000/api/matiere-bacc/specialiste',
         );
         const fetchedSpecialites = response.data.specialites;
         console.log('Specialites fetched:', fetchedSpecialites);
@@ -142,7 +142,7 @@ const ShowCorrecteur = () => {
   const fetchSecteurs = async (specialite: string) => {
     try {
       const response = await axios.get(
-        `https://gestion-vacation.onrender.com/api/matiere-bacc/secteurs?specialite=${specialite}`,
+        `http://localhost:3000/api/matiere-bacc/secteurs?specialite=${specialite}`,
       );
       setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
       setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
@@ -156,7 +156,7 @@ const ShowCorrecteur = () => {
   const fetchOption = async (secteur: string) => {
     try {
       const response = await axios.get(
-        `https://gestion-vacation.onrender.com/api/matiere-bacc/options?secteur=${secteur}`,
+        `http://localhost:3000/api/matiere-bacc/options?secteur=${secteur}`,
       );
       setOptions(response.data.options); // Mettre à jour les matières
     } catch (err) {
@@ -168,7 +168,7 @@ const ShowCorrecteur = () => {
   const fetchMatieres = async (option: string) => {
     try {
       const response = await axios.get(
-        `https://gestion-vacation.onrender.com/api/matiere-bacc/matieres?option=${option}`,
+        `http://localhost:3000/api/matiere-bacc/matieres?option=${option}`,
       );
       setMatieres(response.data.matieres); // Mettre à jour les matières
     } catch (err) {
@@ -194,6 +194,7 @@ const ShowCorrecteur = () => {
  // Filtrage des correcteurs en fonction des critères de recherche
 const filteredCorrecteurs = correcteurs.filter((correcteur) => {
   const matchesNomOrPrenomOrId =
+  correcteur.cin.toLowerCase().includes(searchItem.toLowerCase()) ||
     correcteur.nom.toLowerCase().includes(searchItem.toLowerCase()) ||
     correcteur.prenom.toLowerCase().includes(searchItem.toLowerCase()) ||
     correcteur.idCorrecteur.toLowerCase().includes(searchItem.toLowerCase());
@@ -258,7 +259,7 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
   const confirmDelete = async (idCorrecteur: string) => {
     try {
       await axios.delete(
-        `https://gestion-vacation.onrender.com/api/correcteur/${idCorrecteur}`,
+        `http://localhost:3000/api/correcteur/${idCorrecteur}`,
       );
       setCorrecteurs(
         correcteurs.filter(
@@ -433,7 +434,7 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
               {/* Champ de recherche */}
               <input
                 type="text"
-                placeholder="Rechercher par nom ou ID du correcteur..."
+                placeholder="Entrer le nom ou prenom ou C.I.N ou ID du correcteur..."
                 value={searchItem}
                 onChange={(e) => setSearchItem(e.target.value)}
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 pl-12 pr-5 outline-none
@@ -652,7 +653,7 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                     <tr key={correcteur.idCorrecteur} className="text-center">
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {correcteur.idCorrecteur}
+                          {correcteur.immatricule}
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">

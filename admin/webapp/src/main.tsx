@@ -14,7 +14,6 @@ import App from './App';
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <Router>
-      {/* Le Provider enveloppe votre application et y injecte le store */}
       <Provider store={store}>
         <App />
       </Provider>

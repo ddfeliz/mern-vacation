@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Breadcrumb from '../../../../components/Breadcrumbs/Breadcrumb';
 import axios from 'axios'; // Importer Axios
 import {
@@ -7,13 +7,17 @@ import {
   DialogPanel,
   DialogTitle,
 } from '@headlessui/react';
-import { CheckCircleIcon, ExclamationTriangleIcon, StopCircleIcon } from '@heroicons/react/24/outline';
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  StopCircleIcon,
+} from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
-
 
 const CreateVacation = () => {
   const [formData, setFormData] = useState({
     idCorrecteur: '',
+    immatricule: '',
     firstName: '',
     lastName: '',
     cin: '',
@@ -24,30 +28,99 @@ const CreateVacation = () => {
     matiere: '',
     grade: '',
     experience: '',
+    pochette: '',
     nbcopie: '',
   });
-  const [loading, setLoading] = useState(false); // État pour gérer le chargement
-
+  const [loading, setLoading] = useState(false); 
   const [open, setOpen] = useState(false);
   const [openVerify, setOpenVerify] = useState(false);
   const [openVerifyVac, setOpenVerifyVac] = useState(false);
   const [openVerifyCorrecteur, setOpenVerifyCorrecteur] = useState(false);
   const navigate = useNavigate();
-  const [idCorrecteur, setIdCorrecteur] = useState(''); // État pour stocker l'ID
+  const [immatricule, setImmatricule] = useState('');
+  const [cin, setCin] = useState('');
 
+  const [specialites, setSpecialites] = useState<string[]>([]);
+  const [secteurs, setSecteurs] = useState<string[]>([]); // État pour stocker les secteurs
+  const [options, setOptions] = useState<string[]>([]); // État pour stocker les options
+  const [matieres, setMatieres] = useState<string[]>([]); // État pour stocker les matières
 
-  // Fonction pour récupérer les données d'un correcteur par ID
+  // Récupérer les spécialités depuis le backend au montage du composant
+  useEffect(() => {
+    console.log('Fetching specialites...');
+    const fetchSpecialites = async () => {
+      try {
+        const response = await axios.get(
+          'http://localhost:3000/api/matiere-bacc/specialiste',
+        );
+        const fetchedSpecialites = response.data.specialites;
+        console.log('Specialites fetched:', fetchedSpecialites);
+        setSpecialites(fetchedSpecialites); // Mettre à jour les spécialités avec la réponse de l'API
+      } catch (err) {
+        console.error('Erreur lors de la récupération des spécialités :', err);
+      }
+    };
+
+    fetchSpecialites();
+  }, []);
+
+  // Récupérer les secteurs en fonction de la spécialité sélectionnée
+  const fetchSecteurs = async (specialite: string) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/matiere-bacc/secteurs?specialite=${specialite}`,
+      );
+      setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
+      setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
+      setMatieres([]); // Réinitialiser les matières
+    } catch (err) {
+      console.error('Erreur lors de la récupération des secteurs :', err);
+    }
+  };
+
+  // Récupérer les options en fonction du secteur sélectionné
+  const fetchOption = async (secteur: string) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/matiere-bacc/options?secteur=${secteur}`,
+      );
+      setOptions(response.data.options); // Mettre à jour les matières
+    } catch (err) {
+      console.error('Erreur lors de la récupération des matières :', err);
+    }
+  };
+
+  // Récupérer les matières en fonction du secteur sélectionné
+  const fetchMatieres = async (option: string) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3000/api/matiere-bacc/matieres?option=${option}`,
+      );
+      setMatieres(response.data.matieres); // Mettre à jour les matières
+    } catch (err) {
+      console.error('Erreur lors de la récupération des matières :', err);
+    }
+  };
+
   const fetchCorrecteurById = async () => {
     try {
       setLoading(true);
-      // Appel à l'API pour récupérer les informations du correcteur par ID
+
+      const searchKey = cin || immatricule; // Priorité à l'immatricule, sinon CIN
+      if (!searchKey) {
+        throw new Error("L'immatricule ou le CIN est requis.");
+      }
+
+      // Appel à l'API avec le bon paramètre
       const response = await axios.get(
-        `https://gestion-vacation.onrender.com/api/correcteur/${idCorrecteur}`,
+        `http://localhost:3000/api/correcteur/${searchKey}`,
       );
       const fetchedData = response.data;
+
       // Remplir le formulaire avec les valeurs récupérées
       setFormData({
-        idCorrecteur: fetchedData.idCorrecteur,
+        idCorrecteur: fetchedData.idCorrecteur || '',
+        immatricule: fetchedData.immatricule || '',
         firstName: fetchedData.nom || '',
         lastName: fetchedData.prenom || '',
         cin: fetchedData.cin || '',
@@ -58,14 +131,12 @@ const CreateVacation = () => {
         matiere: fetchedData.matiere || '',
         grade: fetchedData.grade || '',
         experience: fetchedData.experience || '',
-        nbcopie: '',
+        pochette: fetchedData.pochette || '',
+        nbcopie: fetchedData.nbcopie || '',
       });
-
     } catch (err) {
       console.error('Erreur lors de la récupération des champs :', err);
       setOpenVerifyCorrecteur(true);
-      console.log(err);
-      
     } finally {
       setLoading(false);
     }
@@ -74,13 +145,45 @@ const CreateVacation = () => {
   const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+
+    if (name === 'specialite') {
+      fetchSecteurs(value);
+      setFormData((prevData) => ({
+        ...prevData,
+        secteur: '',
+        option: '',
+        matiere: '',
+      }));
+      setOptions([]);
+    }
+
+    if (name === 'secteur') {
+      fetchOption(value);
+      setFormData((prevData) => ({
+        ...prevData,
+        option: '',
+        matiere: '',
+      }));
+      setMatieres([]);
+    }
+
+    if (name === 'option') {
+      fetchMatieres(value);
+    }
   };
 
+  const handleChange1 = (e: { target: { value: string; }; }) => {
+    const value = e.target.value.trim();
+    console.log(value); 
+      setCin(value);
+      setImmatricule(value);
+  };
   const handleReset = () => {
     setFormData({
       idCorrecteur: '',
       firstName: '',
       lastName: '',
+      immatricule: '',
       cin: '',
       telephone: '',
       specialite: '',
@@ -89,6 +192,7 @@ const CreateVacation = () => {
       matiere: '',
       grade: '',
       experience: '',
+      pochette: '',
       nbcopie: '',
     });
   };
@@ -106,6 +210,7 @@ const CreateVacation = () => {
       idCorrecteur,
       firstName,
       lastName,
+      immatricule,
       cin,
       telephone,
       specialite,
@@ -114,6 +219,7 @@ const CreateVacation = () => {
       matiere,
       grade,
       experience,
+      pochette,
       nbcopie,
     } = formData;
 
@@ -125,22 +231,19 @@ const CreateVacation = () => {
     // Vérification si le CIN existe déjà
     const currentSession = new Date().getFullYear(); // Utilisation de l'année actuelle
     const checkResponse = await axios.get(
-      `https://gestion-vacation.onrender.com/api/vacation/check/${idCorrecteur}/${currentSession}`,
+      `http://localhost:3000/api/vacation/verification/${currentSession}/${pochette}`,
     );
 
     try {
       if (checkResponse.data.exists) {
-        // Si une vacation existe déjà pour la session actuelle, afficher un message et arrêter la soumission
-        // setError(
-        //   `Le correcteur ${idCorrecteur} a déjà une vacation pour la session ${currentSession}.`
-        // );
         setOpenVerifyVac(true); // Afficher le dialogue ou message d'erreur
         setLoading(false);
       } else {
         const response = await axios.post(
-          'https://gestion-vacation.onrender.com/api/vacation/add',
+          'http://localhost:3000/api/vacation/ajout',
           {
             idCorrecteur,
+            immatricule,
             nom: lastName,
             prenom: firstName,
             cin,
@@ -151,6 +254,7 @@ const CreateVacation = () => {
             matiere,
             grade,
             experience,
+            pochette,
             nbcopie,
           },
         );
@@ -166,10 +270,8 @@ const CreateVacation = () => {
     } catch (err: any) {
       if (err.response) {
         console.log(err);
-        
       } else {
         console.log(err);
-        
       }
     } finally {
       setLoading(false); // Arrêter le chargement
@@ -185,35 +287,26 @@ const CreateVacation = () => {
           {/* Formulaire de création de correcteur */}
           <div className="w-full rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-              {/*  <h3 className="font-medium text-black dark:text-white">
-                                Formulaire du vacation
-                            </h3>
-                            */}
-              {/* Champ d'ID et bouton de recherche */}
               <div className="mb-4.5 flex gap-6 items-center">
                 <div className="w-full xl:w-1/2">
-                  <label
-                    htmlFor="id"
-                    className="mb-2.5 block text-black dark:text-white"
-                  >
-                    ID du Correcteur
+                  <label className="mb-2.5 block text-black dark:text-white">
+                    Immatricule ou C.I.N
+                    <span className="text-meta-1">*</span>
                   </label>
                   <input
-                    type="text"
-                    name="id"
-                    id="id"
-                    placeholder="Entrez l'ID du correcteur"
-                    value={idCorrecteur}
-                    disabled={loading}
-                    onChange={(e) => setIdCorrecteur(e.target.value)}
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    type="text" 
+                    placeholder="Entrer l'immatricule ou CIN"
+                    value={cin || immatricule || ''}
+                    onChange={handleChange1}
+                    required
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
                 </div>
                 <button
                   type="button"
                   onClick={fetchCorrecteurById}
                   className="flex items-center justify-center rounded bg-blue-500 py-3 px-6 mt-7 font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
-                  disabled={!idCorrecteur || loading}
+                  disabled={!immatricule || !cin || loading}
                 >
                   {loading ? 'Recherche...' : 'Rechercher'}
                 </button>
@@ -308,7 +401,7 @@ const CreateVacation = () => {
                         Verification du vacation
                       </DialogTitle>
                       <p className="mt-2 text-sm text-gray-500">
-                        Cette vacation existe déjà! Veuillze verifer vos source.
+                        Cette vacation existe déjà! Veuillez verifer vos source.
                       </p>
                     </div>
                   </div>
@@ -337,10 +430,11 @@ const CreateVacation = () => {
                     </div>
                     <div>
                       <DialogTitle className="text-xl font-medium text-danger">
-                        Verification ID Correcteur
+                        Verification Correcteur
                       </DialogTitle>
                       <p className="mt-2 text-sm text-gray-500">
-                        Ce Correcteur n'existe pas! Veuillez verifier vos données.
+                        Le C.I.N ou immatricule n'appartient pas à nos correcteurs inscrit!
+                        Veuillez verifier vos données.
                       </p>
                     </div>
                   </div>
@@ -350,6 +444,47 @@ const CreateVacation = () => {
 
             <form onSubmit={handleSubmit}>
               <div className="p-6.5">
+                <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                  <div className="w-full xl:w-1/2">
+                    <label
+                      htmlFor="idCorrecteur"
+                      className="mb-2.5 block text-black dark:text-white"
+                    >
+                      ID Correcteur <span className="text-meta-1">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="idCorrecteur"
+                      id="idCorrecteur"
+                      placeholder="..."
+                      value={formData.idCorrecteur}
+                      onChange={handleChange}
+                      required
+                      disabled
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    />
+                  </div>
+                  <div className="w-full xl:w-1/2">
+                    <label
+                      htmlFor="immatricule"
+                      className="mb-2.5 block text-black dark:text-white"
+                    >
+                      Numéro immatricule
+                      <span className="text-meta-1">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="immatricule"
+                      id="immatricule"
+                      placeholder="..."
+                      value={formData.immatricule}
+                      onChange={handleChange}
+                      required
+                      disabled
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    />
+                  </div>
+                </div>
                 <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
                   <div className="w-full xl:w-1/2">
                     <label
@@ -444,27 +579,44 @@ const CreateVacation = () => {
                     />
                   </div>
                 </div>
-
+                {/* Ligne pour spécialité et grade */}
                 <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
                   <div className="w-full xl:w-1/2">
                     <label
                       htmlFor="specialite"
                       className="mb-2.5 block text-black dark:text-white"
                     >
-                      Bac Spécialité <span className="text-meta-1">*</span>
+                      Baccalauréat d'enseignement{' '}
+                      <span className="text-meta-1">*</span>
                     </label>
-                    <input
-                      type="text"
+                    <select
                       name="specialite"
                       id="specialite"
-                      placeholder="..."
                       value={formData.specialite}
                       onChange={handleChange}
                       required
-                      disabled
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    />
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    >
+                      <option value="">Sélectionnez un enseignement</option>
+                      {specialites && specialites.length > 0 ? (
+                        specialites.map((specialite, index) => (
+                          <option key={index} value={specialite}>
+                            {specialite}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>Chargement...</option>
+                      )}
+                    </select>
+                    {/* Afficher la spécialité sélectionnée */}
+                    {formData.specialite && (
+                      <p className="mt-2 text-black dark:text-white">
+                        Spécialité sélectionnée :{' '}
+                        <strong>{formData.specialite}</strong>
+                      </p>
+                    )}
                   </div>
+
                   <div className="w-full xl:w-1/2">
                     <label
                       htmlFor="secteur"
@@ -472,20 +624,29 @@ const CreateVacation = () => {
                     >
                       Secteur <span className="text-meta-1">*</span>
                     </label>
-                    <input
-                      type="text"
+                    <select
                       name="secteur"
                       id="secteur"
-                      placeholder="..."
                       value={formData.secteur}
                       onChange={handleChange}
                       required
-                      disabled
                       className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    />
+                    >
+                      <option value="">Sélectionnez un secteur</option>
+                      {secteurs && secteurs.length > 0 ? (
+                        secteurs.map((secteur, index) => (
+                          <option key={index} value={secteur}>
+                            {secteur}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>
+                          Veuillez sélectionner une spécialité d'abord
+                        </option>
+                      )}
+                    </select>
                   </div>
                 </div>
-
                 <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
                   <div className="w-full xl:w-1/2">
                     <label
@@ -494,56 +655,84 @@ const CreateVacation = () => {
                     >
                       Option <span className="text-meta-1">*</span>
                     </label>
-                    <input
-                      type="text"
+                    <select
                       name="option"
                       id="option"
-                      placeholder="..."
                       value={formData.option}
                       onChange={handleChange}
                       required
-                      disabled
-                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    />
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    >
+                      <option value="">Sélectionnez une option</option>
+                      {options && options.length > 0 ? (
+                        options.map((option, index) => (
+                          <option key={index} value={option}>
+                            {option}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>
+                          Veuillez sélectionner un secteur d'abord
+                        </option>
+                      )}
+                    </select>
                   </div>
+
                   <div className="w-full xl:w-1/2">
                     <label
                       htmlFor="matiere"
                       className="mb-2.5 block text-black dark:text-white"
                     >
-                      Nom de matière <span className="text-meta-1">*</span>
+                      Matière <span className="text-meta-1">*</span>
                     </label>
-                    <input
-                      type="text"
+                    <select
                       name="matiere"
                       id="matiere"
-                      placeholder="..."
                       value={formData.matiere}
                       onChange={handleChange}
                       required
-                      disabled
                       className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                    />
+                    >
+                      <option value="">
+                        Sélectionnez une matière
+                        {formData.option && (
+                          <p className="mt-2 text-black dark:text-white">
+                            selon l'option selectionné :{' '}
+                            <strong>{formData.option}</strong>
+                          </p>
+                        )}
+                      </option>
+                      {matieres && matieres.length > 0 ? (
+                        matieres.map((matiere, index) => (
+                          <option key={index} value={matiere}>
+                            {matiere}
+                          </option>
+                        ))
+                      ) : (
+                        <option disabled>
+                          Veuillez sélectionner une option d'abord
+                        </option>
+                      )}
+                    </select>
                   </div>
                 </div>
 
                 <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
                   <div className="w-full xl:w-1/2">
                     <label
-                      htmlFor="idCorrecteur"
+                      htmlFor="pochette"
                       className="mb-2.5 block text-black dark:text-white"
                     >
-                      ID Correcteur <span className="text-meta-1">*</span>
+                      Pochette <span className="text-meta-1">*</span>
                     </label>
                     <input
                       type="text"
-                      name="idCorrecteur"
-                      id="idCorrecteur"
-                      placeholder="..."
-                      value={formData.idCorrecteur}
+                      name="pochette"
+                      id="pochette"
+                      placeholder="Entrer le code pochette"
+                      value={formData.pochette}
                       onChange={handleChange}
                       required
-                      disabled
                       className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     />
                   </div>
@@ -559,7 +748,7 @@ const CreateVacation = () => {
                       type="number"
                       name="nbcopie"
                       id="nbcopie"
-                      placeholder="Entrez le nombre d'années d'expérience"
+                      placeholder="Entrez le nombre des copies corrigés "
                       value={formData.nbcopie}
                       onChange={handleChange}
                       required
@@ -572,9 +761,9 @@ const CreateVacation = () => {
                   <button
                     type="button"
                     className="mr-auto inline-flex h-11 items-center justify-center rounded-md border
-                                         border-warning bg-transparent text-black transition hover:bg-transparent
-                                         hover:border-warning hover:text-warning dark:border-strokedark 
-                                          dark:bg-transparent dark:text-white dark:hover:border-warning dark:hover:text-warning"
+                                         border-primary bg-transparent text-black transition hover:bg-transparent
+                                         hover:border-primary hover:text-primary dark:border-strokedark 
+                                          dark:bg-transparent dark:text-white dark:hover:border-primary dark:hover:text-primary"
                     style={{ width: '200px' }} // Ajustez la largeur selon vos besoins
                     onClick={handleView}
                   >

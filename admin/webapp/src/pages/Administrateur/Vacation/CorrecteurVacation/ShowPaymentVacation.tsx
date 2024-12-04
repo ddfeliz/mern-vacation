@@ -15,26 +15,19 @@ import {
   PlusIcon,
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
-import { TrashIcon } from '@heroicons/react/24/outline';
-import { BsCashCoin, BsFilePdfFill, BsSearch } from 'react-icons/bs';
-import { Payment } from '../../../../types/Payment';
+// import { TrashIcon } from '@heroicons/react/24/outline';
+import { BsCashCoin,  BsSearch } from 'react-icons/bs';
 import CardDataStats from '../../../../components/CardDataStats';
-import { PDFDownloadLink } from '@react-pdf/renderer';
-import PaymentPdf from './PaymentPdf';
+// import { PDFDownloadLink } from '@react-pdf/renderer'; BsFilePdfFill,
+// import PaymentPdf from './PaymentPdf';
+import { PaiementRegroupe } from '../../../../types/PaiementRegroupe';
 
 const ShowPaymentVacation = () => {
-  const [formData, setFormData] = useState({
-    specialite: '',
-    secteur: '',
-    option: '',
-    matiere: '',
-  });
-
-  const [payments, setPayments] = useState<Payment[]>([]);
+  const [payments, setPayments] = useState<PaiementRegroupe[]>([]);
   const [totalCopies, setTotalCopies] = useState('0');
   const [totalMontants, setTotalMontants] = useState('0');
-  const [selectedPayment, setSelectedPayment] = useState<Payment | null>(null);
-  const [filteredPayments, setFilteredPayments] = useState<Payment[]>([]); // Nouvel état pour les paiements filtrés
+  const [selectedPayment, setSelectedPayment] = useState<PaiementRegroupe | null>(null);
+  const [filteredPayments, setFilteredPayments] = useState<PaiementRegroupe[]>([]); // Nouvel état pour les paiements filtrés
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [selectedStatus, setSelectedStatus] = useState(''); // État pour le statut de paiement
@@ -45,16 +38,6 @@ const ShowPaymentVacation = () => {
   const [openArchiveSuccess, setOpenArchiveSuccess] = useState(false); // État pour le Dialog
   const [currentPage, setCurrentPage] = useState(1);
   const [paymentsPerPage] = useState(5); // Modifier cette valeur pour ajuster le nombre de correcteurs par page
-
-  const [specialites, setSpecialites] = useState<string[]>([]); // État pour stocker les spécialités
-  const [secteurs, setSecteurs] = useState<string[]>([]); // État pour stocker les secteurs
-  const [options, setOptions] = useState<string[]>([]); // État pour stocker les options
-  const [matieres, setMatieres] = useState<string[]>([]); // État pour stocker les matières
-
-  const [searchSpecialite, setSearchSpecialite] = useState('');
-  const [searchSecteur, setSearchSecteur] = useState('');
-  const [searchOption, setSearchOption] = useState('');
-  const [searchMatiere, setSearchMatiere] = useState('');
   const [searchItem, setSearchItem] = useState('');
 
   const [totalPaid, setTotalPaid] = useState('0');
@@ -62,11 +45,34 @@ const ShowPaymentVacation = () => {
 
   const navigate = useNavigate();
 
+  const [specialite, setSpecialite] = useState("");
+
+    const handleExport = async () => {
+        if (!specialite) {
+            alert("Veuillez sélectionner une spécialité.");
+            return;
+        }
+
+        try {
+            const response = await axios.get(`http://localhost:3000/api/paiement/generer-excel?specialite=${specialite}`, {
+                responseType: "blob",
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", `paiements_${specialite}.xlsx`);
+            document.body.appendChild(link);
+            link.click();
+        } catch (error) {
+            console.error("Erreur lors de l'exportation :", error);
+        }
+    };
+
   const fetchTotalCopies = async () => {
     try {
       // Faire la requête GET vers l'endpoint de l'API
       const response = await axios.get(
-        'https://gestion-vacation.onrender.com/api/payment/total-copie',
+        'http://localhost:3000/api/paiement/total-copie',
       );
 
       // Stocker le total des copies dans l'état
@@ -81,7 +87,7 @@ const ShowPaymentVacation = () => {
     try {
       // Faire la requête GET vers l'endpoint de l'API
       const response = await axios.get(
-        'https://gestion-vacation.onrender.com/api/payment/total-montant',
+        'http://localhost:3000/api/paiement/total-montant',
       );
 
       // Formatage du montant total en tant qu'argent en ariary malgache
@@ -102,23 +108,23 @@ const ShowPaymentVacation = () => {
 
   const fetchTarifs = async () => {
     try {
-      const response = await axios.get('https://gestion-vacation.onrender.com/api/payment/all');
-      setPayments(response.data);
-      setFilteredPayments(response.data); // Initialiser avec tous les paiements
+      const response = await axios.get('http://localhost:3000/api/paiement/regroupement');
+      setPayments(response.data.paiementsRegroupes);
+      setFilteredPayments(response.data.paiementsRegroupes); // Initialiser avec tous les paiements
 
       // Filtrer et calculer le total des paiements "Payé"
-      const totalPaidAmount = response.data
-        .filter((payment: Payment) => payment.statut === 'Payé')
+      const totalPaidAmount = response.data.paiementsRegroupes
+        .filter((payment: PaiementRegroupe) => payment.statut === 'Payé')
         .reduce(
-          (acc: number, payment: Payment) => acc + payment.montantTotal,
+          (acc: number, payment: PaiementRegroupe) => acc + payment.montantTotal,
           0,
         );
 
       // Filtrer et calculer le total des paiements "Non payé"
-      const totalUnpaidAmount = response.data
-        .filter((payment: Payment) => payment.statut === 'Non payé')
+      const totalUnpaidAmount = response.data.paiementsRegroupes
+        .filter((payment: PaiementRegroupe) => payment.statut === 'Non payé')
         .reduce(
-          (acc: number, payment: Payment) => acc + payment.montantTotal,
+          (acc: number, payment: PaiementRegroupe) => acc + payment.montantTotal,
           0,
         );
 
@@ -152,80 +158,14 @@ const ShowPaymentVacation = () => {
     fetchTarifs();
   }, []);
 
-  // Récupérer les spécialités depuis le backend au montage du composant
-  useEffect(() => {
-    console.log('Fetching specialites...');
-    const fetchSpecialites = async () => {
-      try {
-        const response = await axios.get(
-          'https://gestion-vacation.onrender.com/api/matiere-bacc/specialiste',
-        );
-        const fetchedSpecialites = response.data.specialites;
-        console.log('Specialites fetched:', fetchedSpecialites);
-        setSpecialites(fetchedSpecialites); // Mettre à jour les spécialités avec la réponse de l'API
-      } catch (err) {
-        console.error('Erreur lors de la récupération des spécialités :', err);
-      }
-    };
-
-    fetchSpecialites();
-  }, []);
-
-  // Récupérer les secteurs en fonction de la spécialité sélectionnée
-  const fetchSecteurs = async (specialite: string) => {
-    try {
-      const response = await axios.get(
-        `https://gestion-vacation.onrender.com/api/matiere-bacc/secteurs?specialite=${specialite}`,
-      );
-      setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
-      setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
-      setMatieres([]); // Réinitialiser les matières
-    } catch (err) {
-      console.error('Erreur lors de la récupération des secteurs :', err);
-    }
-  };
-
-  // Récupérer les options en fonction du secteur sélectionné
-  const fetchOption = async (secteur: string) => {
-    try {
-      const response = await axios.get(
-        `https://gestion-vacation.onrender.com/api/matiere-bacc/options?secteur=${secteur}`,
-      );
-      setOptions(response.data.options); // Mettre à jour les matières
-    } catch (err) {
-      console.error('Erreur lors de la récupération des matières :', err);
-    }
-  };
-
-  // Récupérer les matières en fonction du secteur sélectionné
-  const fetchMatieres = async (option: string) => {
-    try {
-      const response = await axios.get(
-        `https://gestion-vacation.onrender.com/api/matiere-bacc/matieres?option=${option}`,
-      );
-      setMatieres(response.data.matieres); // Mettre à jour les matières
-    } catch (err) {
-      console.error('Erreur lors de la récupération des matières :', err);
-    }
-  };
-
   // Fonction pour filtrer les paiements par statut et par critères spécifiques
   const combinedFilteredPayments = filteredPayments.filter((payment) => {
     const isNameMatch =
       payment.nom.toLowerCase().includes(searchItem.toLowerCase()) ||
       payment.prenom.toLowerCase().includes(searchItem.toLowerCase()) ||
-      payment.idVacation.toLowerCase().includes(searchItem.toLowerCase()) ||
       payment.idCorrecteur.toLowerCase().includes(searchItem.toLowerCase());
 
-    const isCorrecteurMatch =
-      payment.specialite
-        .toLowerCase()
-        .includes(searchSpecialite.toLowerCase()) &&
-      payment.secteur.toLowerCase().includes(searchSecteur.toLowerCase()) &&
-      payment.option.toLowerCase().includes(searchOption.toLowerCase()) &&
-      payment.matiere.toLowerCase().includes(searchMatiere.toLowerCase());
-
-    return isNameMatch && isCorrecteurMatch;
+    return isNameMatch;
   });
 
   // Fonction pour filtrer les paiements selon le statut sélectionné
@@ -264,16 +204,16 @@ const ShowPaymentVacation = () => {
     combinedFilteredPayments.length / paymentsPerPage,
   );
 
-  const handleDeleting = () => {
-    setOpen(true);
-  };
+  // const handleDeleting = () => {
+  //   setOpen(true);
+  // };
 
   const cancelDelete = () => {
     setOpen(false);
   };
 
   // Fonction pour ouvrir le modal d'édition avec les données du vacation sélectionné
-  const openEditModal = (payment: Payment) => {
+  const openEditModal = (payment: PaiementRegroupe) => {
     setSelectedPayment(payment);
     setOpenUpdatePayment(true);
   };
@@ -283,54 +223,35 @@ const ShowPaymentVacation = () => {
     if (!selectedPayment) return;
 
     try {
-      const updatedPayment = { ...selectedPayment, statut: 'Payé' };
-
-      // Mise à jour dans le backend
+      // Envoyer la requête pour mettre à jour tous les paiements du correcteur
       await axios.put(
-        `https://gestion-vacation.onrender.com/api/payment/${selectedPayment.idPayment}`,
-        updatedPayment,
+          `http://localhost:3000/api/paiement/statut-modification/${selectedPayment.idCorrecteur}`
       );
 
-      // Mettre à jour le tableau des vacations
+      // Mettre à jour le tableau localement
       setPayments((prev) =>
-        prev.map((pay) =>
-          pay.idPayment === selectedPayment.idPayment ? updatedPayment : pay,
-        ),
+          prev.map((pay) =>
+              pay.idCorrecteur === selectedPayment.idCorrecteur && pay.statut === 'Non payé'
+                  ? { ...pay, statut: 'Payé' }
+                  : pay
+          )
       );
 
       setOpenUpdatePayment(false); // Fermer le modal
-      // setOpenSuccess(true);
-      fetchTarifs();
+      fetchTarifs(); // Rafraîchir les données si nécessaire
       fetchTotalCopies();
       fetchTotalMontants();
-      setTimeout(() => {}, 2000); // Délai de 2 secondes avant de naviguer
-    } catch (err) {
-      alert('Erreur lors de la mise à jour du nombre de copies.');
-    }
+  } catch (err) {
+      alert('Erreur lors de la mise à jour du statut des paiements.');
+  }
   };
 
-  // Fonction pour supprimer un correcteur
-  const confirmDelete = async (idPayment: string) => {
-    try {
-      await axios.delete(`https://gestion-vacation.onrender.com/api/payment/${idPayment}`);
-      setPayments(
-        payments.filter((payment) => payment.idPayment !== idPayment),
-      );
-      setOpen2(true); // Afficher le message de succès
-      setOpen(false);
-      setTimeout(() => {
-        navigate('/présidence-service-finance/nouveau-paiement');
-      }, 2000); // Délai de 2 secondes avant de naviguer
-    } catch (err) {
-      alert('Erreur lors de la suppression du tarif.');
-    }
-  };
 
   const handleReset = async () => {
     setLoading(true);
     try {
       const currentYear = new Date().getFullYear();
-      await axios.post('https://gestion-vacation.onrender.com/api/archive/archive-payments', {
+      await axios.post('http://localhost:3000/api/archive/archive-paiements', {
         session: currentYear,
       });
       setOpenArchiveSuccess(true);
@@ -343,42 +264,6 @@ const ShowPaymentVacation = () => {
       console.log(error);
     } finally {
       setLoading(false);
-    }
-  };
-  const handleChange = (e: { target: { name: any; value: any } }) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-
-    if (name === 'specialite') {
-      fetchSecteurs(value);
-      setFormData((prevData) => ({
-        ...prevData,
-        secteur: '',
-        option: '',
-        matiere: '',
-      }));
-      setOptions([]);
-      setSearchSpecialite(value);
-    }
-
-    if (name === 'secteur') {
-      fetchOption(value);
-      setFormData((prevData) => ({
-        ...prevData,
-        option: '',
-        matiere: '',
-      }));
-      setMatieres([]);
-      setSearchSecteur(value);
-    }
-
-    if (name === 'option') {
-      fetchMatieres(value);
-      setSearchOption(value);
-    }
-
-    if (name === 'matiere') {
-      setSearchMatiere(value);
     }
   };
 
@@ -749,7 +634,7 @@ const ShowPaymentVacation = () => {
             {message && <p>{message}</p>}
 
             
-            <PDFDownloadLink
+            {/* <PDFDownloadLink
               document={<PaymentPdf payments={filteredPayments} />}
               fileName="paiements.pdf"
               className="rounded border-[1.5px] border-stroke bg-transparent py-4 px-10 text-black outline-none transition hover:border-primary hover:text-primary focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary dark:hover:border-primary dark:hover:text-primary"
@@ -757,7 +642,24 @@ const ShowPaymentVacation = () => {
               <span className="flex flex-wrap items-center justify-center">
                 <BsFilePdfFill className="w-8 h-5" /> Créer en PDF
               </span>
-            </PDFDownloadLink>
+            </PDFDownloadLink> */}
+
+            <select 
+            value={specialite} 
+            onChange={(e) => setSpecialite(e.target.value)}
+            className='w-1/3 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary'
+            >
+                <option value="">-- Sélectionner une spécialité --</option>
+                <option value="Général">Général</option>
+                <option value="Professionnel et Technique">Professionnel et Technique</option>
+                <option value="Technologique">Technologique</option>
+            </select>
+            <button 
+              onClick={handleExport}
+              className="rounded border-[1.5px] border-primary bg-transparent py-4 px-10 text-black outline-none transition hover:border-primary hover:text-primary focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-primary dark:bg-form-input dark:text-white dark:focus:border-primary dark:hover:border-primary dark:hover:text-primary"
+            >
+              Exporter en excel
+            </button>
 
             <Link
               to="/présidence-service-finance/nouveau-paiement"
@@ -800,142 +702,10 @@ const ShowPaymentVacation = () => {
               </select>
             </div>
           </div>
-
-          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-            <span className="text-secondary text-sm mt-5">Filtré par:</span>
-            <div className="w-full xl:w-1/4">
-              <label
-                htmlFor="specialite"
-                className="mb-2.5 block text-black dark:text-white"
-              >
-                Spécialité <span className="text-meta-1">*</span>
-              </label>
-              <select
-                name="specialite"
-                id="specialite"
-                value={formData.specialite}
-                onChange={handleChange}
-                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none 
-                                transition focus:border-primary active:border-primary disabled:cursor-default 
-                                disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-              >
-                <option value="">Sélectionnez une spécialité</option>
-                {specialites && specialites.length > 0 ? (
-                  specialites.map((specialite, index) => (
-                    <option key={index} value={specialite}>
-                      {specialite}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>Chargement...</option>
-                )}
-              </select>
-            </div>
-
-            <div className="w-full xl:w-1/4">
-              <label
-                htmlFor="secteur"
-                className="mb-2.5 block text-black dark:text-white"
-              >
-                Secteur <span className="text-meta-1">*</span>
-              </label>
-              <select
-                name="secteur"
-                id="secteur"
-                value={formData.secteur}
-                onChange={handleChange}
-                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-              >
-                <option value="">Sélectionnez un secteur</option>
-                {secteurs && secteurs.length > 0 ? (
-                  secteurs.map((secteur, index) => (
-                    <option key={index} value={secteur}>
-                      {secteur}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>
-                    Veuillez sélectionner une spécialité d'abord
-                  </option>
-                )}
-              </select>
-            </div>
-            <div className="w-full xl:w-1/4">
-              <label
-                htmlFor="option"
-                className="mb-2.5 block text-black dark:text-white"
-              >
-                Option <span className="text-meta-1">*</span>
-              </label>
-              <select
-                name="option"
-                id="option"
-                value={formData.option}
-                onChange={handleChange}
-                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-              >
-                <option value="">Sélectionnez une option</option>
-                {options && options.length > 0 ? (
-                  options.map((option, index) => (
-                    <option key={index} value={option}>
-                      {option}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>
-                    Veuillez sélectionner un secteur d'abord
-                  </option>
-                )}
-              </select>
-            </div>
-
-            <div className="w-full xl:w-1/4">
-              <label
-                htmlFor="matiere"
-                className="mb-2.5 block text-black dark:text-white"
-              >
-                Matière <span className="text-meta-1">*</span>
-              </label>
-              <select
-                name="matiere"
-                id="matiere"
-                value={formData.matiere}
-                onChange={handleChange}
-                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-              >
-                <option value="">
-                  Sélectionnez une matière
-                  {formData.option && (
-                    <p className="mt-2 text-black dark:text-white">
-                      selon l'option selectionné :{' '}
-                      <strong>{formData.option}</strong>
-                    </p>
-                  )}
-                </option>
-                {matieres && matieres.length > 0 ? (
-                  matieres.map((matiere, index) => (
-                    <option key={index} value={matiere}>
-                      {matiere}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>
-                    Veuillez sélectionner une option d'abord
-                  </option>
-                )}
-              </select>
-            </div>
-          </div>
           <div className="max-w-full overflow-x-auto">
             <table className="w-full table-auto">
               <thead>
                 <tr className="bg-gray-2 text-center dark:bg-meta-4">
-                  <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                    ID Paiement
-                  </th>
-                  <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                    ID Vacation
-                  </th>
                   <th className="min-w-[160px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
                     ID Correcteur
                   </th>
@@ -946,25 +716,10 @@ const ShowPaymentVacation = () => {
                     CIN
                   </th>
                   <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                    Spécialité Bacc
-                  </th>
-                  <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                    Secteur
-                  </th>
-                  <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                    Option
-                  </th>
-                  <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                    Matière
-                  </th>
-                  <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                    Nombre des copies Corrigées
-                  </th>
-                  <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
                     Session
                   </th>
                   <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                    Option du tarif
+                    Nombres de vacation
                   </th>
                   <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
                     Montant totale
@@ -978,98 +733,63 @@ const ShowPaymentVacation = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentTarifs.length > 0 ? (
-                  currentTarifs.map((payment) => (
-                    <tr key={payment.idPayment}>
+                {currentTarifs && currentTarifs.length > 0 ? (
+                  currentTarifs.map((paiement) => (
+                    <tr key={paiement.idCorrecteur}>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {payment.idPayment}
+                          {paiement.idCorrecteur}
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {payment.idVacation}
+                          {paiement.nom} {paiement.prenom}
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {payment.idCorrecteur}
+                          {paiement.cin}
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {payment.nom} {payment.prenom}
+                          {paiement.session}
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {payment.cin}
-                        </h5>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {payment.specialite}
-                        </h5>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {payment.secteur}
-                        </h5>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {payment.option}
-                        </h5>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {payment.matiere}
-                        </h5>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {payment.nbcopie}
-                        </h5>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {payment.session}
-                        </h5>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                        <h5 className="font-medium text-black dark:text-white">
-                          {payment.optionTarif}
+                          {paiement.nombreVacations}
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                         <p className="text-black dark:text-white">
-                          {payment.montantTotal} Ar
+                          {paiement.montantTotal} Ar
                         </p>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {payment.statut}
+                          {paiement.statut}
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                         <div className="flex items-center justify-center space-x-3.5">
-                          {payment.statut === 'Non payé' && (
+                          {paiement.statut === 'Non payé' && (
                             <button
-                              onClick={() => openEditModal(payment)}
+                              onClick={() => openEditModal(paiement)}
                               className="hover:text-primary"
                             >
                               <CheckIcon className="h-auto w-5 text-green-600" />
                             </button>
                           )}
                           <Link
-                            to={`/présidence-service-finance/paiement/${payment.idPayment}`}
+                            to={`/présidence-service-finance/paiement/correcteur/${paiement.idCorrecteur}`}
                             className="hover:text-primary"
                           >
                             <EyeIcon className="h-auto w-5 text-secondary" />
                           </Link>
-                          <button onClick={handleDeleting}>
+                          {/* <button onClick={handleDeleting}>
                             <TrashIcon className="h-auto w-5 text-danger" />
-                          </button>
+                          </button> */}
                         </div>
 
                         {/* Modal de Confirmation avec Dialog */}
@@ -1104,7 +824,7 @@ const ShowPaymentVacation = () => {
                                         <p className="text-sm text-gray-500 dark:text-gray-300">
                                           Voulez-vous vraiment supprimer ce
                                           correcteur <br /> dont l'ID est:{' '}
-                                          {payment.idPayment} ?
+                                          {paiement.idCorrecteur} ?
                                           <span className="mx-2 text-danger">
                                             Cette action est irreversible!
                                           </span>
@@ -1116,9 +836,9 @@ const ShowPaymentVacation = () => {
                                 <div className="mt-4 mb-4 flex justify-end">
                                   <button
                                     type="button"
-                                    onClick={() =>
-                                      confirmDelete(payment.idPayment)
-                                    }
+                                    // onClick={() =>
+                                    //   // confirmDelete(paiement.immatricule)
+                                    // }
                                     className="mr-2 bg-red-500 text-white px-4 py-2 rounded dark:bg-red-600"
                                   >
                                     Oui, supprimer

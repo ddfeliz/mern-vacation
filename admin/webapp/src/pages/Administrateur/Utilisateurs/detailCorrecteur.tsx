@@ -33,7 +33,7 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
     // Fonction pour supprimer un correcteur
     const confirmDelete = async (idCorrecteur: string) => {
             try {
-                await axios.delete(`https://gestion-vacation.onrender.com/api/correcteur/${idCorrecteur}`);
+                await axios.delete(`http://localhost:3000/api/correcteur/${idCorrecteur}`);
                 setCorrecteurs(correcteurs.filter((correcteur) => correcteur.idCorrecteur !== idCorrecteur));
                 setOpen1(true); // Afficher le message de succès
                 setTimeout(() => {
@@ -49,7 +49,7 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
         const fetchCorrecteur = async () => {
             try {
                 // Inclure idCorrecteur dans l'URL de la requête
-                const response = await axios.get(`https://gestion-vacation.onrender.com/api/correcteur/${idCorrecteur}`);
+                const response = await axios.get(`http://localhost:3000/api/correcteur/${idCorrecteur}`);
                 setCorrecteur(response.data);
             } catch (err) {
                 setError('Erreur lors de la récupération des détails du correcteur');
@@ -87,8 +87,8 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
                     <div className='flex flex-col gap-9 w-full'>
                         <div className='w-full rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
                             <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
-                                <h3 className="font-medium text-black dark:text-white">
-                                    L'ID du correcteur est : {correcteur.idCorrecteur}
+                                <h3 className="font-medium text-black text-center dark:text-white">
+                                    Numéro immatricule du correcteur : {correcteur.immatricule}
                                 </h3>
                             </div>
 

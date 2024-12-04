@@ -1,25 +1,25 @@
-const archivePayment = require("../models/archivePaiementModel");
-const Payment = require("../models/paiementModel");
+const archivePaiement = require("../modelisation/archivage");
+const Paiement = require("../modelisation/paiement");
 const CreateError = require('../utils/appError'); // Import de la fonction CreateError
 
 // Fonction qui archive les paiements d'une année spécifique
-exports.archivePaymentCount = async (year) => {
+exports.archivePaiementCompte = async (year) => {
     if (!year || typeof year !== 'number') {
         return { success: false, message: 'L\'année est invalide.' };
     }
     
     try {
-        const payments = await Payment.find({ session: year });
+        const paiements = await Paiement.find({ session: year });
 
-        if (!payments.length) {
+        if (!paiements.length) {
             return { success: false, message: `Aucun paiement trouvé pour l'année ${year}.` };
         }
 
         // Copier les paiements dans la collection d'archives
-        await archivePayment.insertMany(payments);
+        await archivePaiement.insertMany(paiements);
 
         // Supprimer les paiements de la collection principale
-        await Payment.deleteMany({ session: year });
+        await Paiement.deleteMany({ session: year });
 
         console.log(`Paiements de l'année ${year} archivés avec succès.`);
         return { success: true, message: `Paiements de l'année ${year} archivés.` };
@@ -31,9 +31,9 @@ exports.archivePaymentCount = async (year) => {
 };
 
 // Fonction pour récupérer les paiements archivés
-exports.getArchivePayment = async (req, res, next) => {
+exports.avoirArchivePaiement = async (req, res, next) => {
     try {
-        const archives = await archivePayment.find();
+        const archives = await archivePaiement.find();
         
         // Vérifier si des archives existent
         if (!archives || archives.length === 0) {
@@ -48,12 +48,12 @@ exports.getArchivePayment = async (req, res, next) => {
 };
 
 // Fonction pour obtenir les informations d'une archive par son identifiant MongoDB
-exports.getArchiveByIdPayment = async (req, res, next) => {
+exports.avoirArchiveIdPaiement = async (req, res, next) => {
   try {
-    const { idPayment } = req.params; // Extraction de l'identifiant depuis les paramètres de la requête
+    const { idPaiement } = req.params; // Extraction de l'identifiant depuis les paramètres de la requête
 
     // Rechercher l'archive par son identifiant MongoDB
-    const archive = await archivePayment.findOne({ idPayment });
+    const archive = await archivePaiement.findOne({ idPaiement });
     if (!archive) {
       return next(new CreateError(404, 'Archive non trouvée.'));
     }
@@ -67,12 +67,12 @@ exports.getArchiveByIdPayment = async (req, res, next) => {
 
 
   // Fonction pour supprimer un archive par son identifiant MongoDB
-exports.deleteArchive = async (req, res, next) => {
+exports.supprimerArchive = async (req, res, next) => {
     try {
-      const { idPayment } = req.params; // Extraction de l'identifiant depuis les paramètres de la requête
+      const { idPaiement } = req.params; // Extraction de l'identifiant depuis les paramètres de la requête
   
       // Supprimer le paiement par son identifiant MongoDB
-      const archive = await archivePayment.findOneAndDelete(idPayment);
+      const archive = await archivePaiement.findOneAndDelete(idPaiement);
       
       if (!archive) {
         return next(new CreateError(404, 'Archive non trouvé.'));
@@ -87,9 +87,9 @@ exports.deleteArchive = async (req, res, next) => {
   
 
 // Fonction pour compter les totales des correcteurs
-exports.CountArchive = async (req, res, next) => {
+exports.CompterArchive = async (req, res, next) => {
   try {
-    const archivesCount = await archivePayment.countDocuments();
+    const archivesCount = await archivePaiement.countDocuments();
     res.status(200).json({ totalArchives: archivesCount });
   } catch (error) {
     next(

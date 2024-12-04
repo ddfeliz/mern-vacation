@@ -1,6 +1,7 @@
 export interface Vacation {
     idVacation: string;
-    idCorrecteur: string;       // Assurez-vous que l'identifiant est défini
+    idCorrecteur: string;  
+    immatricule: string;
     nom: string;
     prenom: string;
     cin: string;
@@ -9,5 +10,6 @@ export interface Vacation {
     option: string;
     matiere: string;
     session: number;
+    pochette: string;
     nbcopie: number;
 }
