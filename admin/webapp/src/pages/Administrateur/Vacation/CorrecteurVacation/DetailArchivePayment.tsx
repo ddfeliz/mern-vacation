@@ -18,7 +18,7 @@ import { Archive } from '../../../../types/archive';
 const DetailArchivePayment = () => {
   // Changement du nom en majuscule
   // Récupérer le paramètre d'URL 'idCorrecteur'
-  const { idPayment } = useParams<{ idPayment: string }>();
+  const { idPaiement } = useParams<{ idPaiement: string }>();
   const [payment, setPayment] = useState<Archive | null>(null);
   const [payments, setPayments] = useState<Archive[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,11 +40,11 @@ const DetailArchivePayment = () => {
   };
 
   // Fonction pour supprimer un correcteur
-  const confirmDelete = async (idPayment: string) => {
+  const confirmDelete = async (idPaiement: string) => {
     try {
-      await axios.delete(`http://localhost:3000/api/archive/${idPayment}`);
+      await axios.delete(`http://localhost:3000/api/archive/${idPaiement}`);
       setPayments(
-        payments.filter((payment) => payment.idPayment !== idPayment),
+        payments.filter((payment) => payment.idPaiement !== idPaiement),
       );
       setOpen1(true); // Afficher le message de succès
       setTimeout(() => {
@@ -60,7 +60,7 @@ const DetailArchivePayment = () => {
       try {
         // Inclure idCorrecteur dans l'URL de la requête
         const response = await axios.get(
-          `http://localhost:3000/api/archive/${idPayment}`,
+          `http://localhost:3000/api/archive/${idPaiement}`,
         );
         setPayment(response.data);
       } catch (err) {
@@ -72,7 +72,7 @@ const DetailArchivePayment = () => {
     };
 
     fetchPayment();
-  }, [idPayment]);
+  }, [idPaiement]);
 
   // Affichage d'un loader pendant le chargement
   if (loading)
@@ -99,7 +99,7 @@ const DetailArchivePayment = () => {
             <div className="w-full rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
               <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
                 <h3 className="flex flex-wrap justify-center font-medium text-black dark:text-white">
-                  - L'ID du vacation: {payment.idPayment}{' '}
+                  - L'ID du vacation: {payment.idPaiement}{' '}
                   <span className="mx-6">
                     - L'ID du vacation: {payment.idVacation}
                   </span>
@@ -353,7 +353,7 @@ const DetailArchivePayment = () => {
                                   <p className="text-sm text-gray-500 dark:text-gray-300">
                                     Voulez-vous vraiment supprimer cet archive
                                     de paiement du correcteur dont l'ID est :{' '}
-                                    {payment.idPayment} ?
+                                    {payment.idPaiement} ?
                                   </p>
                                 </div>
                               </div>
@@ -362,7 +362,7 @@ const DetailArchivePayment = () => {
                           <div className="mt-4 mb-4 flex justify-end">
                             <button
                               type="button"
-                              onClick={() => confirmDelete(payment.idPayment)}
+                              onClick={() => confirmDelete(payment.idPaiement)}
                               className="mr-2 bg-red-500 text-white px-4 py-2 rounded dark:bg-red-600"
                             >
                               Oui, Supprimer

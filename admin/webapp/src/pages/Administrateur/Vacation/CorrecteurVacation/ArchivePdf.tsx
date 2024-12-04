@@ -128,8 +128,8 @@ const ArchivePdf: React.FC<ArchivePdfProps> = ({ archives }) => {
               </Text>
             </View>
             {archives.map((archive) => (
-              <View style={styles.tableRow} key={archive.idPayment}>
-                <Text style={styles.tableCell}>{archive.idPayment}</Text>
+              <View style={styles.tableRow} key={archive.idPaiement}>
+                <Text style={styles.tableCell}>{archive.idPaiement}</Text>
                 <Text style={styles.tableCell}>{archive.idVacation}</Text>
                 <Text style={styles.tableCell}>{archive.idCorrecteur}</Text>
                 <Text

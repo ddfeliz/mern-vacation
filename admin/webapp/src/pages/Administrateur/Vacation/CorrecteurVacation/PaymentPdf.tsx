@@ -110,8 +110,8 @@ const PaymentPdf: React.FC<PaymentPdfProps> = ({ payments }) => {
               <Text style={[styles.tableCell, styles.headerCell]}>Statut</Text>
             </View>
             {payments.map((payment) => (
-              <View style={styles.tableRow} key={payment.idPayment}>
-                <Text style={styles.tableCell}>{payment.idPayment}</Text>
+              <View style={styles.tableRow} key={payment.idPaiement}>
+                <Text style={styles.tableCell}>{payment.idPaiement}</Text>
                 <Text style={styles.tableCell}>{payment.idVacation}</Text>
                 <Text style={styles.tableCell}>{payment.idCorrecteur}</Text>
                 <Text style={styles.tableCell}>{`${payment.nom} ${payment.prenom}`}</Text>
