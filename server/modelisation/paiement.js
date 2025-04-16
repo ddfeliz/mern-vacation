@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-// Définition du schéma pour le correcteur
+// Définition du schéma pour le paiement
 const paiementSchema = new mongoose.Schema(
   {
     idPaiement: {
@@ -10,89 +10,76 @@ const paiementSchema = new mongoose.Schema(
     },
     idVacation: {
       type: String,
-      required: true,
-      unique: true,
     },
     idCorrecteur: {
       type: String,
-      required: true
     },
     immatricule: {
-        type: String,
-        required: true
+      type: String,
     },
     nom: {
       type: String,
-      required: true,
     },
     prenom: {
       type: String,
-      required: true,
     },
     cin: {
       type: String,
-      required: true
     },
     specialite: {
       type: String,
-      required: true,
     },
     secteur: {
       type: String,
-      required: true,
     },
     option: {
       type: String,
-      required: true,
     },
     matiere: {
       type: String,
-      required: true,
     },
     pochette: {
-        type: String,
-        required: true,
+      type: String,
     },
     nbcopie: {
       type: Number,
-      required: true,
-      min: 0, // Le nombre des copies ne peut pas être négative
+      min: 0,
     },
     optionTarif: {
       type: String,
-      required: true,
     },
     montantTotal: {
       type: Number,
-      required: true,
       min: 0,
     },
     session: {
       type: Number,
-      required: true,
       min: 0,
     },
     statut: {
-        type: String,
-        enum: ['Payé', 'Non payé'],
-        default: 'Non payé' // Défaut "Non payé"
+      type: String,
+      enum: ['Payé', 'Non payé'],
+      default: 'Non payé'
     },
   },
   {
-    timestamps: true, // Pour garder la trace des dates de création et de mise à jour
+    timestamps: true,
   }
 );
 
-// Middlaware pour générer automatiquement l'idCorrecteur avant la sauvegarde
+// Création du modèle à partir du schéma
+const Paiement = mongoose.model("Paiement", paiementSchema);
+
+// Middleware pour générer automatiquement l'idPaiement avant la sauvegarde
 paiementSchema.pre("save", async function (next) {
   const paiement = this;
 
-  // Si l'idCorrecteur n'est pas défini (cas d'ajout d'un nouveau correcteur)
+  // Si l'idPaiement n'est pas encore défini
   if (!paiement.idPaiement) {
     const lastPaiement = await Paiement.findOne().sort({ _id: -1 });
 
     let newIdNumber = 1;
-    if (lastPaiement && lastPaiement.idPaiement) {
+    if (lastPaiement && /^PAYM-\d+$/.test(lastPaiement.idPaiement)) {
       const lastIdNumber = parseInt(lastPaiement.idPaiement.split("-")[1], 10);
       newIdNumber = lastIdNumber + 1;
     }
@@ -102,8 +89,5 @@ paiementSchema.pre("save", async function (next) {
 
   next();
 });
-
-// Création du modèle à partir du schéma
-const Paiement = mongoose.model("Paiement", paiementSchema);
 
 module.exports = Paiement;

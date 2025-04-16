@@ -117,6 +117,21 @@ exports.avoirCINCorrecteur = async (req, res) => {
   }
 };
 
+exports.avoirIdCorrecteur = async (req, res) => {
+  try {
+      const { idCorrecteur } = req.params;
+      const correcteur = await Correcteur.findOne({idCorrecteur});
+
+      if (!correcteur) {
+          return next(new CreateError(404, 'correcteur non trouvé.'));
+      }
+
+      res.status(200).json(correcteur);
+  } catch (error) {
+      next(new CreateError(500, 'Erreur lors de la récupération du correcteur.', error));
+  }
+};
+
 exports.avoirIMCorrecteur = async (req, res, next) => {
   try {
     const { identifiant } = req.params;

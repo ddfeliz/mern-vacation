@@ -10,6 +10,8 @@ router.post('/comptage', Controlleur.CompterCorrecteursStatut);
 
 router.get('/compter', Controlleur.CompterCorrecteur);
 
+router.get('/:idCorrecteur', Controlleur.avoirIdCorrecteur);
+
 router.get('/:identifiant', Controlleur.avoirIMCorrecteur);
 
 router.get('/verification/:cin', Controlleur.avoirCINCorrecteur);

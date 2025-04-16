@@ -10,11 +10,6 @@ exports.ajoutPaiement = async (req, res, next) => {
 
     const currentYear = new Date().getFullYear();
 
-    // Vérifier que les champs obligatoires sont fournis
-    if ( !idVacation || !idCorrecteur|| !immatricule || !nom || !prenom || !cin || !specialite || !secteur || !option || !matiere || !pochette || !nbcopie || !optionTarif|| !montantTotal) {
-      return next(new CreateError(400, 'Tous les champs obligatoires doivent être fournis.')); // Ajout de 'new'
-    }
-
     // Vérifier si un correcteur avec l'email existe déjà
     const paiementExist = await Paiement.findOne({ idVacation });
     if (paiementExist) {
@@ -48,25 +43,7 @@ exports.ajoutPaiement = async (req, res, next) => {
 
     res.status(201).json({
       message: 'Payment du correcteur ajouté avec succès.',
-      payment: {
-        idPayment: newPaiement.idPayment,
-        idVacation: newPaiement.idVacation,
-        idCorrecteur: newPaiement.idCorrecteur,
-        immatricule: newPaiement.immatricule,
-        nom: newPaiement.nom,
-        prenom: newPaiement.prenom,
-        cin: newPaiement.cin,
-        specialite: newPaiement.specialite,
-        secteur: newPaiement.secteur,
-        option: newPaiement.option,
-        matiere: newPaiement.matiere,
-        pochette: newPaiement.pochette,
-        nbcopie: newPaiement.nbcopie,
-        optionTarif: newPaiement.optionTarif,
-        montantTotal: newPaiement.montantTotal,
-        session: newPaiement.session,
-        statut: newPaiement.statut
-      }
+      paiement: newPaiement
     });
   } catch (error) {
     next(new CreateError(500, 'Erreur lors de l\'ajout du paiement du vacation.', error)); // Ajout de 'new'
@@ -268,7 +245,7 @@ exports.modificationPaiement = async (req, res, next) => {
 
     res.status(200).json({
       message: 'Paiement mis à jour avec succès.',
-      payment
+      paiement
     });
   } catch (error) {
     next(new CreateError(500, 'Erreur lors de la mise à jour du paiement.', error)); // Ajout de 'new'
@@ -303,7 +280,8 @@ exports.supprimerPaiement = async (req, res, next) => {
     }
 
     res.status(200).json({
-      message: 'Paiement supprimé avec succès.'
+      message: 'Paiement supprimé avec succès.',
+      paiement
     });
   } catch (error) {
     next(new CreateError(500, 'Erreur lors de la suppression du paiement.', error)); // Ajout de 'new'
@@ -325,11 +303,13 @@ const getPaiementsGroupedByCorrecteur = async (specialite) => {
                       nom: "$nom",
                       prenom: "$prenom",
                       cin: "$cin",
-                      specialite: "$specialite",
+                      specialite: "$specialite"
                   },
               },
               vacations: {
                   $push: {
+                      secteur: "$secteur",
+                      option: "$option", 
                       matiere: "$matiere",
                       pochette: "$pochette",
                       nbcopie: "$nbcopie",
@@ -344,104 +324,111 @@ const getPaiementsGroupedByCorrecteur = async (specialite) => {
 
 exports.generateExcelForSpeciality = async (req, res) => {
   try {
-      const { specialite } = req.query; // Récupérer la spécialité depuis les paramètres de requête
+    const { specialite } = req.query;
+    if (!specialite) {
+      return res.status(400).send("La spécialité est requise.");
+    }
 
-      if (!specialite) {
-          return res.status(400).send("La spécialité est requise.");
-      }
+    const data = await getPaiementsGroupedByCorrecteur(specialite);
 
-      const data = await getPaiementsGroupedByCorrecteur(specialite);
+    if (data.length === 0) {
+      return res.status(404).send(`Aucun paiement trouvé pour la spécialité : ${specialite}`);
+    }
 
-      if (data.length === 0) {
-          return res.status(404).send(`Aucun paiement trouvé pour la spécialité : ${specialite}`);
-      }
+    const ExcelJS = require("exceljs");
+    const path = require("path");
 
-      const ExcelJS = require("exceljs");
-      const path = require("path");
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(`Paiements - ${specialite}`);
 
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet(`Paiements - ${specialite}`);
+    worksheet.columns = [
+      { header: "Nom et Prénom(s)", key: "nomPrenom", width: 30 },
+      { header: "CIN", key: "cin", width: 15 },
+      { header: "Spécialité", key: "specialite", width: 20 },
+      { header: "Secteur", key: "secteur", width: 20 },
+      { header: "Option", key: "option", width: 20 },
+      { header: "Matière", key: "matiere", width: 20 },
+      { header: "Pochette", key: "pochette", width: 30 },
+      { header: "Nombre de Copies", key: "nbcopie", width: 20 },
+      { header: "Montant", key: "montantTotal", width: 15 },
+    ];
 
-      // Définir les colonnes
-      worksheet.columns = [
-          { header: "Nom et Prénom(s)", key: "nomPrenom", width: 30 },
-          { header: "CIN", key: "cin", width: 15 },
-          { header: "Spécialité", key: "specialite", width: 20 },
-          { header: "Option", key: "option", width: 30 },
-          { header: "Pochette", key: "pochette", width: 30 },
-          { header: "Nombre de Copies", key: "nbcopie", width: 35 },
-          { header: "Montant", key: "montantTotal", width: 15 },
-      ];
+    let grandTotal = 0;
 
-      let grandTotal = 0;
+    data.forEach((correcteur) => {
+      const { correcteurInfo, vacations } = correcteur;
 
-      // Ajouter les données
-      data.forEach((correcteur) => {
-          const { correcteurInfo, vacations } = correcteur;
+      const totalCorrecteur = vacations.reduce((sum, v) => sum + v.montantTotal, 0);
+      grandTotal += totalCorrecteur;
 
-          const totalCorrecteur = vacations.reduce((sum, v) => sum + v.montantTotal, 0);
-          grandTotal += totalCorrecteur;
-
-          // Ligne principale du correcteur
-          worksheet.addRow({
-              nomPrenom: `${correcteurInfo.nom} ${correcteurInfo.prenom}`,
-              cin: correcteurInfo.cin,
-              specialite: correcteurInfo.specialite,
-              option: "",
-              pochette: "",
-              nbcopie: "",
-              montantTotal: "",
-          });
-
-          // Détails des vacations
-          vacations.forEach((vacation) => {
-              worksheet.addRow({
-                  nomPrenom: "",
-                  cin: "",
-                  specialite: "",
-                  option: vacation.matiere,
-                  pochette: vacation.pochette,
-                  nbcopie: vacation.nbcopie,
-                  montantTotal: vacation.montantTotal,
-              });
-          });
-
-          // Total par correcteur
-          worksheet.addRow({
-              nomPrenom: "",
-              cin: "",
-              specialite: "",
-              option: "Montant totale",
-              pochette: "",
-              nbcopie: "",
-              montantTotal: totalCorrecteur,
-          });
-
-          // Ligne vide pour séparer
-          worksheet.addRow({});
+      // ✅ Ligne principale AVEC secteur & option
+      worksheet.addRow({
+        nomPrenom: `${correcteurInfo.nom} ${correcteurInfo.prenom}`,
+        cin: correcteurInfo.cin,
+        specialite: correcteurInfo.specialite,
+        secteur: "",
+        option: "",
+        matiere: "",
+        pochette: "",
+        nbcopie: "",
+        montantTotal: "",
       });
 
-      // Grand total général
-      worksheet.addRow({
+      // Détails des vacations
+      vacations.forEach((vacation) => {
+        worksheet.addRow({
           nomPrenom: "",
           cin: "",
           specialite: "",
-          option: "Grand Total",
-          pochette: "",
-          nbcopie: "",
-          montantTotal: grandTotal,
+          secteur: vacation.secteur,
+          option: vacation.option,
+          matiere: vacation.matiere,
+          pochette: vacation.pochette,
+          nbcopie: vacation.nbcopie,
+          montantTotal: vacation.montantTotal,
+        });
       });
 
-      const lastRow = worksheet.lastRow;
-      lastRow.font = { bold: true };
+      // Total par correcteur
+      worksheet.addRow({
+        nomPrenom: "",
+        cin: "",
+        specialite: "",
+        secteur: "",
+        option: "Montant total",
+        matiere: "",
+        pochette: "",
+        nbcopie: "",
+        montantTotal: totalCorrecteur,
+      });
 
-      // Enregistrer le fichier
-      const filePath = path.join(__dirname, `../files/paiements_${specialite}.xlsx`);
-      await workbook.xlsx.writeFile(filePath);
-      res.download(filePath, `paiements_${specialite}.xlsx`);
+      worksheet.addRow({});
+    });
+
+    // Grand total général
+    worksheet.addRow({
+      nomPrenom: "",
+      cin: "",
+      specialite: "",
+      secteur: "",
+      option: "Grand Total",
+      matiere: "",
+      pochette: "",
+      nbcopie: "",
+      montantTotal: grandTotal,
+    });
+
+    const lastRow = worksheet.lastRow;
+    lastRow.font = { bold: true };
+
+    const filePath = path.join(__dirname, `../files/paiements_${specialite}.xlsx`);
+    await workbook.xlsx.writeFile(filePath);
+    res.download(filePath, `paiements_${specialite}.xlsx`);
   } catch (error) {
-      console.error("Erreur :", error);
-      res.status(500).send("Erreur lors de la génération du fichier Excel");
+    console.error("Erreur :", error);
+    res.status(500).send("Erreur lors de la génération du fichier Excel");
   }
 };
+
+
 

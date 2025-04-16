@@ -246,7 +246,7 @@ const DetailVacation = () => {
     try {
       console.log('Data sent to server:', formData); // Vérifier ce qui est envoyé
       const response = await axios.post(
-        'http://localhost:3000/api/paiement/ajout',
+        'http://localhost:3000/api/paiement/ajoute',
         {
           idVacation,
           idCorrecteur,

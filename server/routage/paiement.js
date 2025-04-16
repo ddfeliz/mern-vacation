@@ -3,7 +3,7 @@ const router = express.Router();
 const Controlleur = require('../controlleur/paiement');
 
 
-router.post('/ajout', Controlleur.ajoutPaiement);
+router.post('/ajoute', Controlleur.ajoutPaiement);
 
 router.get('/tous', Controlleur.avoirTousPaiements);
 

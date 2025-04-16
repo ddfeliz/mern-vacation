@@ -26,6 +26,7 @@ const CreatePaymentVacation = () => {
     secteur: '',
     option: '',
     matiere: '',
+    pochette: '',
     nbcopie: '',
     optionTarif: '',
     montantTotal: '',
@@ -85,6 +86,7 @@ const CreatePaymentVacation = () => {
         secteur: fetchedData.secteur || '',
         option: fetchedData.option || '',
         matiere: fetchedData.matiere || '',
+        pochette: fetchedData.pochette || '',
         nbcopie: fetchedData.nbcopie ? fetchedData.nbcopie.toString() : '',
         optionTarif: optionTarifChoisi || '',
         montantTotal: montantTotal?.toString() || '',
@@ -156,6 +158,7 @@ const CreatePaymentVacation = () => {
       option: '',
       matiere: '',
       nbcopie: '',
+      pochette: '',
       optionTarif: '',
       montantTotal: '',
     });
@@ -181,6 +184,7 @@ const CreatePaymentVacation = () => {
       option,
       matiere,
       nbcopie,
+      pochette,
       optionTarif,
       montantTotal,
     } = formData;
@@ -192,7 +196,7 @@ const CreatePaymentVacation = () => {
     try {
       console.log('Data sent to server:', formData); // Vérifier ce qui est envoyé
       const response = await axios.post(
-        'http://localhost:3000/api/paiement/ajout',
+        'http://localhost:3000/api/paiement/ajoute',
         {
           idVacation,
           idCorrecteur,
@@ -204,6 +208,7 @@ const CreatePaymentVacation = () => {
           option,
           matiere,
           nbcopie,
+          pochette,
           optionTarif,
           montantTotal,
         },
@@ -582,7 +587,7 @@ const CreatePaymentVacation = () => {
                 </div>
 
                 <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                  <div className="w-full xl:w-1/2">
+                  <div className="w-full xl:w-1/3">
                     <label
                       htmlFor="matiere"
                       className="mb-2.5 block text-black dark:text-white"
@@ -602,7 +607,27 @@ const CreatePaymentVacation = () => {
                     />
                   </div>
 
-                  <div className="w-full xl:w-1/2">
+                  <div className="w-full xl:w-1/3">
+                    <label
+                      htmlFor="pochette"
+                      className="mb-2.5 block text-black dark:text-white"
+                    >
+                      Pochette <span className="text-meta-1">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="pochette"
+                      id="pochette"
+                      placeholder="..."
+                      value={formData.pochette}
+                      onChange={handleChange}
+                      required
+                      disabled
+                      className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                    />
+                  </div>
+
+                  <div className="w-full xl:w-1/3">
                     <label
                       htmlFor="nbcopie"
                       className="mb-2.5 block text-black dark:text-white"

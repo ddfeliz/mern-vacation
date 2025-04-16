@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Breadcrumb from '../../../components/Breadcrumbs/Breadcrumb';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -11,6 +11,7 @@ import {
 } from '@headlessui/react';
 import {
   CheckCircleIcon,
+  DocumentTextIcon,
   EyeIcon,
   PencilSquareIcon,
 } from '@heroicons/react/24/outline';
@@ -20,10 +21,20 @@ import { BsSearch } from 'react-icons/bs';
 
 const ShowCorrecteur = () => {
   const [formData, setFormData] = useState({
+    idCorrecteur: '',
+    immatricule: '',
+    firstName: '',
+    lastName: '',
+    cin: '',
+    telephone: '',
     specialite: '',
     secteur: '',
     option: '',
     matiere: '',
+    grade: '',
+    experience: '',
+    pochette: '',
+    nbcopie: '',
   });
 
   const [correcteurs, setCorrecteurs] = useState<Correcteur[]>([]);
@@ -37,8 +48,16 @@ const ShowCorrecteur = () => {
   const [secteurs, setSecteurs] = useState<string[]>([]); // État pour stocker les secteurs
   const [options, setOptions] = useState<string[]>([]); // État pour stocker les options
   const [matieres, setMatieres] = useState<string[]>([]); // État pour stocker les matières
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+    const [openSuccess, setOpenSuccess] = useState(false);
+  
+  const [openVerifyVac, setOpenVerifyVac] = useState(false);
   // État pour les filtres de recherche
   const [searchItem, setSearchItem] = useState('');
+  
+    const navigate = useNavigate();
 
   const [searchSpecialite, setSearchSpecialite] = useState('');
   const [searchSecteur, setSearchSecteur] = useState('');
@@ -306,6 +325,112 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
 
     if (name === 'matiere') {
       setSearchMatiere(value);
+    }
+  };
+
+  // Fonction pour ouvrir le modal et récupérer les données de vacation
+  const handleOpenModal = async (idCorrecteur: string) => {
+    // Typage du paramètre idVacation
+    try {
+      // Appel API pour récupérer les données de la vacation
+      const response = await axios.get(
+        `http://localhost:3000/api/correcteur/${idCorrecteur}`,
+      );
+      const fetchedData = response.data;
+      setIsModalOpen(true);
+
+
+      // Remplir le formulaire avec les valeurs récupérées
+      setFormData({
+        idCorrecteur: fetchedData.idCorrecteur || '',
+        immatricule: fetchedData.immatricule || '',
+        firstName: fetchedData.nom || '',
+        lastName: fetchedData.prenom || '',
+        cin: fetchedData.cin || '',
+        telephone: fetchedData.telephone || '',
+        specialite: fetchedData.specialite || '',
+        secteur: fetchedData.secteur || '',
+        option: fetchedData.option || '',
+        matiere: fetchedData.matiere || '',
+        grade: fetchedData.grade || '',
+        experience: fetchedData.experience || '',
+        pochette: fetchedData.pochette || '',
+        nbcopie: fetchedData.nbcopie || '',
+      });
+    } catch (error) {
+      console.error(
+        'Erreur lors de la récupération des données de vacation',
+        error,
+      );
+    }
+  };
+
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    setLoading(true); // Démarrer le chargement
+
+    // Préparez les données à envoyer
+    const {
+      idCorrecteur,
+      firstName,
+      lastName,
+      immatricule,
+      cin,
+      telephone,
+      specialite,
+      secteur,
+      option,
+      matiere,
+      grade,
+      experience,
+      pochette,
+      nbcopie,
+    } = formData;
+
+    // Vérification si le CIN existe déjà
+    const currentSession = new Date().getFullYear(); // Utilisation de l'année actuelle
+    const checkResponse = await axios.get(
+      `http://localhost:3000/api/vacation/verification/${currentSession}/${pochette}`,
+    );
+
+    try {
+      if (checkResponse.data.exists) {
+        setOpenVerifyVac(true); // Afficher le dialogue ou message d'erreur
+        setLoading(false);
+      } else {
+        const response = await axios.post(
+          'http://localhost:3000/api/vacation/ajout',
+          {
+            idCorrecteur,
+            immatricule,
+            nom: lastName,
+            prenom: firstName,
+            cin,
+            telephone,
+            specialite,
+            secteur,
+            option,
+            matiere,
+            grade,
+            experience,
+            pochette,
+            nbcopie,
+          },
+        );
+
+        console.log('Vacation ajouté avec succès', response.data);
+        // Traitez le succès ici, par exemple afficher un message ou rediriger
+
+        setOpenSuccess(true); // Afficher le message de succès
+      }
+    } catch (err: any) {
+      if (err.response) {
+        console.log(err);
+      } else {
+        console.log(err);
+      }
+    } finally {
+      setLoading(false); // Arrêter le chargement
     }
   };
 
@@ -723,6 +848,13 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                         <div className="flex items-center justify-center space-x-3.5">
                           <Link
+                            to=""
+                            className="hover:text-primary"
+                          >
+                            <DocumentTextIcon className="h-auto w-5 text-success" 
+                            onClick={() => handleOpenModal(correcteur.idCorrecteur)} />
+                          </Link>
+                          <Link
                             to={`/présidence-service-finance/correcteur/${correcteur.idCorrecteur}`}
                             className="hover:text-primary"
                           >
@@ -813,6 +945,434 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                 )}
               </tbody>
             </table>
+
+
+                {/* Modal */}
+                {isModalOpen && (
+                  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-lg w-2/3 max-h-[90vh] overflow-auto shadow-lg dark:bg-meta-4">
+                      <h2 className="font-semibold mb-4 text-center text-title-lg">
+                        Créer un paiement pour un vacation
+                      </h2>
+
+                      {/* Dialog de vérification */}
+                      <Dialog
+                        open={openVerifyVac||openSuccess}
+                        onClose={() => {
+                          setOpenVerifyVac(false);
+                          setOpenSuccess(false);
+                        }}
+                        className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto"
+                      >
+                        <div className="fixed inset-0 bg-black bg-opacity-50"></div>
+                        <div className="flex items-center justify-center min-h-screen">
+                          <div className="relative mx-auto w-full max-w-md rounded-lg bg-white shadow-lg p-6">
+                            <div className="flex items-center space-x-4">
+                              <div className="flex-shrink-0">
+                                {openVerifyVac ? (
+                                  <CheckCircleIcon className="h-12 w-12 text-warning" />
+                                ) : (
+                                  <CheckCircleIcon className="h-12 w-12 text-success" />
+                                )}
+                              </div>
+                              <div>
+                                <h3 className="text-xl font-medium text-danger">
+                                  {openVerifyVac
+                                    ? 'Vérification du vacation'
+                                    : 'Succès!'}
+                                </h3>
+                                <p className="mt-2 text-sm text-gray-500">
+                                  {openVerifyVac
+                                    ? 'Ce vacation existe déjà ! Veuillez vérifier vos sources.'
+                                    : `Le vacation du correcteur s'est deroulé avec succès`}
+                                </p>
+                                <div className="flex justify-end">
+                                  <button
+                                    type="button"
+                                    className="mt-8 mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                    border-secondary bg-transparent text-black transition hover:bg-transparent
+                                    hover:border-secondary hover:text-secondary dark:border-strokedark 
+                                    dark:bg-transparent dark:text-secondary dark:hover:border-secondary dark:hover:text-secondary"
+                                    style={{ width: '100px' }}
+                                    onClick={() => {
+                                      setOpenVerifyVac(false);
+                                    }}
+                                  >
+                                    Fermer
+                                  </button>
+                                  {openSuccess && (
+                                    <button
+                                      type="button"
+                                      className="mt-8 mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                    border-success bg-transparent text-black transition hover:bg-transparent
+                                    hover:border-success hover:text-success dark:border-strokedark 
+                                    dark:bg-transparent dark:text-success dark:hover:border-success dark:hover:text-success"
+                                      style={{ width: '100px' }}
+                                      onClick={() => {
+                                        setOpenSuccess(false);
+                                        navigate('/présidence-service-finance/vacation');
+                                      }}
+                                    >
+                                      OK
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Dialog>
+
+                      <form onSubmit={handleSubmit}>
+                        <div className="p-6.5">
+                          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                            <div className="w-full xl:w-1/2">
+                              <label
+                                htmlFor="idCorrecteur"
+                                className="mb-2.5 block text-black dark:text-white"
+                              >
+                                ID Correcteur <span className="text-meta-1">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                name="idCorrecteur"
+                                id="idCorrecteur"
+                                placeholder="..."
+                                value={formData.idCorrecteur}
+                                onChange={handleChange}
+                                required
+                                disabled
+                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                              />
+                            </div>
+                            <div className="w-full xl:w-1/2">
+                              <label
+                                htmlFor="immatricule"
+                                className="mb-2.5 block text-black dark:text-white"
+                              >
+                                Numéro immatricule
+                                <span className="text-meta-1">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                name="immatricule"
+                                id="immatricule"
+                                placeholder="..."
+                                value={formData.immatricule}
+                                onChange={handleChange}
+                                required
+                                disabled
+                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                              />
+                            </div>
+                          </div>
+                          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                            <div className="w-full xl:w-1/2">
+                              <label
+                                htmlFor="firstName"
+                                className="mb-2.5 block text-black dark:text-white"
+                              >
+                                Prénom <span className="text-meta-1">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                name="firstName"
+                                id="firstName"
+                                placeholder="..."
+                                value={formData.firstName}
+                                onChange={handleChange}
+                                required
+                                disabled
+                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                              />
+                            </div>
+
+                            <div className="w-full xl:w-1/2">
+                              <label
+                                htmlFor="lastName"
+                                className="mb-2.5 block text-black dark:text-white"
+                              >
+                                Nom de famille <span className="text-meta-1">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                name="lastName"
+                                id="lastName"
+                                placeholder="..."
+                                value={formData.lastName}
+                                onChange={handleChange}
+                                required
+                                disabled
+                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Ligne pour l'email et le téléphone */}
+                          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                            <div className="w-full xl:w-1/2">
+                              <label
+                                htmlFor="cin"
+                                className="mb-2.5 block text-black dark:text-white"
+                              >
+                                CIN <span className="text-meta-1">*</span>
+                              </label>
+                              <input
+                                type="number"
+                                name="cin"
+                                id="cin"
+                                placeholder="..."
+                                value={formData.cin}
+                                onChange={handleChange}
+                                onBlur={() => {
+                                  if (formData.cin.length !== 14) {
+                                    alert('Le numéro CIN doit contenir exactement 14 chiffres.');
+                                  }
+                                }}
+                                minLength={14}
+                                maxLength={14}
+                                required
+                                disabled
+                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                              />
+                            </div>
+
+                            <div className="w-full xl:w-1/2">
+                              <label
+                                htmlFor="telephone"
+                                className="mb-2.5 block text-black dark:text-white"
+                              >
+                                Téléphone <span className="text-meta-1">*</span>
+                              </label>
+                              <input
+                                type="tel"
+                                name="telephone"
+                                id="telephone"
+                                placeholder="..."
+                                value={formData.telephone}
+                                onChange={handleChange}
+                                required
+                                disabled
+                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                              />
+                            </div>
+                          </div>
+                          
+                          {/* Ligne pour spécialité et grade */}
+                          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                            <div className="w-full xl:w-1/2">
+                              <label
+                                htmlFor="specialite"
+                                className="mb-2.5 block text-black dark:text-white"
+                              >
+                                Baccalauréat d'enseignement{' '}
+                                <span className="text-meta-1">*</span>
+                              </label>
+                              <select
+                                name="specialite"
+                                id="specialite"
+                                value={formData.specialite}
+                                onChange={handleChange}
+                                required
+                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                              >
+                                <option value="">Sélectionnez un enseignement</option>
+                                {specialites && specialites.length > 0 ? (
+                                  specialites.map((specialite, index) => (
+                                    <option key={index} value={specialite}>
+                                      {specialite}
+                                    </option>
+                                  ))
+                                ) : (
+                                  <option disabled>Chargement...</option>
+                                )}
+                              </select>
+                              {formData.specialite && (
+                                <p className="mt-2 text-black dark:text-white">
+                                  Spécialité sélectionnée :{' '}
+                                  <strong>{formData.specialite}</strong>
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="w-full xl:w-1/2">
+                              <label
+                                htmlFor="secteur"
+                                className="mb-2.5 block text-black dark:text-white"
+                              >
+                                Secteur <span className="text-meta-1">*</span>
+                              </label>
+                              <select
+                                name="secteur"
+                                id="secteur"
+                                value={formData.secteur}
+                                onChange={handleChange}
+                                required
+                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                              >
+                                <option value="">Sélectionnez un secteur</option>
+                                {secteurs && secteurs.length > 0 ? (
+                                  secteurs.map((secteur, index) => (
+                                    <option key={index} value={secteur}>
+                                      {secteur}
+                                    </option>
+                                  ))
+                                ) : (
+                                  <option disabled>
+                                    Veuillez sélectionner une spécialité d'abord
+                                  </option>
+                                )}
+                              </select>
+                            </div>
+                          </div>
+                          
+                          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                            <div className="w-full xl:w-1/2">
+                              <label
+                                htmlFor="option"
+                                className="mb-2.5 block text-black dark:text-white"
+                              >
+                                Option <span className="text-meta-1">*</span>
+                              </label>
+                              <select
+                                name="option"
+                                id="option"
+                                value={formData.option}
+                                onChange={handleChange}
+                                required
+                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                              >
+                                <option value="">Sélectionnez une option</option>
+                                {options && options.length > 0 ? (
+                                  options.map((option, index) => (
+                                    <option key={index} value={option}>
+                                      {option}
+                                    </option>
+                                  ))
+                                ) : (
+                                  <option disabled>
+                                    Veuillez sélectionner un secteur d'abord
+                                  </option>
+                                )}
+                              </select>
+                            </div>
+
+                            <div className="w-full xl:w-1/2">
+                              <label
+                                htmlFor="matiere"
+                                className="mb-2.5 block text-black dark:text-white"
+                              >
+                                Matière <span className="text-meta-1">*</span>
+                              </label>
+                              <select
+                                name="matiere"
+                                id="matiere"
+                                value={formData.matiere}
+                                onChange={handleChange}
+                                required
+                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                              >
+                                <option value="">
+                                  Sélectionnez une matière
+                                  {formData.option && (
+                                    <p className="mt-2 text-black dark:text-white">
+                                      selon l'option selectionné :{' '}
+                                      <strong>{formData.option}</strong>
+                                    </p>
+                                  )}
+                                </option>
+                                {matieres && matieres.length > 0 ? (
+                                  matieres.map((matiere, index) => (
+                                    <option key={index} value={matiere}>
+                                      {matiere}
+                                    </option>
+                                  ))
+                                ) : (
+                                  <option disabled>
+                                    Veuillez sélectionner une option d'abord
+                                  </option>
+                                )}
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                            <div className="w-full xl:w-1/2">
+                              <label
+                                htmlFor="pochette"
+                                className="mb-2.5 block text-black dark:text-white"
+                              >
+                                Pochette <span className="text-meta-1">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                name="pochette"
+                                id="pochette"
+                                placeholder="Entrer le code pochette"
+                                value={formData.pochette}
+                                onChange={handleChange}
+                                required
+                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                              />
+                            </div>
+                            <div className="w-full xl:w-1/2">
+                              <label
+                                htmlFor="nbcopie"
+                                className="mb-2.5 block text-black dark:text-white"
+                              >
+                                Nombre des Copies corrigées{' '}
+                                <span className="text-meta-1">*</span>
+                              </label>
+                              <input
+                                type="number"
+                                name="nbcopie"
+                                id="nbcopie"
+                                placeholder="Entrez le nombre des copies corrigés "
+                                value={formData.nbcopie}
+                                onChange={handleChange}
+                                required
+                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex justify-end p-6.5 border-t border-stroke dark:border-strokedark">
+                            <button
+                              type="button"
+                              className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                              border-secondary bg-transparent text-black transition hover:bg-transparent
+                                              hover:border-secondary hover:text-secondary dark:border-strokedark 
+                                                dark:bg-transparent dark:text-white dark:hover:border-secondary dark:hover:text-secondary"
+                              style={{ width: '180px' }}
+                              onClick={() => {
+                                setIsModalOpen(false); // Ferme la modale
+                              }}
+                            >
+                              Annuler
+                            </button>
+                            <button
+                              type="submit"
+                              disabled={loading}
+                              className={`mr-3 inline-flex w-40 h-11 items-center justify-center rounded-md border
+                                                  border-primary bg-transparent text-black transition hover:bg-transparent
+                                                  hover:border-primary hover:text-primary dark:border-strokedark 
+                                                    dark:bg-transparent dark:text-white dark:hover:border-primary dark:hover:text-primary ${
+                                                      loading
+                                                        ? 'cursor-not-allowed opacity-50'
+                                                        : ''
+                                                    }`}
+                            >
+                              {loading ? 'Chargement...' : 'Créer'}
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
+
+
+
           </div>
         </div>
 
