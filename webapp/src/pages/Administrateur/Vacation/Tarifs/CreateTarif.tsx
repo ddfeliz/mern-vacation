@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Dialog,
   DialogBackdrop,
@@ -9,6 +10,8 @@ import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Breadcrumb from '../../../../components/Breadcrumbs/Breadcrumb';
+import API_TARIF from '../../../../api/tarif';
+import { toast } from 'react-toastify';
 
 const CreateTarif = () => {
   const [formData, setFormData] = useState({
@@ -73,7 +76,8 @@ const CreateTarif = () => {
     try {
       // Vérifier si le tarif existe déjà
       const responseCheck = await axios.get(
-        `http://localhost:3000/api/tarif/verification`,
+        // `http://localhost:3000/api/tarif/verification`,
+        API_TARIF.verificationTarif,
         {
           params: { optionTarif, nombreTarif, MontantTarif },
         },
@@ -85,7 +89,8 @@ const CreateTarif = () => {
         return; // Ne pas continuer si le tarif existe
       } else {
         const response = await axios.post(
-          'http://localhost:3000/api/tarif/ajout',
+          // 'http://localhost:3000/api/tarif/ajout',
+          API_TARIF.ajoutTarif,
           {
             optionTarif,
             nombreTarif,
@@ -96,7 +101,8 @@ const CreateTarif = () => {
         console.log('Correcteur ajouté avec succès', response.data);
         // Traitez le succès ici, par exemple afficher un message ou rediriger
 
-        setOpen(true); // Afficher le message de succès
+        // setOpen(true);
+        toast.success('Tarif ajouté avec succès.');
         setTimeout(() => {
           navigate('/présidence-service-finance/tarif'); // Naviguer après un délai
         }, 3000); // Délai de 2 secondes avant de naviguer
@@ -104,6 +110,7 @@ const CreateTarif = () => {
     } catch (err: any) {
       if (err.response) {
         console.log(err);
+        toast.error(err);
         
       } else {
         console.log(err);

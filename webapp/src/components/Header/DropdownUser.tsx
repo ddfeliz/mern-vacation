@@ -7,6 +7,7 @@ import axios from 'axios';
 import { Utilisateur } from '../../types/utilisateur';
 import { useDispatch } from 'react-redux';
 import { logout, setAuthenticationStatus } from '../../slices/authSlice';
+import API_UTILISATEUR from '../../api/utilisateur';
 
 const DropdownUser = () => {
   const [utilisateur, setUtilisateur] = useState<Utilisateur | null>(null);
@@ -47,14 +48,25 @@ const DropdownUser = () => {
           throw new Error('Token JWT manquant');
         }
 
+        // const response = await axios.get<Utilisateur>(
+        //   'http://localhost:3000/api/utilisateur/profile',
+        //   {
+        //     headers: {
+        //       Authorization: `Bearer ${token}`,
+        //     },
+        //   }
+        // );
         const response = await axios.get<Utilisateur>(
-          'http://localhost:3000/api/utilisateur/profile',
+          API_UTILISATEUR.profileUtilisateur, // Utilisation de l'API pour obtenir le profil utilisateur
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
         );
+
+
+
 
         setUtilisateur(response.data); // Ajustez en fonction de la structure de la réponse
       } catch (err: any) {

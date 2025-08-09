@@ -98,7 +98,7 @@ exports.avoirTousCorrecteurs = async (req, res, next) => {
   }
 };
 
-exports.avoirCINCorrecteur = async (req, res) => {
+exports.avoirCINCorrecteur = async (req, res, next) => { // Ajout de next
   try {
     const cin = req.params.cin;
     const correcteur = await Correcteur.findOne({ cin });
@@ -117,7 +117,7 @@ exports.avoirCINCorrecteur = async (req, res) => {
   }
 };
 
-exports.avoirIdCorrecteur = async (req, res) => {
+exports.avoirIdCorrecteur = async (req, res, next) => { // Ajout de next
   try {
       const { idCorrecteur } = req.params;
       const correcteur = await Correcteur.findOne({idCorrecteur});

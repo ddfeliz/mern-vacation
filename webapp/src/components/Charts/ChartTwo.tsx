@@ -2,6 +2,7 @@ import { ApexOptions } from 'apexcharts';
 import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import axios from 'axios'; // Assurez-vous d'avoir axios installé
+import API_VACATION from '../../api/vacation';
 
 const initialOptions: ApexOptions = {
   colors: ['#3C50E0', '#80CAEE'],
@@ -84,7 +85,8 @@ const ChartTwo: React.FC = () => {
   // Récupérer les données des copies corrigées par année
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/vacation/totales-copies-en-annee'); // Mettez à jour l'URL de l'API si nécessaire
+      // const response = await axios.get('http://localhost:3000/api/vacation/totales-copies-en-annee');
+      const response = await axios.get(API_VACATION.totalCopieEnAnneeVacation);
       const data = response.data.data;
 
       const copiesByYear = [0, 0, 0]; // [2022, 2023, 2024]

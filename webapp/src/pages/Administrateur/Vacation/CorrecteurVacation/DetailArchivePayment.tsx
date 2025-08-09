@@ -14,6 +14,8 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline';
 import { Archive } from '../../../../types/archive';
+import API_ARCHIVE from '../../../../api/archivage';
+import { toast } from 'react-toastify';
 
 const DetailArchivePayment = () => {
   // Changement du nom en majuscule
@@ -42,16 +44,18 @@ const DetailArchivePayment = () => {
   // Fonction pour supprimer un correcteur
   const confirmDelete = async (idPaiement: string) => {
     try {
-      await axios.delete(`http://localhost:3000/api/archive/${idPaiement}`);
+      // await axios.delete(`http://localhost:3000/api/archive/${idPaiement}`);
+      await axios.delete(`${API_ARCHIVE.supprimerArchive}/${idPaiement}`);
       setPayments(
         payments.filter((payment) => payment.idPaiement !== idPaiement),
       );
-      setOpen1(true); // Afficher le message de succès
+      // setOpen1(true);
+      toast.success('Paiement supprimé avec succès !');
       setTimeout(() => {
         navigate('/présidence-service-finance/paiement-liste'); // Naviguer après un délai
       }, 3000); // Délai de 2 secondes avant de naviguer
     } catch (err) {
-      alert('Erreur lors de la suppression du correcteur.');
+      toast.error('Erreur lors de la suppression du correcteur.');
     }
   };
 
@@ -59,8 +63,11 @@ const DetailArchivePayment = () => {
     const fetchPayment = async () => {
       try {
         // Inclure idCorrecteur dans l'URL de la requête
+        // const response = await axios.get(
+        //   `http://localhost:3000/api/archive/${idPaiement}`,
+        // );
         const response = await axios.get(
-          `http://localhost:3000/api/archive/${idPaiement}`,
+          `${API_ARCHIVE.listesArchive}/${idPaiement}`,
         );
         setPayment(response.data);
       } catch (err) {

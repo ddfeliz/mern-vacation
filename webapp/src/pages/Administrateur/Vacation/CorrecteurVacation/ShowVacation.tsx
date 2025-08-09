@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Link } from 'react-router-dom';
 import Breadcrumb from '../../../../components/Breadcrumbs/Breadcrumb';
 import { useEffect, useState } from 'react';
@@ -12,18 +13,20 @@ import {
   CheckCircleIcon,
   EyeIcon
 } from '@heroicons/react/24/outline';
-import { TrashIcon } from '@heroicons/react/24/outline';
+// import { TrashIcon } from '@heroicons/react/24/outline';
 import CardDataStats from '../../../../components/CardDataStats';
 import { BsSearch } from 'react-icons/bs';
 import { VacationGroupe } from '../../../../types/vacationGroupe';
+import API_VACATION from '../../../../api/vacation';
+// import { toast } from 'react-toastify';
+// import API_VACATION from '../../../../api/vacation';
 
 const ShowVacation: React.FC = () => {
 
   const [vacations, setVacations] = useState<VacationGroupe[]>([]);
   const [totalCopies, setTotalCopies] = useState('0');
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false); // État pour le Dialog
-  const [open2, setOpen2] = useState(false); // État pour le Dialog
+  // const [open, setOpen] = useState(false); 
   const [openSuccess, setOpenSuccess] = useState(false);
   const [selectedYear, setSelectedYear] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,7 +40,8 @@ const ShowVacation: React.FC = () => {
     try {
       // Faire la requête GET vers l'endpoint de l'API
       const response = await axios.get(
-        'http://localhost:3000/api/vacation/totales-copies',
+        // 'http://localhost:3000/api/vacation/totales-copies',
+        API_VACATION.totalCopieVacation
       );
 
       // Stocker le total des copies dans l'état
@@ -51,7 +55,8 @@ const ShowVacation: React.FC = () => {
   const fetchVacationCount = async () => {
     try {
       const responseVacation = await axios.get(
-        'http://localhost:3000/api/vacation/compte',
+        // 'http://localhost:3000/api/vacation/compte',
+        API_VACATION.compterVacation
       );
       setTotalVacations(responseVacation.data.totalVacation.toString());
     } catch (err) {
@@ -67,7 +72,8 @@ const ShowVacation: React.FC = () => {
     const fetchVacations = async () => {
       try {
         const response = await axios.get<VacationGroupe[]>(
-          'http://localhost:3000/api/vacation/compte-vacation',
+          // 'http://localhost:3000/api/vacation/compte-vacation',
+          API_VACATION.compteVacationByCorrecteur
         );
         setVacations(response.data);
       } catch (err) {
@@ -101,27 +107,6 @@ const ShowVacation: React.FC = () => {
 
   // Calculer le nombre total de pages
   const totalPages = Math.ceil(vacations.length / vacationsPerPage);
-
-  const handleDeleting = () => {
-    setOpen(true);
-  };
-
-  const cancelDelete = () => {
-    setOpen(false);
-  };
-
-  // Fonction pour supprimer un correcteur
-  const confirmDelete = async (idVacation: string) => {
-    try {
-      await axios.delete(`http://localhost:3000/api/vacation/${idVacation}`);
-      setVacations(
-        vacations.filter((vacation) => vacation.idVacation !== idVacation),
-      );
-      setOpen2(true); // Afficher le message de succès
-    } catch (err) {
-      alert('Erreur lors de la suppression du vacation.');
-    }
-  };
 
   return (
     <>
@@ -172,39 +157,6 @@ const ShowVacation: React.FC = () => {
           </svg>
         </CardDataStats>
       </div>
-
-
-      <Dialog
-        open={open2}
-        onClose={() => setOpen2(false)}
-        className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
-      >
-        {/* Arrière-plan grisé */}
-        <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-50" />
-
-        {/* Contenu de la modal */}
-        <div className="flex items-center justify-center min-h-screen">
-          <DialogPanel className="relative mx-auto w-full max-w-md rounded-lg bg-white shadow-lg p-6">
-            {/* Icône et Message */}
-            <div className="flex items-center space-x-4">
-              <div className="flex-shrink-0">
-                <CheckCircleIcon
-                  className="h-12 w-12 text-green-600"
-                  aria-hidden="true"
-                />
-              </div>
-              <div>
-                <DialogTitle className="text-xl font-medium text-success">
-                  Suppression avec succès
-                </DialogTitle>
-                <p className="mt-2 text-sm text-gray-500">
-                  Le vacation du correcteur a été supprimé!
-                </p>
-              </div>
-            </div>
-          </DialogPanel>
-        </div>
-      </Dialog>
 
       <Dialog
         open={openSuccess}
@@ -342,7 +294,7 @@ const ShowVacation: React.FC = () => {
               <tbody>
                 {currentVacations.length > 0 ? (
                   currentVacations.map((vacation) => (
-                    <tr key={vacation.idVacation} className='text-center'>
+                    <tr key={vacation.immatricule} className='text-center'>
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
                           {vacation.immatricule}
@@ -376,70 +328,10 @@ const ShowVacation: React.FC = () => {
                           >
                             <EyeIcon className="h-auto w-5 text-secondary" />
                           </Link>
-                          <button onClick={handleDeleting}>
+                          {/* <button onClick={handleDeleting}>
                             <TrashIcon className="h-auto w-5 text-danger" />
-                          </button>
+                          </button> */}
                         </div>
-
-                        {/* Modal de Confirmation avec Dialog */}
-                        <Dialog
-                          open={open}
-                          onClose={() => setOpen(false)}
-                          className="relative z-10"
-                        >
-                          <div
-                            className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-                            aria-hidden="true"
-                          />
-                          <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-                            <div className="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
-                              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg dark:bg-gray-800">
-                                <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 dark:bg-gray-800">
-                                  <div className="sm:flex sm:items-start">
-                                    <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10 dark:bg-red-600">
-                                      <CheckCircleIcon
-                                        aria-hidden="true"
-                                        className="h-6 w-6 text-red-600 dark:text-red-200"
-                                      />
-                                    </div>
-                                    <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                      <Dialog.Title
-                                        as="h3"
-                                        className="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100"
-                                      >
-                                        Confirmation
-                                      </Dialog.Title>
-                                      <div className="mt-2">
-                                        <p className="text-sm text-gray-500 dark:text-gray-300">
-                                          Voulez-vous vraiment supprimer ce
-                                          correcteur dont l'ID est :{' '}
-                                          {vacation.idVacation} ?
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="mt-4 mb-4 flex justify-end">
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      confirmDelete(vacation.idVacation)
-                                    }
-                                    className="mr-2 bg-red-500 text-white px-4 py-2 rounded dark:bg-red-600"
-                                  >
-                                    Oui, supprimer
-                                  </button>
-                                  <button
-                                    onClick={cancelDelete}
-                                    className="bg-gray-300 text-gray-800 px-4 py-2 rounded dark:bg-gray-600 dark:text-gray-200"
-                                  >
-                                    Annuler
-                                  </button>
-                                </div>
-                              </Dialog.Panel>
-                            </div>
-                          </div>
-                        </Dialog>
                       </td>
                     </tr>
                   ))

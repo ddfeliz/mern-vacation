@@ -14,6 +14,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { Tarif } from '../../../../types/tarif';
+import API_TARIF from '../../../../api/tarif';
+import API_VACATION from '../../../../api/vacation';
+import API_PAIEMENT from '../../../../api/paiement';
+import { toast } from 'react-toastify';
 
 const CreatePaymentVacation = () => {
   const [formData, setFormData] = useState({
@@ -51,7 +55,8 @@ const CreatePaymentVacation = () => {
     const fetchTarifs = async () => {
       try {
         const tarifResponse = await axios.get(
-          'http://localhost:3000/api/tarif/tous',
+          // 'http://localhost:3000/api/tarif/tous',
+          API_TARIF.listesTarif
         );
         setTarifs(tarifResponse.data);
       } catch (err) {
@@ -68,7 +73,8 @@ const CreatePaymentVacation = () => {
       setLoading(true);
       // Appel à l'API pour récupérer les informations du correcteur par ID
       const response = await axios.get(
-        `http://localhost:3000/api/vacation/${idVacation}`,
+        // `http://localhost:3000/api/vacation/${idVacation}`,
+        `${API_VACATION.avoirIMVacation}/${idVacation}`,
       );
       const fetchedData = response.data;
 
@@ -190,13 +196,15 @@ const CreatePaymentVacation = () => {
     } = formData;
 
     if (!montantTotal || !idVacation) {
-      setOpenVerify(true);
+      // setOpenVerify(true);
+      toast.error('Veuillez entrer le montant total!');
     }
 
     try {
       console.log('Data sent to server:', formData); // Vérifier ce qui est envoyé
       const response = await axios.post(
-        'http://localhost:3000/api/paiement/ajoute',
+        // 'http://localhost:3000/api/paiement/ajoute',
+        API_PAIEMENT.ajoutPaiement,
         {
           idVacation,
           idCorrecteur,
@@ -217,7 +225,9 @@ const CreatePaymentVacation = () => {
       console.log('Paiement ajouté avec succès', response.data);
       // Traitez le succès ici, par exemple afficher un message ou rediriger
 
-      setOpen(true); // Afficher le message de succès
+      // setOpen(true); 
+      //toast
+      toast.success('Sauvegardé avec succès.');
       setTimeout(() => {
         navigate('/présidence-service-finance/paiement-liste'); // Naviguer après un délai
       }, 3000); // Délai de 2 secondes avant de naviguer
@@ -228,6 +238,7 @@ const CreatePaymentVacation = () => {
             'Authentication failed. Please try again.',
         );
         setOpenVerifyPayment(true);
+        toast.error(`Paiement déjà existé ou un erreur pendant l'ajout de paiement`);
       } else {
         setError('An error occurred. Please try again.');
       }

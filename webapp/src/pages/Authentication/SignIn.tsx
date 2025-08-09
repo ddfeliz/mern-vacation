@@ -6,31 +6,28 @@ import axios from 'axios';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { CheckCircleIcon } from '@heroicons/react/24/outline';
 import DarkModeSwitcher from '../../components/Header/DarkModeSwitcher';
-import { useDispatch, useSelector } from 'react-redux';
 import { login, setAuthenticationStatus } from '../../slices/authSlice';
 import { RootState } from '../../store';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
+import API_UTILISATEUR from '../../api/utilisateur';
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState('');
   const [motDePasse, setPassword] = useState(''); // Changement du nom en 'password'
-  const [error, setError] = useState('');
+  // const [error, setError] = useState('');
   const navigate = useNavigate();
-  const [visible, setVisible] = useState(false);
+  // const [visible, setVisible] = useState(false);
   const [openSuccess, setOpenSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
   // Utilisation de useEffect pour lancer un timer de 5 secondes
-  useEffect(() => {
-    if (error) {
-      setVisible(true);
-      const timer = setTimeout(() => {
-        setVisible(false);
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
+  // useEffect(() => {
+  //   if (error) {
+  //     toast.error('Erreur lors de la connexion : ' + error);
+  //   }
+  // }, [error]);
 
   // Vérification de l'authentification depuis le localStorage au démarrage
   useEffect(() => {
@@ -42,12 +39,10 @@ const SignIn: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      setOpenSuccess(true); // Afficher le message de succès
-      setTimeout(() => {
-        navigate('/présidence-service-finance/', {replace : true}); // Naviguer après un délai
-      }, 2000); // Délai de 2 secondes avant de naviguer
+      toast.success('Vous êtes connectés !');
+        navigate('/présidence-service-finance/', { replace: true });
     }
-  }, [isAuthenticated])
+  }, [isAuthenticated, navigate])
 
   // Fonction pour gérer la soumission du formulaire
   const handleSubmit = async (event: React.FormEvent) => {
@@ -55,7 +50,7 @@ const SignIn: React.FC = () => {
     setLoading(true); // Démarrer le chargement
 
     try {
-      const response = await axios.post('http://localhost:3000/api/utilisateur/connexion', {
+      const response = await axios.post(API_UTILISATEUR.connecterUtilisateur, {
         email,
         motDePasse, // Changement ici également
       });
@@ -65,19 +60,11 @@ const SignIn: React.FC = () => {
         localStorage.setItem('token', response.data.token);
         dispatch(login());
         dispatch(setAuthenticationStatus(true));
-        setOpenSuccess(true); // Afficher le message de succès
-        setTimeout(() => {
-          navigate('/présidence-service-finance/'); // Naviguer après un délai
-        }, 2000); // Délai de 2 secondes avant de naviguer
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      // Gestion des erreurs
-      if (err.response) {
-        setError(err.response.data.message || 'Authentication failed. Please try again.');
-      } else {
-        setError('An error occurred. Please try again.');
-      }
-    }finally{
+      toast.error(err.response?.data?.message || 'email ou mot de passe incorrect!');
+    } finally {
       setLoading(false);
     }
 
@@ -196,7 +183,7 @@ const SignIn: React.FC = () => {
 
 
 
-              <Dialog open={openSuccess} onClose={() => {setOpenSuccess(false)}} className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
+              <Dialog open={openSuccess} onClose={() => { setOpenSuccess(false) }} className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto">
                 {/* Arrière-plan grisé */}
                 <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-50" />
 
@@ -298,7 +285,7 @@ const SignIn: React.FC = () => {
                 </div>
 
                 {/* {error && <p className="text-red-500 text-sm mb-4">{error}</p>} */}
-                {visible && error &&
+                {/* {visible && error &&
                   <div className="flex w-full border-l-6 border-[#F87171] bg-[#F87171] bg-opacity-[15%] px-7 py-8 shadow-md dark:bg-[#1B1B24] dark:bg-opacity-30 md:p-9">
                     <div className="mr-5 flex h-9 w-full max-w-[36px] items-center justify-center rounded-lg bg-[#F87171]">
                       <svg
@@ -326,12 +313,12 @@ const SignIn: React.FC = () => {
                       </ul>
                     </div>
                   </div>
-                }
+                } */}
 
                 <div className="mb-5 mt-5">
-                  <button 
-                  type="submit"
-                  className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
+                  <button
+                    type="submit"
+                    className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
                   >
                     {loading ? "Connexion..." : "Se connecter"}
                   </button>

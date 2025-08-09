@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -14,6 +15,8 @@ import {
   TrashIcon,
 } from '@heroicons/react/24/outline';
 import { Tarif } from '../../../../types/tarif';
+import API_TARIF from '../../../../api/tarif';
+import { toast } from 'react-toastify';
 
 const DetailTarif = () => {
   // Changement du nom en majuscule
@@ -42,15 +45,16 @@ const DetailTarif = () => {
   // Fonction pour supprimer un correcteur
   const confirmDelete = async (idTarif: string) => {
     try {
-      await axios.delete(`http://localhost:3000/api/tarif/${idTarif}`);
+      await axios.delete(`${API_TARIF.supprimerTarif}/${idTarif}`);
       setTarifs(tarifs.filter((tarif) => tarif.idTarif !== idTarif));
-      setOpen1(true); // Afficher le message de succès
+      // setOpen1(true);
+      toast.success('Suppression avec succès.');
       setOpen(false);
       setTimeout(() => {
         navigate('/présidence-service-finance/tarif'); // Naviguer après un délai
       }, 3000); // Délai de 2 secondes avant de naviguer
     } catch (err) {
-      alert('Erreur lors de la suppression du correcteur.');
+      toast.error('Erreur lors de la suppression du correcteur.');
     }
   };
 
@@ -59,7 +63,7 @@ const DetailTarif = () => {
       try {
         // Inclure idCorrecteur dans l'URL de la requête
         const response = await axios.get(
-          `http://localhost:3000/api/tarif/${idTarif}`,
+          `${API_TARIF.avoirIdTarif}/${idTarif}`,
         );
         setTarif(response.data);
       } catch (err) {
@@ -71,7 +75,7 @@ const DetailTarif = () => {
     };
 
     fetchTarif();
-  }, [idTarif]);
+  }, [error, idTarif]);
 
   // Affichage d'un loader pendant le chargement
   if (loading)

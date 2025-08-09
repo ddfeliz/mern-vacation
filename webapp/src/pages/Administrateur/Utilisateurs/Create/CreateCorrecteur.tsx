@@ -4,6 +4,9 @@ import axios from "axios"; // Importer Axios
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
 import { CheckCircleIcon, CheckIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { useNavigate } from "react-router-dom";
+import API_BACC from "../../../../api/baccalaureat";
+import API_CORRECTEUR from "../../../../api/correcteur";
+import { toast } from "react-toastify";
 
 const CreateCorrecteur = () => {
   const [formData, setFormData] = useState({
@@ -39,7 +42,8 @@ const CreateCorrecteur = () => {
     console.log("Fetching specialites...");
     const fetchSpecialites = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/matiere-bacc/specialiste');
+        // const response = await axios.get('http://localhost:3000/api/matiere-bacc/specialiste');
+        const response = await axios.get(API_BACC.specialisteBacc);
         const fetchedSpecialites = response.data.specialites;
         console.log("Specialites fetched:", fetchedSpecialites);
         setSpecialites(fetchedSpecialites); // Mettre à jour les spécialités avec la réponse de l'API
@@ -54,7 +58,7 @@ const CreateCorrecteur = () => {
   // Récupérer les secteurs en fonction de la spécialité sélectionnée
   const fetchSecteurs = async (specialite: string) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/matiere-bacc/secteurs?specialite=${specialite}`);
+      const response = await axios.get(`${API_BACC.secteurBacc}?specialite=${specialite}`);
       setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
       setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
       setMatieres([]); // Réinitialiser les matières
@@ -66,7 +70,7 @@ const CreateCorrecteur = () => {
   // Récupérer les options en fonction du secteur sélectionné
   const fetchOption = async (secteur: string) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/matiere-bacc/options?secteur=${secteur}`);
+      const response = await axios.get(`${API_BACC.optionBacc}?secteur=${secteur}`);
       setOptions(response.data.options); // Mettre à jour les matières
     } catch (err) {
       console.error("Erreur lors de la récupération des matières :", err);
@@ -76,7 +80,7 @@ const CreateCorrecteur = () => {
   // Récupérer les matières en fonction du secteur sélectionné
   const fetchMatieres = async (option: string) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/matiere-bacc/matieres?option=${option}`);
+      const response = await axios.get(`${API_BACC.matiereBacc}?option=${option}`);
       setMatieres(response.data.matieres); // Mettre à jour les matières
     } catch (err) {
       console.error("Erreur lors de la récupération des matières :", err);
@@ -173,13 +177,14 @@ const CreateCorrecteur = () => {
 
 
       // Vérification si le CIN existe déjà
-      const checkResponse = await axios.get(`http://localhost:3000/api/correcteur/verification/${cin}`);
+      const checkResponse = await axios.get(`${API_CORRECTEUR.verifierCINCorrecteur}/${cin}`);
       if (checkResponse.data.exists) {
-        setOpenVerify(true);
+        // setOpenVerify(true);
+        toast.error('Ce correcteur existe déjà avec ce CIN!');
         setLoading(false);
         return; // Arrêter la soumission
       } else {
-        const response = await axios.post('http://localhost:3000/api/correcteur/ajout', {
+        const response = await axios.post(API_CORRECTEUR.ajoutCorrecteur, {
           nom: lastName,
           prenom: firstName,
           cin,
@@ -196,7 +201,8 @@ const CreateCorrecteur = () => {
         console.log('Correcteur ajouté avec succès', response.data);
         // Traitez le succès ici, par exemple afficher un message ou rediriger
 
-        setOpen(true); // Afficher le message de succès
+        // setOpen(true);
+        toast.success('Correcteur ajouté avec succès ')
         setTimeout(() => {
           navigate('/présidence-service-finance/correcteur'); // Naviguer après un délai
         }, 3000); // Délai de 2 secondes avant de naviguer
@@ -205,6 +211,7 @@ const CreateCorrecteur = () => {
     } catch (err: any) {
       if (err.response) {
         console.log(err);
+        toast.error(err);
         
       } else {
         console.log(err);

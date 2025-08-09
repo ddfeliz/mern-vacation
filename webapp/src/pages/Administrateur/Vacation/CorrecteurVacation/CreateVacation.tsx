@@ -13,6 +13,10 @@ import {
   StopCircleIcon,
 } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import API_VACATION from '../../../../api/vacation';
+import API_CORRECTEUR from '../../../../api/correcteur';
+import API_BACC from '../../../../api/baccalaureat';
 
 const CreateVacation = () => {
   const [formData, setFormData] = useState({
@@ -51,7 +55,8 @@ const CreateVacation = () => {
     const fetchSpecialites = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:3000/api/matiere-bacc/specialiste',
+          // 'http://localhost:3000/api/matiere-bacc/specialiste',
+          API_BACC.specialisteBacc,
         );
         const fetchedSpecialites = response.data.specialites;
         console.log('Specialites fetched:', fetchedSpecialites);
@@ -68,7 +73,7 @@ const CreateVacation = () => {
   const fetchSecteurs = async (specialite: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/secteurs?specialite=${specialite}`,
+        `${API_BACC.secteurBacc}?specialite=${specialite}`,
       );
       setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
       setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
@@ -82,7 +87,7 @@ const CreateVacation = () => {
   const fetchOption = async (secteur: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/options?secteur=${secteur}`,
+        `${API_BACC.optionBacc}?secteur=${secteur}`,
       );
       setOptions(response.data.options); // Mettre à jour les matières
     } catch (err) {
@@ -94,7 +99,7 @@ const CreateVacation = () => {
   const fetchMatieres = async (option: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/matieres?option=${option}`,
+        `${API_BACC.matiereBacc}?option=${option}`,
       );
       setMatieres(response.data.matieres); // Mettre à jour les matières
     } catch (err) {
@@ -113,7 +118,8 @@ const CreateVacation = () => {
 
       // Appel à l'API avec le bon paramètre
       const response = await axios.get(
-        `http://localhost:3000/api/correcteur/${searchKey}`,
+        // `http://localhost:3000/api/correcteur/${searchKey}`,
+        `${API_CORRECTEUR.avoirIdCorrecteur}/${searchKey}`,
       );
       const fetchedData = response.data;
 
@@ -231,7 +237,7 @@ const CreateVacation = () => {
     // Vérification si le CIN existe déjà
     const currentSession = new Date().getFullYear(); // Utilisation de l'année actuelle
     const checkResponse = await axios.get(
-      `http://localhost:3000/api/vacation/verification/${currentSession}/${pochette}`,
+      `${API_VACATION.verifierPocheteVacation}/${currentSession}/${pochette}`,
     );
 
     try {
@@ -240,7 +246,8 @@ const CreateVacation = () => {
         setLoading(false);
       } else {
         const response = await axios.post(
-          'http://localhost:3000/api/vacation/ajout',
+          // 'http://localhost:3000/api/vacation/ajout',
+          API_VACATION.ajoutVacation,
           {
             idCorrecteur,
             immatricule,
@@ -262,7 +269,8 @@ const CreateVacation = () => {
         console.log('Vacation ajouté avec succès', response.data);
         // Traitez le succès ici, par exemple afficher un message ou rediriger
 
-        setOpen(true); // Afficher le message de succès
+        // setOpen(true);
+        toast.success('Sauvegarde avec succès.');
         setTimeout(() => {
           navigate('/présidence-service-finance/vacation'); // Naviguer après un délai
         }, 3000); // Délai de 2 secondes avant de naviguer
@@ -273,6 +281,7 @@ const CreateVacation = () => {
       } else {
         console.log(err);
       }
+      toast.error(`Erreur lors d'ajout vacation du correcteur!`);
     } finally {
       setLoading(false); // Arrêter le chargement
     }

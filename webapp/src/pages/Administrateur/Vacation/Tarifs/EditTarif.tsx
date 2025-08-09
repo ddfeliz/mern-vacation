@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Dialog,
   DialogBackdrop,
@@ -13,6 +14,8 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Breadcrumb from '../../../../components/Breadcrumbs/Breadcrumb';
+import API_TARIF from '../../../../api/tarif';
+import { toast } from 'react-toastify';
 
 const EditTarif = () => {
   const [formData, setFormData] = useState({
@@ -33,7 +36,8 @@ const EditTarif = () => {
       setLoading(true);
       try {
         const response = await axios.get(
-          `http://localhost:3000/api/tarif/${idTarif}`,
+          // `http://localhost:3000/api/tarif/${idTarif}`,
+          `${API_TARIF.avoirIdTarif}/${idTarif}`,
         );
         const tarif = response.data;
 
@@ -84,7 +88,7 @@ const EditTarif = () => {
 
     try {
       const response = await axios.put(
-        `http://localhost:3000/api/tarif/${idTarif}`,
+        `${API_TARIF.modifierTarif}/${idTarif}`,
         {
           optionTarif,
           nombreTarif,
@@ -93,12 +97,14 @@ const EditTarif = () => {
       );
 
       console.log('Tarifs mis à jour avec succès', response.data);
-      setOpen(true); // Afficher le message de succès
+      // setOpen(true); 
+      toast.success('modification effectué avec succès.')
       setTimeout(() => {
         navigate('/présidence-service-finance/tarif'); // Naviguer après un délai
       }, 3000); // Délai de 3 secondes avant de naviguer
     } catch (error) {
       setError('Erreur lors de la mise à jour du tarif.');
+      toast.error('Erreur lors de la mise à jour du tarif.');
     } finally {
       setLoading(false);
     }

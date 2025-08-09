@@ -5,6 +5,8 @@ import { Correcteur } from '../../../types/correcteur';
 import Breadcrumb from '../../../components/Breadcrumbs/Breadcrumb';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
 import { ArrowLeftIcon, CheckCircleIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
+import API_CORRECTEUR from '../../../api/correcteur';
+import { toast } from 'react-toastify';
 
 const detailCorrecteur = () => {  // Changement du nom en majuscule
     // Récupérer le paramètre d'URL 'idCorrecteur'
@@ -33,14 +35,17 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
     // Fonction pour supprimer un correcteur
     const confirmDelete = async (idCorrecteur: string) => {
             try {
-                await axios.delete(`http://localhost:3000/api/correcteur/${idCorrecteur}`);
+                // await axios.delete(`http://localhost:3000/api/correcteur/${idCorrecteur}`);
+                await axios.delete(`${API_CORRECTEUR.supprimerCorrecteur}/${idCorrecteur}`);
                 setCorrecteurs(correcteurs.filter((correcteur) => correcteur.idCorrecteur !== idCorrecteur));
-                setOpen1(true); // Afficher le message de succès
+                // setOpen1(true); 
+                toast.success('Suppression de correcteur avec succès.');
                 setTimeout(() => {
                     navigate('/présidence-service-finance/correcteur'); // Naviguer après un délai
                 }, 3000); // Délai de 2 secondes avant de naviguer
             } catch (err) {
-                alert("Erreur lors de la suppression du correcteur.");
+                // alert("Erreur lors de la suppression du correcteur.");
+                toast.error('Erreur lors de la suppression du correcteur.')
             }
         
     };
@@ -49,11 +54,13 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
         const fetchCorrecteur = async () => {
             try {
                 // Inclure idCorrecteur dans l'URL de la requête
-                const response = await axios.get(`http://localhost:3000/api/correcteur/${idCorrecteur}`);
+                // const response = await axios.get(`http://localhost:3000/api/correcteur/${idCorrecteur}`);
+                const response = await axios.get(`${API_CORRECTEUR.avoirIdCorrecteur}/${idCorrecteur}`);
                 setCorrecteur(response.data);
             } catch (err) {
                 setError('Erreur lors de la récupération des détails du correcteur');
                 console.log(error);
+                toast.error(error);
                 
             } finally {
                 setLoading(false);

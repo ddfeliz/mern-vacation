@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Link } from 'react-router-dom';
 import Breadcrumb from '../../../../components/Breadcrumbs/Breadcrumb';
 import { useEffect, useState } from 'react';
@@ -7,6 +8,7 @@ import { CheckCircleIcon, EyeIcon, PencilSquareIcon } from '@heroicons/react/24/
 import { TrashIcon } from '@heroicons/react/24/outline';
 import { Tarif } from '../../../../types/tarif';
 import { BsFillFilePlusFill } from 'react-icons/bs';
+import API_TARIF from '../../../../api/tarif';
 
 const ShowTarif = () => {
     const [tarifs, setTarifs] = useState<Tarif[]>([]);
@@ -20,7 +22,7 @@ const ShowTarif = () => {
     useEffect(() => {
         const fetchTarifs = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/tarif/tous');
+                const response = await axios.get(API_TARIF.listesTarif);
                 setTarifs(response.data);
             } catch (err) {
                 setError('Erreur lors de la récupération des correcteurs');
@@ -73,7 +75,7 @@ const ShowTarif = () => {
     // Fonction pour supprimer un correcteur
     const confirmDelete = async (idTarif: string) => {
         try {
-            await axios.delete(`http://localhost:3000/api/tarif/${idTarif}`);
+            await axios.delete(`${API_TARIF.avoirIdTarif}/${idTarif}`);
             setTarifs(tarifs.filter((tarif) => tarif.idTarif !== idTarif));
             setOpen2(true); // Afficher le message de succès
             setOpen(false);

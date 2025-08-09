@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Link, useNavigate } from 'react-router-dom';
-import Breadcrumb from '../../../../components/Breadcrumbs/Breadcrumb';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
@@ -18,6 +18,9 @@ import {
 // import { TrashIcon } from '@heroicons/react/24/outline';
 import { BsCashCoin,  BsSearch } from 'react-icons/bs';
 import { PaiementRegroupe } from '../../../../types/PaiementRegroupe';
+import API_PAIEMENT from '../../../../api/paiement';
+import API_ARCHIVE from '../../../../api/archivage';
+import { toast } from 'react-toastify';
 
 const TablePayment = () => {
   const [payments, setPayments] = useState<PaiementRegroupe[]>([]);
@@ -39,7 +42,8 @@ const TablePayment = () => {
 
   const fetchTarifs = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/paiement/regroupement');
+      // const response = await axios.get('http://localhost:3000/api/paiement/regroupement');
+      const response = await axios.get(API_PAIEMENT.regouperPaiement);
       setPayments(response.data.paiementsRegroupes);
       setFilteredPayments(response.data.paiementsRegroupes);
 
@@ -120,8 +124,11 @@ const TablePayment = () => {
 
     try {
       // Envoyer la requête pour mettre à jour tous les paiements du correcteur
+      // await axios.put(
+      //     `http://localhost:3000/api/paiement/statut-modification/${selectedPayment.idCorrecteur}`
+      // );
       await axios.put(
-          `http://localhost:3000/api/paiement/statut-modification/${selectedPayment.idCorrecteur}`
+          `${API_PAIEMENT.modifierToPayerPaiement}/${selectedPayment.idCorrecteur}`
       );
 
       // Mettre à jour le tableau localement
@@ -134,9 +141,11 @@ const TablePayment = () => {
       );
 
       setOpenUpdatePayment(false); // Fermer le modal
+      toast.success('Sauvegarder avec succès');
       fetchTarifs(); 
   } catch (err) {
       alert('Erreur lors de la mise à jour du statut des paiements.');
+      toast.error('Erreur lors de la mise à jour du statut des paiements.');
   }
   };
 
@@ -145,7 +154,10 @@ const TablePayment = () => {
     setLoading(true);
     try {
       const currentYear = new Date().getFullYear();
-      await axios.post('http://localhost:3000/api/archive/archive-paiements', {
+      // await axios.post('http://localhost:3000/api/archive/archive-paiements', {
+      //   session: currentYear,
+      // });
+      await axios.post(API_ARCHIVE.ajoutArchive, {
         session: currentYear,
       });
       setOpenArchiveSuccess(true);
@@ -162,7 +174,7 @@ const TablePayment = () => {
 
   return (
     <>
-      <Breadcrumb pageName="Paiement des correcteurs" />
+      {/* <Breadcrumb pageName="Paiement des correcteurs" /> */}
 
       {/* Modal de Confirmation avec Dialog */}
       <Dialog

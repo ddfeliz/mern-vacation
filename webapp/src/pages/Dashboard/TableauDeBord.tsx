@@ -5,6 +5,10 @@ import TablePayment from '../Administrateur/Vacation/CorrecteurVacation/TablePay
 import CardDataStats from '../../components/CardDataStats';
 import axios from 'axios';
 import { NavLink } from 'react-router-dom';
+import API_CORRECTEUR from '../../api/correcteur';
+import API_PAIEMENT from '../../api/paiement';
+import API_ARCHIVE from '../../api/archivage';
+import API_VACATION from '../../api/vacation';
 
 const TableauDeBord: React.FC = () => {
   const [totalCorrecteurs, setTotalCorrecteurs] = useState('0');
@@ -14,8 +18,11 @@ const TableauDeBord: React.FC = () => {
 
   const fetchCorrecteursCount = async () => {
     try {
+      // const response = await axios.get(
+      //   'http://localhost:3000/api/correcteur/compter',
+      // );
       const response = await axios.get(
-        'http://localhost:3000/api/correcteur/compter',
+        API_CORRECTEUR.compterCorrecteur,
       );
       setTotalCorrecteurs(response.data.totalCorrecteurs.toString());
     } catch (err) {
@@ -25,8 +32,11 @@ const TableauDeBord: React.FC = () => {
 
   const fetchPaymentsCount = async () => {
     try {
+      // const responsePayment = await axios.get(
+      //   'http://localhost:3000/api/paiement/compter',
+      // );
       const responsePayment = await axios.get(
-        'http://localhost:3000/api/paiement/compter',
+        API_PAIEMENT.compterPaiement,
       );
       setTotalPayments(responsePayment.data.totalPaiements.toString());
     } catch (err) {
@@ -36,8 +46,11 @@ const TableauDeBord: React.FC = () => {
 
   const fetchArchiveCount = async () => {
     try {
+      // const responseArchive = await axios.get(
+      //   'http://localhost:3000/api/archive/compter',
+      // );
       const responseArchive = await axios.get(
-        'http://localhost:3000/api/archive/compter',
+        API_ARCHIVE.compterArchive,
       );
       setTotalArchives(responseArchive.data.totalArchives.toString());
     } catch (err) {
@@ -47,8 +60,11 @@ const TableauDeBord: React.FC = () => {
 
   const fetchVacationCount = async () => {
     try {
+      // const responseVacation = await axios.get(
+      //   'http://localhost:3000/api/vacation/compte',
+      // );
       const responseVacation = await axios.get(
-        'http://localhost:3000/api/vacation/compte',
+        API_VACATION.compterVacation,
       );
       setTotalVacations(responseVacation.data.totalVacation.toString());
     } catch (err) {

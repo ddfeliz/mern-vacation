@@ -320,8 +320,6 @@ const getPaiementsGroupedByCorrecteur = async (specialite) => {
       },
   ]);
 };
-
-
 exports.generateExcelForSpeciality = async (req, res) => {
   try {
     const { specialite } = req.query;
@@ -330,7 +328,6 @@ exports.generateExcelForSpeciality = async (req, res) => {
     }
 
     const data = await getPaiementsGroupedByCorrecteur(specialite);
-
     if (data.length === 0) {
       return res.status(404).send(`Aucun paiement trouvé pour la spécialité : ${specialite}`);
     }
@@ -338,97 +335,119 @@ exports.generateExcelForSpeciality = async (req, res) => {
     const ExcelJS = require("exceljs");
     const path = require("path");
 
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet(`Paiements - ${specialite}`);
+    // Fonction pour tronquer nom feuille à 31 caractères max
+    function truncateSheetName(name) {
+      return name.length > 31 ? name.substring(0, 31) : name;
+    }
 
-    worksheet.columns = [
-      { header: "Nom et Prénom(s)", key: "nomPrenom", width: 30 },
-      { header: "CIN", key: "cin", width: 15 },
-      { header: "Spécialité", key: "specialite", width: 20 },
-      { header: "Secteur", key: "secteur", width: 20 },
-      { header: "Option", key: "option", width: 20 },
-      { header: "Matière", key: "matiere", width: 20 },
-      { header: "Pochette", key: "pochette", width: 30 },
-      { header: "Nombre de Copies", key: "nbcopie", width: 20 },
-      { header: "Montant", key: "montantTotal", width: 15 },
+    const sheetName = truncateSheetName(`Paiements - ${specialite}`);
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(sheetName);
+
+    // 🔹 EN-TÊTE TITRE COMME DANS LE DOCUMENT
+    const headerLines = [
+      "REPOBILIKAN'I MADAGASIKARA",
+      "Fitiavana - Tanindrazana - Fandrosoana",
+      "----------------------------",
+      "MINISTERE DE L'ENSEIGNEMENT SUPÉRIEUR",
+      "ET DE LA RECHERCHE SCIENTIFIQUE",
+      "----------------------------",
+      "UNIVERSITÉ DE TOLIARA",
+      "----------------------------",
+      "PRESIDENCE",
+      "",
+      `B - VACATION D'ANNEE: - ${new Date().getFullYear()}`,
+      `VACATION DES CORRECTEURS - MATIÈRES ${specialite.toUpperCase()}`
     ];
+
+    headerLines.forEach((line) => {
+      const row = worksheet.addRow([line]);
+      worksheet.mergeCells(`A${row.number}:G${row.number}`);
+      row.alignment = { horizontal: "center", vertical: "middle" };
+      row.font = { bold: true };
+    });
+
+    worksheet.addRow([]);
+
+    // 🔹 EN-TÊTE DU TABLEAU
+    // Ligne fusionnée A1:A2 retirée pour éviter conflit
+    // worksheet.mergeCells("A1:A2"); 
+
+    worksheet.addRow(["Nom et Prénom(s)", "Total", "Matières", "Pochettes", "Nb de copies", "Montant", "Total"]);
+
+    // Styles d’en-tête
+    const headerRow = worksheet.lastRow;
+    headerRow.eachCell((cell) => {
+      cell.font = { bold: true };
+      cell.alignment = { horizontal: "center", vertical: "middle" };
+      cell.border = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" }
+      };
+    });
 
     let grandTotal = 0;
 
+    // 🔹 BOUCLE SUR CHAQUE CORRECTEUR
     data.forEach((correcteur) => {
       const { correcteurInfo, vacations } = correcteur;
-
       const totalCorrecteur = vacations.reduce((sum, v) => sum + v.montantTotal, 0);
       grandTotal += totalCorrecteur;
 
-      // ✅ Ligne principale AVEC secteur & option
-      worksheet.addRow({
-        nomPrenom: `${correcteurInfo.nom} ${correcteurInfo.prenom}`,
-        cin: correcteurInfo.cin,
-        specialite: correcteurInfo.specialite,
-        secteur: "",
-        option: "",
-        matiere: "",
-        pochette: "",
-        nbcopie: "",
-        montantTotal: "",
+      // Ligne avec nom + total global
+      const rowNom = worksheet.addRow([
+        `${correcteurInfo.nom} ${correcteurInfo.prenom}`,
+        totalCorrecteur,
+        "", "", "", "", totalCorrecteur
+      ]);
+      rowNom.font = { bold: true };
+
+      // Matières du correcteur
+      vacations.forEach((vac) => {
+        worksheet.addRow([
+          "",
+          "",
+          vac.matiere,
+          vac.pochette,
+          vac.nbcopie,
+          vac.montantTotal,
+          ""
+        ]);
       });
 
-      // Détails des vacations
-      vacations.forEach((vacation) => {
-        worksheet.addRow({
-          nomPrenom: "",
-          cin: "",
-          specialite: "",
-          secteur: vacation.secteur,
-          option: vacation.option,
-          matiere: vacation.matiere,
-          pochette: vacation.pochette,
-          nbcopie: vacation.nbcopie,
-          montantTotal: vacation.montantTotal,
-        });
-      });
-
-      // Total par correcteur
-      worksheet.addRow({
-        nomPrenom: "",
-        cin: "",
-        specialite: "",
-        secteur: "",
-        option: "Montant total",
-        matiere: "",
-        pochette: "",
-        nbcopie: "",
-        montantTotal: totalCorrecteur,
-      });
-
-      worksheet.addRow({});
+      worksheet.addRow([]); // ligne vide entre correcteurs
     });
 
-    // Grand total général
-    worksheet.addRow({
-      nomPrenom: "",
-      cin: "",
-      specialite: "",
-      secteur: "",
-      option: "Grand Total",
-      matiere: "",
-      pochette: "",
-      nbcopie: "",
-      montantTotal: grandTotal,
-    });
+    // 🔹 GRAND TOTAL
+    const rowTotal = worksheet.addRow(["", "", "", "", "", "Grand Total", grandTotal]);
+    rowTotal.font = { bold: true };
 
-    const lastRow = worksheet.lastRow;
-    lastRow.font = { bold: true };
+    // Ajuster largeur colonnes
+    worksheet.columns = [
+      { width: 35 }, // Nom
+      { width: 12 }, // Total global
+      { width: 20 }, // Matière
+      { width: 25 }, // Pochettes
+      { width: 15 }, // Nb copies
+      { width: 15 }, // Montant
+      { width: 15 }  // Total répété
+    ];
 
-    const filePath = path.join(__dirname, `../files/paiements_${specialite}.xlsx`);
+    // Sauvegarde et téléchargement
+    const filePath = path.join(__dirname, `../files/vacations_${specialite}.xlsx`);
     await workbook.xlsx.writeFile(filePath);
-    res.download(filePath, `paiements_${specialite}.xlsx`);
+    res.download(filePath, `vacations_${specialite}.xlsx`);
+
   } catch (error) {
     console.error("Erreur :", error);
     res.status(500).send("Erreur lors de la génération du fichier Excel");
   }
 };
+
+
+
 
 
 

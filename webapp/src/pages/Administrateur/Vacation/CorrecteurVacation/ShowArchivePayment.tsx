@@ -18,6 +18,8 @@ import { Archive } from '../../../../types/archive';
 import { BsFilePdfFill, BsSearch } from 'react-icons/bs';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import ArchivePdf from './ArchivePdf';
+import API_ARCHIVE from '../../../../api/archivage';
+import API_BACC from '../../../../api/baccalaureat';
 
 const ShowArchivePayment = () => {
   const [formData, setFormData] = useState({
@@ -47,10 +49,10 @@ const ShowArchivePayment = () => {
   const [searchItem, setSearchItem] = useState('');
 
   useEffect(() => {
-    const fetchTarifs = async () => {
+    const fetchArchive = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:3000/api/archive/tous',
+          API_ARCHIVE.listesArchive
         );
         setArchives(response.data);
       } catch (err) {
@@ -60,7 +62,7 @@ const ShowArchivePayment = () => {
       }
     };
 
-    fetchTarifs();
+    fetchArchive();
   }, []);
 
   // Récupérer les spécialités depuis le backend au montage du composant
@@ -69,7 +71,7 @@ const ShowArchivePayment = () => {
     const fetchSpecialites = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:3000/api/matiere-bacc/specialiste',
+          API_BACC.specialisteBacc
         );
         const fetchedSpecialites = response.data.specialites;
         console.log('Specialites fetched:', fetchedSpecialites);
@@ -86,7 +88,7 @@ const ShowArchivePayment = () => {
   const fetchSecteurs = async (specialite: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/secteurs?specialite=${specialite}`,
+        `${API_BACC.secteurBacc}?specialite=${specialite}`,
       );
       setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
       setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
@@ -100,7 +102,7 @@ const ShowArchivePayment = () => {
   const fetchOption = async (secteur: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/options?secteur=${secteur}`,
+        `${API_BACC.optionBacc}?secteur=${secteur}`,
       );
       setOptions(response.data.options); // Mettre à jour les matières
     } catch (err) {
@@ -112,7 +114,7 @@ const ShowArchivePayment = () => {
   const fetchMatieres = async (option: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/matieres?option=${option}`,
+        `${API_BACC.matiereBacc}?option=${option}`,
       );
       setMatieres(response.data.matieres); // Mettre à jour les matières
     } catch (err) {
@@ -169,7 +171,7 @@ const ShowArchivePayment = () => {
   const confirmDelete = async (idPaiement: string) => {
     try {
       // Suppression du paiement par son identifiant MongoDB (_id)
-      await axios.delete(`http://localhost:3000/api/archive/${idPaiement}`);
+      await axios.delete(`${API_ARCHIVE.supprimerArchive}`);
 
       // Mettre à jour l'état en supprimant le paiement localement de la liste
       setArchives(

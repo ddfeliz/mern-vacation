@@ -12,6 +12,10 @@ import {
 } from '@heroicons/react/24/outline';
 import { Vacation } from '../../../../types/vacation';
 import { Tarif } from '../../../../types/tarif';
+import API_TARIF from '../../../../api/tarif';
+import API_VACATION from '../../../../api/vacation';
+import API_PAIEMENT from '../../../../api/paiement';
+import { toast } from 'react-toastify';
 
 const DetailVacation = () => {
   const [formData, setFormData] = useState({
@@ -55,7 +59,7 @@ const DetailVacation = () => {
     const fetchTarifs = async () => {
       try {
         const tarifResponse = await axios.get(
-          'http://localhost:3000/api/tarif/tous',
+          API_TARIF.listesTarif
         );
         setTarifs(tarifResponse.data);
       } catch (err) {
@@ -85,15 +89,16 @@ const DetailVacation = () => {
   // Fonction pour supprimer un correcteur
   const confirmDelete = async (idVacation: string) => {
     try {
-      await axios.delete(`http://localhost:3000/api/vacation/${idVacation}`);
+      await axios.delete(`${API_VACATION.supprimerVacation}/${idVacation}`);
       setVacations(
         vacations.filter((vacation) => vacation.idVacation !== idVacation),
       );
+      toast.success('Suppression avec succès.')
       setTimeout(() => {
         navigate('/présidence-service-finance/vacation'); // Naviguer après un délai
       }, 3000); // Délai de 2 secondes avant de naviguer
     } catch (err) {
-      alert('Erreur lors de la suppression du correcteur.');
+      toast.error('Erreur lors de la suppression du correcteur.');
     }
   };
 
@@ -102,7 +107,8 @@ const DetailVacation = () => {
       try {
         // Inclure idCorrecteur dans l'URL de la requête
         const response = await axios.get<Vacation[]>(
-          `http://localhost:3000/api/vacation/correcteur/${immatricule}`,
+          // `http://localhost:3000/api/vacation/correcteur/${immatricule}`,
+          `${API_VACATION.avoirIdVacation}/${immatricule}`,
         );
         setVacations(response.data);
       } catch (err) {
@@ -134,7 +140,8 @@ const DetailVacation = () => {
     try {
       // Appel API pour récupérer les données de la vacation
       const response = await axios.get(
-        `http://localhost:3000/api/vacation/${idVacation}`,
+        // `http://localhost:3000/api/vacation/${idVacation}`,
+        `${API_VACATION.avoirIMVacation}/${idVacation}`,
       );
       const fetchedData = response.data;
       setIsModalOpen(true);
@@ -246,7 +253,8 @@ const DetailVacation = () => {
     try {
       console.log('Data sent to server:', formData); // Vérifier ce qui est envoyé
       const response = await axios.post(
-        'http://localhost:3000/api/paiement/ajoute',
+        // 'http://localhost:3000/api/paiement/ajoute',
+        API_PAIEMENT.ajoutPaiement,
         {
           idVacation,
           idCorrecteur,
@@ -908,7 +916,7 @@ const DetailVacation = () => {
                       className={`mr-3 inline-flex w-40 h-11 items-center justify-center rounded-md border
                                              border-primary bg-transparent text-black transition hover:bg-transparent
                                              hover:border-primary hover:text-primary dark:border-strokedark 
-                                              dark:bg-transparent dark:text-white dark:hover:border-primary dark:hover:text-primary ${
+                                              dark:bg-transparent dark:text-primary dark:hover:border-primary dark:hover:text-primary ${
                                                 loading
                                                   ? 'cursor-not-allowed opacity-50'
                                                   : ''

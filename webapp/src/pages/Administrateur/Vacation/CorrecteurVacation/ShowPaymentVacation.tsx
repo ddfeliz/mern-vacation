@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Link, useNavigate } from 'react-router-dom';
 import Breadcrumb from '../../../../components/Breadcrumbs/Breadcrumb';
 import { useEffect, useState } from 'react';
@@ -16,11 +17,14 @@ import {
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 // import { TrashIcon } from '@heroicons/react/24/outline';
-import { BsCashCoin,  BsSearch } from 'react-icons/bs';
+import { BsCashCoin, BsSearch } from 'react-icons/bs';
 import CardDataStats from '../../../../components/CardDataStats';
 // import { PDFDownloadLink } from '@react-pdf/renderer'; BsFilePdfFill,
 // import PaymentPdf from './PaymentPdf';
 import { PaiementRegroupe } from '../../../../types/PaiementRegroupe';
+import API_PAIEMENT from '../../../../api/paiement';
+import { toast } from 'react-toastify';
+import API_ARCHIVE from '../../../../api/archivage';
 
 const ShowPaymentVacation = () => {
   const [payments, setPayments] = useState<PaiementRegroupe[]>([]);
@@ -29,13 +33,13 @@ const ShowPaymentVacation = () => {
   const [selectedPayment, setSelectedPayment] = useState<PaiementRegroupe | null>(null);
   const [filteredPayments, setFilteredPayments] = useState<PaiementRegroupe[]>([]); // Nouvel état pour les paiements filtrés
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState('');
+  // const [message, setMessage] = useState('');
   const [selectedStatus, setSelectedStatus] = useState(''); // État pour le statut de paiement
   const [open, setOpen] = useState(false); // État pour le Dialog
   const [open2, setOpen2] = useState(false); // État pour le Dialog
   const [openUpdatePayment, setOpenUpdatePayment] = useState(false); // État pour le Dialog
   const [openArchive, setOpenArchive] = useState(false); // État pour le Dialog
-  const [openArchiveSuccess, setOpenArchiveSuccess] = useState(false); // État pour le Dialog
+  // const [openArchiveSuccess, setOpenArchiveSuccess] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [paymentsPerPage] = useState(5); // Modifier cette valeur pour ajuster le nombre de correcteurs par page
   const [searchItem, setSearchItem] = useState('');
@@ -47,32 +51,37 @@ const ShowPaymentVacation = () => {
 
   const [specialite, setSpecialite] = useState("");
 
-    const handleExport = async () => {
-        if (!specialite) {
-            alert("Veuillez sélectionner une spécialité.");
-            return;
-        }
+  const handleExport = async () => {
+    if (!specialite) {
+      toast.info("Veuillez sélectionner une spécialité.");
+      return;
+    }
 
-        try {
-            const response = await axios.get(`http://localhost:3000/api/paiement/generer-excel?specialite=${specialite}`, {
-                responseType: "blob",
-            });
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute("download", `paiements_${specialite}.xlsx`);
-            document.body.appendChild(link);
-            link.click();
-        } catch (error) {
-            console.error("Erreur lors de l'exportation :", error);
-        }
-    };
+    try {
+      // const response = await axios.get(`http://localhost:3000/api/paiement/generer-excel?specialite=${specialite}`, {
+      //     responseType: "blob",
+      // });
+      const response = await axios.get(`${API_PAIEMENT.genererExcelPaiement}?specialite=${specialite}`, {
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `paiements_${specialite}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      toast.success('Generer en Excel avec succès.')
+    } catch (error) {
+      console.error("Erreur lors de l'exportation :", error);
+    }
+  };
 
   const fetchTotalCopies = async () => {
     try {
       // Faire la requête GET vers l'endpoint de l'API
       const response = await axios.get(
-        'http://localhost:3000/api/paiement/total-copie',
+        // 'http://localhost:3000/api/paiement/total-copie',
+        API_PAIEMENT.totalCopiePaiement
       );
 
       // Stocker le total des copies dans l'état
@@ -87,7 +96,8 @@ const ShowPaymentVacation = () => {
     try {
       // Faire la requête GET vers l'endpoint de l'API
       const response = await axios.get(
-        'http://localhost:3000/api/paiement/total-montant',
+        // 'http://localhost:3000/api/paiement/total-montant',
+        API_PAIEMENT.totalMontantPaiement
       );
 
       // Formatage du montant total en tant qu'argent en ariary malgache
@@ -108,7 +118,7 @@ const ShowPaymentVacation = () => {
 
   const fetchTarifs = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/paiement/regroupement');
+      const response = await axios.get(API_PAIEMENT.regouperPaiement);
       setPayments(response.data.paiementsRegroupes);
       setFilteredPayments(response.data.paiementsRegroupes); // Initialiser avec tous les paiements
 
@@ -224,26 +234,30 @@ const ShowPaymentVacation = () => {
 
     try {
       // Envoyer la requête pour mettre à jour tous les paiements du correcteur
+      // await axios.put(
+      //     `http://localhost:3000/api/paiement/statut-modification/${selectedPayment.idCorrecteur}`
+      // );
       await axios.put(
-          `http://localhost:3000/api/paiement/statut-modification/${selectedPayment.idCorrecteur}`
+        `${API_PAIEMENT.modifierToPayerPaiement}/${selectedPayment.idCorrecteur}`
       );
 
       // Mettre à jour le tableau localement
       setPayments((prev) =>
-          prev.map((pay) =>
-              pay.idCorrecteur === selectedPayment.idCorrecteur && pay.statut === 'Non payé'
-                  ? { ...pay, statut: 'Payé' }
-                  : pay
-          )
+        prev.map((pay) =>
+          pay.idCorrecteur === selectedPayment.idCorrecteur && pay.statut === 'Non payé'
+            ? { ...pay, statut: 'Payé' }
+            : pay
+        )
       );
 
       setOpenUpdatePayment(false); // Fermer le modal
+      toast.success('Sauvegarder avec succès');
       fetchTarifs(); // Rafraîchir les données si nécessaire
       fetchTotalCopies();
       fetchTotalMontants();
-  } catch (err) {
-      alert('Erreur lors de la mise à jour du statut des paiements.');
-  }
+    } catch (err) {
+      toast.error('Erreur lors de la mise à jour du statut des paiements.');
+    }
   };
 
 
@@ -251,16 +265,20 @@ const ShowPaymentVacation = () => {
     setLoading(true);
     try {
       const currentYear = new Date().getFullYear();
-      await axios.post('http://localhost:3000/api/archive/archive-paiements', {
+      // await axios.post('http://localhost:3000/api/archive/archive-paiements', {
+      //   session: currentYear,
+      // });
+      await axios.post(API_ARCHIVE.ajoutArchive, {
         session: currentYear,
       });
-      setOpenArchiveSuccess(true);
+      // setOpenArchiveSuccess(true);
+      toast.success(`Réinitialisation des paiements ${new Date().getFullYear()} réussie !`);
       setOpenArchive(false);
       setTimeout(() => {
         navigate('/présidence-service-finance/nouveau-paiement');
       }, 2000); // Délai de 2 secondes avant de naviguer
     } catch (error) {
-      setMessage('Erreur lors de la réinitialisation des paiements.');
+      toast.error('Erreur lors de la réinitialisation des paiements.');
       console.log(error);
     } finally {
       setLoading(false);
@@ -558,18 +576,14 @@ const ShowPaymentVacation = () => {
         </div>
       </Dialog>
 
-      <Dialog
+      {/* <Dialog
         open={openArchiveSuccess}
         onClose={() => setOpenArchiveSuccess(false)}
         className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
       >
-        {/* Arrière-plan grisé */}
         <DialogBackdrop className="fixed inset-0 bg-black bg-opacity-50" />
-
-        {/* Contenu de la modal */}
         <div className="flex items-center justify-center min-h-screen">
           <DialogPanel className="relative mx-auto w-full max-w-md rounded-lg bg-white shadow-lg p-6">
-            {/* Icône et Message */}
             <div className="flex items-center space-x-4">
               <div className="flex-shrink-0">
                 <CheckCircleIcon
@@ -589,7 +603,7 @@ const ShowPaymentVacation = () => {
             </div>
           </DialogPanel>
         </div>
-      </Dialog>
+      </Dialog> */}
 
       <Dialog
         open={open2}
@@ -631,9 +645,9 @@ const ShowPaymentVacation = () => {
             >
               Réinitialiser les paiements
             </button>
-            {message && <p>{message}</p>}
+            {/* {message && <p>{message}</p>} */}
 
-            
+
             {/* <PDFDownloadLink
               document={<PaymentPdf payments={filteredPayments} />}
               fileName="paiements.pdf"
@@ -644,17 +658,17 @@ const ShowPaymentVacation = () => {
               </span>
             </PDFDownloadLink> */}
 
-            <select 
-            value={specialite} 
-            onChange={(e) => setSpecialite(e.target.value)}
-            className='w-1/3 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary'
+            <select
+              value={specialite}
+              onChange={(e) => setSpecialite(e.target.value)}
+              className='w-1/3 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary'
             >
-                <option value="">-- Sélectionner une spécialité --</option>
-                <option value="Général">Général</option>
-                <option value="Professionnel et Technique">Professionnel et Technique</option>
-                <option value="Technologique">Technologique</option>
+              <option value="">-- Sélectionner une spécialité --</option>
+              <option value="Général">Général</option>
+              <option value="Professionnel et Technique">Professionnel et Technique</option>
+              <option value="Technologique">Technologique</option>
             </select>
-            <button 
+            <button
               onClick={handleExport}
               className="rounded border-[1.5px] border-primary bg-transparent py-4 px-10 text-black outline-none transition hover:border-primary hover:text-primary focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-primary dark:bg-form-input dark:text-white dark:focus:border-primary dark:hover:border-primary dark:hover:text-primary"
             >
@@ -875,22 +889,20 @@ const ShowPaymentVacation = () => {
         {/* Pagination */}
         <div className="flex justify-center space-x-2 mt-4">
           <button
-            className={`py-2 px-4 rounded ${
-              currentPage === 1
+            className={`py-2 px-4 rounded ${currentPage === 1
                 ? 'bg-gray-300 cursor-not-allowed'
                 : 'bg-primary text-white'
-            }`}
+              }`}
             onClick={() => paginate(currentPage - 1)}
             disabled={currentPage === 1}
           >
             Précédent
           </button>
           <button
-            className={`py-2 px-4 rounded ${
-              currentPage === totalPages
+            className={`py-2 px-4 rounded ${currentPage === totalPages
                 ? 'bg-gray-300 cursor-not-allowed'
                 : 'bg-primary text-white'
-            }`}
+              }`}
             onClick={() => paginate(currentPage + 1)}
             disabled={currentPage === totalPages}
           >

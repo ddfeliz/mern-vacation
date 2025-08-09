@@ -4,6 +4,8 @@ import Breadcrumb from '../../../components/Breadcrumbs/Breadcrumb';
 import axios from "axios"; // Importer Axios
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/react";
 import { ArrowLeftIcon, CheckCircleIcon, ExclamationTriangleIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import API_CORRECTEUR from "../../../api/correcteur";
+import { toast } from "react-toastify";
 
 const EditCorrecteur = () => {
     const { idCorrecteur } = useParams<{ idCorrecteur: string }>(); // Récupérer l'ID du correcteur depuis l'URL
@@ -27,7 +29,8 @@ const EditCorrecteur = () => {
         const fetchCorrecteur = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`http://localhost:3000/api/correcteur/${idCorrecteur}`);
+                // const response = await axios.get(`http://localhost:3000/api/correcteur/${idCorrecteur}`);
+                const response = await axios.get(`${API_CORRECTEUR.avoirIdCorrecteur}/${idCorrecteur}`);
                 const correcteur = response.data;
 
                 setFormData({
@@ -67,7 +70,10 @@ const EditCorrecteur = () => {
         const { firstName, lastName, cin, adresse, adresseProfession, telephone, grade } = formData;
 
         try {
-            const response = await axios.put(`http://localhost:3000/api/correcteur/${idCorrecteur}`, {
+            const response = await axios.put(
+                // `http://localhost:3000/api/correcteur/${idCorrecteur}`, 
+                `${API_CORRECTEUR.modifierCorrecteur}/${idCorrecteur}`,
+                {
                 nom: lastName,
                 prenom: firstName,
                 cin,
@@ -79,13 +85,15 @@ const EditCorrecteur = () => {
 
             console.log('Correcteur mis à jour avec succès', response.data);
 
-            setOpen(true); // Afficher le message de succès
+            // setOpen(true);
+            toast.success('Correcteur mis à jour avec succès.');
             setTimeout(() => {
                 navigate('/présidence-service-finance/correcteur'); // Naviguer après un délai
             }, 3000); // Délai de 2 secondes avant de naviguer
 
         } catch (error) {
             setError('Erreur lors de la mise à jour du correcteur.');
+            toast.error('Erreur lors de la mise à jour du correcteur.');
         } finally {
             setLoading(false);
         }

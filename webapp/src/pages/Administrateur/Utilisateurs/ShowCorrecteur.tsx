@@ -18,6 +18,10 @@ import {
 import { TrashIcon } from '@heroicons/react/24/outline';
 import CardDataStats from '../../../components/CardDataStats';
 import { BsSearch } from 'react-icons/bs';
+import API_CORRECTEUR from '../../../api/correcteur';
+import API_BACC from '../../../api/baccalaureat';
+import { toast } from 'react-toastify';
+import API_VACATION from '../../../api/vacation';
 
 const ShowCorrecteur = () => {
   const [formData, setFormData] = useState({
@@ -51,13 +55,13 @@ const ShowCorrecteur = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-    const [openSuccess, setOpenSuccess] = useState(false);
+    // const [openSuccess, setOpenSuccess] = useState(false);
   
-  const [openVerifyVac, setOpenVerifyVac] = useState(false);
+  // const [openVerifyVac, setOpenVerifyVac] = useState(false);
   // État pour les filtres de recherche
   const [searchItem, setSearchItem] = useState('');
   
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
   const [searchSpecialite, setSearchSpecialite] = useState('');
   const [searchSecteur, setSearchSecteur] = useState('');
@@ -71,7 +75,10 @@ const ShowCorrecteur = () => {
   const updateCorrecteurStatus = async (session: number) => {
     try {
       // Envoie une requête PUT pour mettre à jour les statuts des correcteurs
-      await axios.put('http://localhost:3000/api/correcteur/modificationStatus', {
+      // await axios.put('http://localhost:3000/api/correcteur/modificationStatus', {
+      //   session: session,
+      // });
+      await axios.put(API_CORRECTEUR.modificationStatutCorrecteur, {
         session: session,
       });
     } catch (error) {
@@ -82,7 +89,8 @@ const ShowCorrecteur = () => {
   const fetchCorrecteurs = async () => {
     try {
       const response = await axios.get(
-        'http://localhost:3000/api/correcteur/tous',
+        // 'http://localhost:3000/api/correcteur/tous',
+        API_CORRECTEUR.listesCorrecteur,
       );
       setCorrecteurs(response.data);
     } catch (err) {
@@ -95,7 +103,8 @@ const ShowCorrecteur = () => {
   const fetchStats = async (session: number) => {
     try {
       const response = await axios.post(
-        'http://localhost:3000/api/correcteur/comptage',
+        // 'http://localhost:3000/api/correcteur/comptage',
+        API_CORRECTEUR.compterStatutCorrecteur,
         {
           session: session,
         },
@@ -125,7 +134,8 @@ const ShowCorrecteur = () => {
     const fetchCorrecteursCount = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:3000/api/correcteur/compter',
+          // 'http://localhost:3000/api/correcteur/compter',
+          API_CORRECTEUR.compterCorrecteur,
         );
         setTotalCorrecteurs(response.data.totalCorrecteurs.toString());
       } catch (err) {
@@ -144,7 +154,8 @@ const ShowCorrecteur = () => {
     const fetchSpecialites = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:3000/api/matiere-bacc/specialiste',
+          // 'http://localhost:3000/api/matiere-bacc/specialiste',
+          API_BACC.specialisteBacc,
         );
         const fetchedSpecialites = response.data.specialites;
         console.log('Specialites fetched:', fetchedSpecialites);
@@ -161,7 +172,9 @@ const ShowCorrecteur = () => {
   const fetchSecteurs = async (specialite: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/secteurs?specialite=${specialite}`,
+        // `http://localhost:3000/api/matiere-bacc/secteurs?specialite=${specialite}`,
+        `${API_BACC.secteurBacc}?specialite=${specialite}`,
+
       );
       setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
       setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
@@ -175,7 +188,8 @@ const ShowCorrecteur = () => {
   const fetchOption = async (secteur: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/options?secteur=${secteur}`,
+        // `http://localhost:3000/api/matiere-bacc/options?secteur=${secteur}`,
+        `${API_BACC.optionBacc}?secteur=${secteur}`,
       );
       setOptions(response.data.options); // Mettre à jour les matières
     } catch (err) {
@@ -187,7 +201,8 @@ const ShowCorrecteur = () => {
   const fetchMatieres = async (option: string) => {
     try {
       const response = await axios.get(
-        `http://localhost:3000/api/matiere-bacc/matieres?option=${option}`,
+        // `http://localhost:3000/api/matiere-bacc/matieres?option=${option}`,
+        `${API_BACC.matiereBacc}?option=${option}`,
       );
       setMatieres(response.data.matieres); // Mettre à jour les matières
     } catch (err) {
@@ -278,16 +293,19 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
   const confirmDelete = async (idCorrecteur: string) => {
     try {
       await axios.delete(
-        `http://localhost:3000/api/correcteur/${idCorrecteur}`,
+        // `http://localhost:3000/api/correcteur/${idCorrecteur}`,
+        `${API_CORRECTEUR.supprimerCorrecteur}/${idCorrecteur}`,
       );
       setCorrecteurs(
         correcteurs.filter(
           (correcteur) => correcteur.idCorrecteur !== idCorrecteur,
         ),
       );
-      setOpen2(true); // Afficher le message de succès
+      // setOpen2(true);
+      toast.success('Correcteur supprimé avec succès.');
     } catch (err) {
-      alert('Erreur lors de la suppression du correcteur.');
+      // alert('Erreur lors de la suppression du correcteur.');
+      toast.error('Erreur lors de la suppression du correcteur.');
     }
   };
 
@@ -328,42 +346,127 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
     }
   };
 
-  // Fonction pour ouvrir le modal et récupérer les données de vacation
-  const handleOpenModal = async (idCorrecteur: string) => {
-    // Typage du paramètre idVacation
-    try {
-      // Appel API pour récupérer les données de la vacation
-      const response = await axios.get(
-        `http://localhost:3000/api/correcteur/${idCorrecteur}`,
-      );
-      const fetchedData = response.data;
-      setIsModalOpen(true);
+  
+  const handleChangeFiltre = (e: { target: { name: any; value: any } }) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
 
+    if (name === 'specialite') {
+      fetchSecteurs(value);
+      setFormData((prevData) => ({
+        ...prevData,
+        secteur: '',
+        option: '',
+        matiere: '',
+      }));
+      setSearchSpecialite(value);
+    }
 
-      // Remplir le formulaire avec les valeurs récupérées
-      setFormData({
-        idCorrecteur: fetchedData.idCorrecteur || '',
-        immatricule: fetchedData.immatricule || '',
-        firstName: fetchedData.nom || '',
-        lastName: fetchedData.prenom || '',
-        cin: fetchedData.cin || '',
-        telephone: fetchedData.telephone || '',
-        specialite: fetchedData.specialite || '',
-        secteur: fetchedData.secteur || '',
-        option: fetchedData.option || '',
-        matiere: fetchedData.matiere || '',
-        grade: fetchedData.grade || '',
-        experience: fetchedData.experience || '',
-        pochette: fetchedData.pochette || '',
-        nbcopie: fetchedData.nbcopie || '',
-      });
-    } catch (error) {
-      console.error(
-        'Erreur lors de la récupération des données de vacation',
-        error,
-      );
+    if (name === 'secteur') {
+      fetchOption(value);
+      setFormData((prevData) => ({
+        ...prevData,
+        option: '',
+        matiere: '',
+      }));
+      setSearchSecteur(value);
+    }
+
+    if (name === 'option') {
+      fetchMatieres(value);
+      setSearchOption(value);
+    }
+
+    if (name === 'matiere') {
+      setSearchMatiere(value);
     }
   };
+
+  // Fonction pour ouvrir le modal et récupérer les données de vacation
+  // const handleOpenModal = async (idCorrecteur: string) => {
+  //   // Typage du paramètre idVacation
+  //   try {
+  //     // Appel API pour récupérer les données de la vacation
+  //     const response = await axios.get(
+  //       // `http://localhost:3000/api/correcteur/${idCorrecteur}`,
+  //       `${API_CORRECTEUR.avoirIdCorrecteur}/${idCorrecteur}`,
+  //     );
+  //     const fetchedData = response.data;
+  //     setIsModalOpen(true);
+
+
+  //     // Remplir le formulaire avec les valeurs récupérées
+  //     setFormData({
+  //       idCorrecteur: fetchedData.idCorrecteur || '',
+  //       immatricule: fetchedData.immatricule || '',
+  //       firstName: fetchedData.nom || '',
+  //       lastName: fetchedData.prenom || '',
+  //       cin: fetchedData.cin || '',
+  //       telephone: fetchedData.telephone || '',
+  //       specialite: fetchedData.specialite || '',
+  //       secteur: fetchedData.secteur || '',
+  //       option: fetchedData.option || '',
+  //       matiere: fetchedData.matiere || '',
+  //       grade: fetchedData.grade || '',
+  //       experience: fetchedData.experience || '',
+  //       pochette: fetchedData.pochette || '',
+  //       nbcopie: fetchedData.nbcopie || '',
+  //     });
+  //   } catch (error) {
+  //     console.error(
+  //       'Erreur lors de la récupération des données de vacation',
+  //       error,
+  //     );
+  //   }
+  // };
+
+  const handleOpenModal = async (idCorrecteur: string) => {
+  try {
+    // 1️⃣ Récupérer le correcteur par ID
+    const response = await axios.get(
+      `${API_CORRECTEUR.avoirIdCorrecteur}/${idCorrecteur}`
+    );
+    const fetchedData = response.data;
+
+    // 2️⃣ Charger les listes dépendantes dans le bon ordre
+    if (fetchedData.specialite) {
+      await fetchSecteurs(fetchedData.specialite);
+    }
+
+    if (fetchedData.secteur) {
+      await fetchOption(fetchedData.secteur);
+    }
+
+    if (fetchedData.option) {
+      await fetchMatieres(fetchedData.option);
+    }
+
+    // 3️⃣ Remplir le formulaire avec les données récupérées
+    setFormData({
+      idCorrecteur: fetchedData.idCorrecteur || '',
+      immatricule: fetchedData.immatricule || '',
+      firstName: fetchedData.nom || '',
+      lastName: fetchedData.prenom || '',
+      cin: fetchedData.cin || '',
+      telephone: fetchedData.telephone || '',
+      specialite: fetchedData.specialite || '',
+      secteur: fetchedData.secteur || '',
+      option: fetchedData.option || '',
+      matiere: fetchedData.matiere || '',
+      grade: fetchedData.grade || '',
+      experience: fetchedData.experience || '',
+      pochette: fetchedData.pochette || '',
+      nbcopie: fetchedData.nbcopie || '',
+    });
+
+    // 4️⃣ Ouvrir le modal
+    setIsModalOpen(true);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des données du correcteur', error);
+    toast.error('Impossible de charger les détails du correcteur.');
+  }
+};
+
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -390,16 +493,19 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
     // Vérification si le CIN existe déjà
     const currentSession = new Date().getFullYear(); // Utilisation de l'année actuelle
     const checkResponse = await axios.get(
-      `http://localhost:3000/api/vacation/verification/${currentSession}/${pochette}`,
+      // `http://localhost:3000/api/vacation/verification/${currentSession}/${pochette}`,
+      `${API_VACATION.verifierPocheteVacation}/${currentSession}/${pochette}`,
     );
 
     try {
       if (checkResponse.data.exists) {
-        setOpenVerifyVac(true); // Afficher le dialogue ou message d'erreur
+        // setOpenVerifyVac(true); 
+        toast.error('CIN déjà existé, veuillez vérifier le CIN.');
         setLoading(false);
       } else {
         const response = await axios.post(
-          'http://localhost:3000/api/vacation/ajout',
+          // 'http://localhost:3000/api/vacation/ajout',
+          API_VACATION.ajoutVacation,
           {
             idCorrecteur,
             immatricule,
@@ -421,7 +527,9 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
         console.log('Vacation ajouté avec succès', response.data);
         // Traitez le succès ici, par exemple afficher un message ou rediriger
 
-        setOpenSuccess(true); // Afficher le message de succès
+        // setOpenSuccess(true); 
+        setIsModalOpen(false); // Fermer le modal
+        toast.success('Vacation ajouté avec succès.');
       }
     } catch (err: any) {
       if (err.response) {
@@ -612,7 +720,7 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                 name="specialite"
                 id="specialite"
                 value={formData.specialite}
-                onChange={handleChange}
+                onChange={handleChangeFiltre}
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none 
                                 transition focus:border-primary active:border-primary disabled:cursor-default 
                                 disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
@@ -641,7 +749,7 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                 name="secteur"
                 id="secteur"
                 value={formData.secteur}
-                onChange={handleChange}
+                onChange={handleChangeFiltre}
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
               >
                 <option value="">Sélectionnez un secteur</option>
@@ -669,7 +777,7 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                 name="option"
                 id="option"
                 value={formData.option}
-                onChange={handleChange}
+                onChange={handleChangeFiltre}
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
               >
                 <option value="">Sélectionnez une option</option>
@@ -698,7 +806,7 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                 name="matiere"
                 id="matiere"
                 value={formData.matiere}
-                onChange={handleChange}
+                onChange={handleChangeFiltre}
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
               >
                 <option value="">
@@ -956,7 +1064,7 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                       </h2>
 
                       {/* Dialog de vérification */}
-                      <Dialog
+                      {/* <Dialog
                         open={openVerifyVac||openSuccess}
                         onClose={() => {
                           setOpenVerifyVac(false);
@@ -1021,7 +1129,7 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                             </div>
                           </div>
                         </div>
-                      </Dialog>
+                      </Dialog> */}
 
                       <form onSubmit={handleSubmit}>
                         <div className="p-6.5">

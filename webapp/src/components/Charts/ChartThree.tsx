@@ -2,6 +2,7 @@ import { ApexOptions } from 'apexcharts';
 import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import axios from 'axios';
+import API_CORRECTEUR from '../../api/correcteur';
 
 const options: ApexOptions = {
   chart: {
@@ -51,7 +52,10 @@ const ChartThree: React.FC = () => {
 
   const fetchStats = async (session: number) => {
     try {
-      const response = await axios.post('http://localhost:3000/api/correcteur/comptage', {
+      // const response = await axios.post('http://localhost:3000/api/correcteur/comptage', {
+      //   session: session,
+      // });
+      const response = await axios.post(API_CORRECTEUR.compterStatutCorrecteur, {
         session: session,
       });
       setSeries([response.data.actifs, response.data.nonActifs]); // Mettre à jour les séries
