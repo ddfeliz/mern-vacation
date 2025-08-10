@@ -279,6 +279,7 @@ const DetailVacation = () => {
 
       setOpenSuccess(true); // Afficher le message de succès
       toast.success('Paiement ajouté avec succès');
+      handleCloseModal(); // Fermer le modal après l'ajout
       // setTimeout(() => {
       //   navigate('/présidence-service-finance/paiement-liste'); // Naviguer après un délai
       // }, 3000); // Délai de 2 secondes avant de naviguer
