@@ -17,7 +17,7 @@ router.get('/compte-vacation', Controlleur.avoirVacationCompteByCorrecteur);
 
 router.get('/correcteur/:immatricule', Controlleur.avoirIdVacation);
 
-router.get('/verification/:session/:pochette', Controlleur.avoirPochette);
+router.get('/verification/:session', Controlleur.avoirPochette);
 
 router.get('/:idVacation', Controlleur.avoirIMVacation);
 

@@ -514,7 +514,11 @@ const ShowCorrecteur = () => {
     const currentSession = new Date().getFullYear(); // Utilisation de l'année actuelle
     const checkResponse = await axios.get(
       // `http://localhost:3000/api/vacation/verification/${currentSession}/${pochette}`,
-      `${API_VACATION.verifierPocheteVacation}/${currentSession}/${pochette}`,
+      `${API_VACATION.verifierPocheteVacation}/${currentSession}`,
+      {
+        params: { pochette }  // axios encode automatiquement en query string
+      }
+
     );
 
     try {

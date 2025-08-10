@@ -128,7 +128,7 @@ exports.avoirTousVacations = async (req, res, next) => {
 exports.avoirPochette = async (req, res) => {
   try {
     const session = req.params.session;
-    const pochette = req.params.pochette;
+    const pochette = req.query.pochette;
     const vacation = await Vacation.findOne({ pochette, session });
 
     if (vacation) {
