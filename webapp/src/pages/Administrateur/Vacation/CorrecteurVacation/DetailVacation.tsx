@@ -247,7 +247,8 @@ const DetailVacation = () => {
 
     if (!montantTotal || !optionTarif) {
       console.log('Condition manquante pour montantTotal ou idVacation');
-      setOpenVerify(true);
+      // setOpenVerify(true);
+      toast.error('Veuillez vérifier les champs manquants !');
     }
 
     try {
@@ -277,6 +278,7 @@ const DetailVacation = () => {
       // Traitez le succès ici, par exemple afficher un message ou rediriger
 
       setOpenSuccess(true); // Afficher le message de succès
+      toast.success('Paiement ajouté avec succès');
       // setTimeout(() => {
       //   navigate('/présidence-service-finance/paiement-liste'); // Naviguer après un délai
       // }, 3000); // Délai de 2 secondes avant de naviguer
@@ -286,12 +288,14 @@ const DetailVacation = () => {
           err.response.data.message ||
           'Authentication failed. Please try again.',
         );
-        setOpenVerifyPayment(true);
+        // setOpenVerifyPayment(true);
+        toast.error('Ce paiement existe déjà ! Veuillez vérifier vos sources.');
       } else {
-        setError('An error occurred. Please try again.');
+        toast.error('Une erreur s’est produite. Veuillez réessayer.');
       }
 
       console.log(error);
+      toast.error('Erreur lors de l’ajout du paiement.');
     } finally {
       setLoading(false); // Arrêter le chargement
     }
