@@ -182,7 +182,7 @@ function Mydash() {
           path="/paiement/correcteur/:idCorrecteur"
           element={
             <>
-              <PageTitle title="Detail-Vacation | Système de vacation des correcteurs du baccalauréat" />
+              <PageTitle title="Detail-Paiement-Vacation | Système de vacation des correcteurs du baccalauréat" />
               <DetailPaymentVacation />
             </>
           }

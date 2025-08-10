@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom'; //useNavigate
 import Breadcrumb from '../../../components/Breadcrumbs/Breadcrumb';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -54,19 +54,28 @@ const ShowCorrecteur = () => {
   const [matieres, setMatieres] = useState<string[]>([]); // État pour stocker les matières
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
-    // const [openSuccess, setOpenSuccess] = useState(false);
-  
+
+  // const [openSuccess, setOpenSuccess] = useState(false);
+
   // const [openVerifyVac, setOpenVerifyVac] = useState(false);
   // État pour les filtres de recherche
   const [searchItem, setSearchItem] = useState('');
-  
-    // const navigate = useNavigate();
 
-  const [searchSpecialite, setSearchSpecialite] = useState('');
-  const [searchSecteur, setSearchSecteur] = useState('');
-  const [searchOption, setSearchOption] = useState('');
-  const [searchMatiere, setSearchMatiere] = useState('');
+  // const navigate = useNavigate();
+
+  const [filtreData, setFiltreData] = useState({
+    specialite: '',
+    secteur: '',
+    option: '',
+    matiere: '',
+  });
+
+  const [filtreSpecialites, setFiltreSpecialites] = useState<string[]>([]);
+  const [filtreSecteurs, setFiltreSecteurs] = useState<string[]>([]);
+  const [filtreOptions, setFiltreOptions] = useState<string[]>([]);
+  const [filtreMatieres, setFiltreMatieres] = useState<string[]>([]);
+
+
   const [totalCorrecteurs, setTotalCorrecteurs] = useState('0');
   const [actifs, setActifs] = useState(0);
   const [nonActifs, setNonActifs] = useState(0);
@@ -159,7 +168,8 @@ const ShowCorrecteur = () => {
         );
         const fetchedSpecialites = response.data.specialites;
         console.log('Specialites fetched:', fetchedSpecialites);
-        setSpecialites(fetchedSpecialites); // Mettre à jour les spécialités avec la réponse de l'API
+        setSpecialites(fetchedSpecialites);
+        setFiltreSpecialites(fetchedSpecialites);
       } catch (err) {
         console.error('Erreur lors de la récupération des spécialités :', err);
       }
@@ -167,6 +177,40 @@ const ShowCorrecteur = () => {
 
     fetchSpecialites();
   }, []);
+
+  // Pour le filtre
+  const fetchSecteursFiltre = async (specialite: string) => {
+    try {
+      const res = await axios.get(`${API_BACC.secteurBacc}?specialite=${specialite}`);
+      setFiltreSecteurs(res.data.secteurs || []);
+      setFiltreOptions([]);
+      setFiltreMatieres([]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchOptionsFiltre = async (secteur: string) => {
+    try {
+      const res = await axios.get(`${API_BACC.optionBacc}?secteur=${secteur}`);
+      setFiltreOptions(res.data.options || []);
+      setFiltreMatieres([]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchMatieresFiltre = async (option: string) => {
+    try {
+      const res = await axios.get(`${API_BACC.matiereBacc}?option=${option}`);
+      setFiltreMatieres(res.data.matieres || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
+
 
   // Récupérer les secteurs en fonction de la spécialité sélectionnée
   const fetchSecteurs = async (specialite: string) => {
@@ -225,39 +269,28 @@ const ShowCorrecteur = () => {
     }
   };
 
- // Filtrage des correcteurs en fonction des critères de recherche
-const filteredCorrecteurs = correcteurs.filter((correcteur) => {
-  const matchesNomOrPrenomOrId =
-  correcteur.cin.toLowerCase().includes(searchItem.toLowerCase()) ||
-    correcteur.nom.toLowerCase().includes(searchItem.toLowerCase()) ||
-    correcteur.prenom.toLowerCase().includes(searchItem.toLowerCase()) ||
-    correcteur.idCorrecteur.toLowerCase().includes(searchItem.toLowerCase());
+  // Filtrage des correcteurs en fonction des critères de recherche
+  const filteredCorrecteurs = correcteurs.filter((correcteur) => {
+    const matchesNomOrPrenomOrId =
+      correcteur.cin.toLowerCase().includes(searchItem.toLowerCase()) ||
+      correcteur.nom.toLowerCase().includes(searchItem.toLowerCase()) ||
+      correcteur.prenom.toLowerCase().includes(searchItem.toLowerCase()) ||
+      correcteur.idCorrecteur.toLowerCase().includes(searchItem.toLowerCase());
 
-  const matchesSpecialite = correcteur.specialite
-    .toLowerCase()
-    .includes(searchSpecialite.toLowerCase());
-  
-  const matchesSecteur = correcteur.secteur
-    .toLowerCase()
-    .includes(searchSecteur.toLowerCase());
+    const matchesSpecialite = !filtreData.specialite || correcteur.specialite === filtreData.specialite;
+    const matchesSecteur = !filtreData.secteur || correcteur.secteur === filtreData.secteur;
+    const matchesOption = !filtreData.option || correcteur.option === filtreData.option;
+    const matchesMatiere = !filtreData.matiere || correcteur.matiere === filtreData.matiere;
 
-  const matchesOption = correcteur.option
-    .toLowerCase()
-    .includes(searchOption.toLowerCase());
-
-  const matchesMatiere = correcteur.matiere
-    .toLowerCase()
-    .includes(searchMatiere.toLowerCase());
-
-  // Retourne les résultats qui correspondent aux critères de recherche
-  return (
-    matchesNomOrPrenomOrId &&
-    matchesSpecialite &&
-    matchesSecteur &&
-    matchesOption &&
-    matchesMatiere
-  );
-});
+    // Retourne les résultats qui correspondent aux critères de recherche
+    return (
+      matchesNomOrPrenomOrId &&
+      matchesSpecialite &&
+      matchesSecteur &&
+      matchesOption &&
+      matchesMatiere
+    );
+  });
 
 
   // Pagination
@@ -303,6 +336,7 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
       );
       // setOpen2(true);
       toast.success('Correcteur supprimé avec succès.');
+      setOpen(false);
     } catch (err) {
       // alert('Erreur lors de la suppression du correcteur.');
       toast.error('Erreur lors de la suppression du correcteur.');
@@ -321,8 +355,9 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
         option: '',
         matiere: '',
       }));
+      setSecteurs([])
       setOptions([]);
-      setSearchSpecialite(value);
+      setMatieres([])
     }
 
     if (name === 'secteur') {
@@ -332,53 +367,38 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
         option: '',
         matiere: '',
       }));
-      setMatieres([]);
-      setSearchSecteur(value);
+      setOptions([]);
+      setMatieres([])
     }
 
     if (name === 'option') {
       fetchMatieres(value);
-      setSearchOption(value);
-    }
-
-    if (name === 'matiere') {
-      setSearchMatiere(value);
+      setMatieres([])
     }
   };
 
-  
+
   const handleChangeFiltre = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFiltreData(prev => ({ ...prev, [name]: value }));
 
     if (name === 'specialite') {
-      fetchSecteurs(value);
-      setFormData((prevData) => ({
-        ...prevData,
-        secteur: '',
-        option: '',
-        matiere: '',
-      }));
-      setSearchSpecialite(value);
+      fetchSecteursFiltre(value);
+      setFiltreData(prev => ({ ...prev, secteur: '', option: '', matiere: '' }));
+      setFiltreSecteurs([]);
+      setFiltreOptions([]);
+      setFiltreMatieres([]);
     }
-
     if (name === 'secteur') {
-      fetchOption(value);
-      setFormData((prevData) => ({
-        ...prevData,
-        option: '',
-        matiere: '',
-      }));
-      setSearchSecteur(value);
+      fetchOptionsFiltre(value);
+      setFiltreData(prev => ({ ...prev, option: '', matiere: '' }));
+      setFiltreOptions([])
+      setFiltreMatieres([]);
     }
-
     if (name === 'option') {
-      fetchMatieres(value);
-      setSearchOption(value);
-    }
-
-    if (name === 'matiere') {
-      setSearchMatiere(value);
+      fetchMatieresFiltre(value);
+      setFiltreData(prev => ({ ...prev, matiere: '' }));
+      setFiltreMatieres([])
     }
   };
 
@@ -421,51 +441,51 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
   // };
 
   const handleOpenModal = async (idCorrecteur: string) => {
-  try {
-    // 1️⃣ Récupérer le correcteur par ID
-    const response = await axios.get(
-      `${API_CORRECTEUR.avoirIdCorrecteur}/${idCorrecteur}`
-    );
-    const fetchedData = response.data;
+    try {
+      // 1️⃣ Récupérer le correcteur par ID
+      const response = await axios.get(
+        `${API_CORRECTEUR.avoirIdCorrecteur}/${idCorrecteur}`
+      );
+      const fetchedData = response.data;
 
-    // 2️⃣ Charger les listes dépendantes dans le bon ordre
-    if (fetchedData.specialite) {
-      await fetchSecteurs(fetchedData.specialite);
+      // 2️⃣ Charger les listes dépendantes dans le bon ordre
+      if (fetchedData.specialite) {
+        await fetchSecteurs(fetchedData.specialite);
+      }
+
+      if (fetchedData.secteur) {
+        await fetchOption(fetchedData.secteur);
+      }
+
+      if (fetchedData.option) {
+        await fetchMatieres(fetchedData.option);
+      }
+
+      // 3️⃣ Remplir le formulaire avec les données récupérées
+      setFormData({
+        idCorrecteur: fetchedData.idCorrecteur || '',
+        immatricule: fetchedData.immatricule || '',
+        firstName: fetchedData.nom || '',
+        lastName: fetchedData.prenom || '',
+        cin: fetchedData.cin || '',
+        telephone: fetchedData.telephone || '',
+        specialite: fetchedData.specialite || '',
+        secteur: fetchedData.secteur || '',
+        option: fetchedData.option || '',
+        matiere: fetchedData.matiere || '',
+        grade: fetchedData.grade || '',
+        experience: fetchedData.experience || '',
+        pochette: fetchedData.pochette || '',
+        nbcopie: fetchedData.nbcopie || '',
+      });
+
+      // 4️⃣ Ouvrir le modal
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données du correcteur', error);
+      toast.error('Impossible de charger les détails du correcteur.');
     }
-
-    if (fetchedData.secteur) {
-      await fetchOption(fetchedData.secteur);
-    }
-
-    if (fetchedData.option) {
-      await fetchMatieres(fetchedData.option);
-    }
-
-    // 3️⃣ Remplir le formulaire avec les données récupérées
-    setFormData({
-      idCorrecteur: fetchedData.idCorrecteur || '',
-      immatricule: fetchedData.immatricule || '',
-      firstName: fetchedData.nom || '',
-      lastName: fetchedData.prenom || '',
-      cin: fetchedData.cin || '',
-      telephone: fetchedData.telephone || '',
-      specialite: fetchedData.specialite || '',
-      secteur: fetchedData.secteur || '',
-      option: fetchedData.option || '',
-      matiere: fetchedData.matiere || '',
-      grade: fetchedData.grade || '',
-      experience: fetchedData.experience || '',
-      pochette: fetchedData.pochette || '',
-      nbcopie: fetchedData.nbcopie || '',
-    });
-
-    // 4️⃣ Ouvrir le modal
-    setIsModalOpen(true);
-  } catch (error) {
-    console.error('Erreur lors de la récupération des données du correcteur', error);
-    toast.error('Impossible de charger les détails du correcteur.');
-  }
-};
+  };
 
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -719,22 +739,15 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
               <select
                 name="specialite"
                 id="specialite"
-                value={formData.specialite}
+                value={filtreData.specialite}
                 onChange={handleChangeFiltre}
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none 
                                 transition focus:border-primary active:border-primary disabled:cursor-default 
                                 disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
               >
                 <option value="">Sélectionnez une spécialité</option>
-                {specialites && specialites.length > 0 ? (
-                  specialites.map((specialite, index) => (
-                    <option key={index} value={specialite}>
-                      {specialite}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>Chargement...</option>
-                )}
+
+                {filtreSpecialites.map((sp, i) => <option key={i} value={sp}>{sp}</option>)}
               </select>
             </div>
 
@@ -748,22 +761,13 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
               <select
                 name="secteur"
                 id="secteur"
-                value={formData.secteur}
+                value={filtreData.secteur}
                 onChange={handleChangeFiltre}
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
               >
                 <option value="">Sélectionnez un secteur</option>
-                {secteurs && secteurs.length > 0 ? (
-                  secteurs.map((secteur, index) => (
-                    <option key={index} value={secteur}>
-                      {secteur}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>
-                    Veuillez sélectionner une spécialité d'abord
-                  </option>
-                )}
+
+                {filtreSecteurs.map((sec, i) => <option key={i} value={sec}>{sec}</option>)}
               </select>
             </div>
             <div className="w-full xl:w-1/4">
@@ -776,22 +780,13 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
               <select
                 name="option"
                 id="option"
-                value={formData.option}
+                value={filtreData.option}
                 onChange={handleChangeFiltre}
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
               >
                 <option value="">Sélectionnez une option</option>
-                {options && options.length > 0 ? (
-                  options.map((option, index) => (
-                    <option key={index} value={option}>
-                      {option}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>
-                    Veuillez sélectionner un secteur d'abord
-                  </option>
-                )}
+
+                {filtreOptions.map((opt, i) => <option key={i} value={opt}>{opt}</option>)}
               </select>
             </div>
 
@@ -805,7 +800,7 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
               <select
                 name="matiere"
                 id="matiere"
-                value={formData.matiere}
+                value={filtreData.matiere}
                 onChange={handleChangeFiltre}
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
               >
@@ -818,17 +813,8 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                     </p>
                   )}
                 </option>
-                {matieres && matieres.length > 0 ? (
-                  matieres.map((matiere, index) => (
-                    <option key={index} value={matiere}>
-                      {matiere}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>
-                    Veuillez sélectionner une option d'abord
-                  </option>
-                )}
+
+                {filtreMatieres.map((mat, i) => <option key={i} value={mat}>{mat}</option>)}
               </select>
             </div>
           </div>
@@ -959,8 +945,8 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                             to=""
                             className="hover:text-primary"
                           >
-                            <DocumentTextIcon className="h-auto w-5 text-success" 
-                            onClick={() => handleOpenModal(correcteur.idCorrecteur)} />
+                            <DocumentTextIcon className="h-auto w-5 text-success"
+                              onClick={() => handleOpenModal(correcteur.idCorrecteur)} />
                           </Link>
                           <Link
                             to={`/présidence-service-finance/correcteur/${correcteur.idCorrecteur}`}
@@ -992,7 +978,7 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                           <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
                             <div className="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
                               <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg dark:bg-gray-800">
-                                <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 dark:bg-black">
+                                <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 dark:bg-white">
                                   <div className="sm:flex sm:items-start">
                                     <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10 dark:bg-red-600">
                                       <CheckCircleIcon
@@ -1003,12 +989,12 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                                     <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
                                       <DialogTitle
                                         as="h3"
-                                        className="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100"
+                                        className="text-base font-semibold leading-6 text-gray-900 dark:text-black"
                                       >
                                         Confirmation
                                       </DialogTitle>
                                       <div className="mt-2">
-                                        <p className="text-sm text-black dark:text-white">
+                                        <p className="text-sm text-black dark:text-black">
                                           Voulez-vous vraiment supprimer ce
                                           correcteur dont l'ID est :{' '}
                                           {correcteur.idCorrecteur} ?
@@ -1020,18 +1006,24 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
                                 <div className="mt-4 mb-4 flex justify-end">
                                   <button
                                     onClick={cancelDelete}
-                                    className="mr-2 bg-secondary text-black px-4 py-2 rounded dark:bg-secondary dark:text-white"
+                                    className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-secondary bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-secondary hover:text-secondary dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-secondary dark:hover:text-secondary"
                                   >
-                                    Annuler
+                                    <span className='m-5'>Annuler</span>
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() =>
                                       confirmDelete(correcteur.idCorrecteur)
                                     }
-                                    className="mr-2 bg-red-500 text-white px-4 py-2 rounded dark:bg-red-600"
+                                    className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-danger bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-danger hover:text-danger dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-danger dark:hover:text-danger"
                                   >
-                                    Oui, supprimer
+                                    <span className='m-5'>Oui, supprimer</span>
                                   </button>
                                 </div>
                               </DialogPanel>
@@ -1055,429 +1047,353 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
             </table>
 
 
-                {/* Modal */}
-                {isModalOpen && (
-                  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-6 rounded-lg w-2/3 max-h-[90vh] overflow-auto shadow-lg dark:bg-meta-4">
-                      <h2 className="font-semibold mb-4 text-center text-title-lg">
-                        Créer un paiement pour un vacation
-                      </h2>
-
-                      {/* Dialog de vérification */}
-                      {/* <Dialog
-                        open={openVerifyVac||openSuccess}
-                        onClose={() => {
-                          setOpenVerifyVac(false);
-                          setOpenSuccess(false);
-                        }}
-                        className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto"
-                      >
-                        <div className="fixed inset-0 bg-black bg-opacity-50"></div>
-                        <div className="flex items-center justify-center min-h-screen">
-                          <div className="relative mx-auto w-full max-w-md rounded-lg bg-white shadow-lg p-6">
-                            <div className="flex items-center space-x-4">
-                              <div className="flex-shrink-0">
-                                {openVerifyVac ? (
-                                  <CheckCircleIcon className="h-12 w-12 text-warning" />
-                                ) : (
-                                  <CheckCircleIcon className="h-12 w-12 text-success" />
-                                )}
-                              </div>
-                              <div>
-                                <h3 className="text-xl font-medium text-danger">
-                                  {openVerifyVac
-                                    ? 'Vérification du vacation'
-                                    : 'Succès!'}
-                                </h3>
-                                <p className="mt-2 text-sm text-gray-500">
-                                  {openVerifyVac
-                                    ? 'Ce vacation existe déjà ! Veuillez vérifier vos sources.'
-                                    : `Le vacation du correcteur s'est deroulé avec succès`}
-                                </p>
-                                <div className="flex justify-end">
-                                  <button
-                                    type="button"
-                                    className="mt-8 mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
-                                    border-secondary bg-transparent text-black transition hover:bg-transparent
-                                    hover:border-secondary hover:text-secondary dark:border-strokedark 
-                                    dark:bg-transparent dark:text-secondary dark:hover:border-secondary dark:hover:text-secondary"
-                                    style={{ width: '100px' }}
-                                    onClick={() => {
-                                      setOpenVerifyVac(false);
-                                    }}
-                                  >
-                                    Fermer
-                                  </button>
-                                  {openSuccess && (
-                                    <button
-                                      type="button"
-                                      className="mt-8 mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
-                                    border-success bg-transparent text-black transition hover:bg-transparent
-                                    hover:border-success hover:text-success dark:border-strokedark 
-                                    dark:bg-transparent dark:text-success dark:hover:border-success dark:hover:text-success"
-                                      style={{ width: '100px' }}
-                                      onClick={() => {
-                                        setOpenSuccess(false);
-                                        navigate('/présidence-service-finance/vacation');
-                                      }}
-                                    >
-                                      OK
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+            {/* Modal */}
+            {isModalOpen && (
+              <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
+                <div className="bg-white p-6 rounded-lg w-2/3 max-h-[90vh] overflow-auto shadow-lg dark:bg-meta-4">
+                  <h2 className="font-semibold mb-4 text-center text-title-lg">
+                    Créer un paiement pour un vacation
+                  </h2>
+                  <form onSubmit={handleSubmit}>
+                    <div className="p-6.5">
+                      <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                        <div className="w-full xl:w-1/2">
+                          <label
+                            htmlFor="idCorrecteur"
+                            className="mb-2.5 block text-black dark:text-white"
+                          >
+                            ID Correcteur <span className="text-meta-1">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            name="idCorrecteur"
+                            id="idCorrecteur"
+                            placeholder="..."
+                            value={formData.idCorrecteur}
+                            onChange={handleChange}
+                            required
+                            disabled
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          />
                         </div>
-                      </Dialog> */}
+                        <div className="w-full xl:w-1/2">
+                          <label
+                            htmlFor="immatricule"
+                            className="mb-2.5 block text-black dark:text-white"
+                          >
+                            Numéro immatricule
+                            <span className="text-meta-1">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            name="immatricule"
+                            id="immatricule"
+                            placeholder="..."
+                            value={formData.immatricule}
+                            onChange={handleChange}
+                            required
+                            disabled
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                        <div className="w-full xl:w-1/2">
+                          <label
+                            htmlFor="firstName"
+                            className="mb-2.5 block text-black dark:text-white"
+                          >
+                            Prénom <span className="text-meta-1">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            name="firstName"
+                            id="firstName"
+                            placeholder="..."
+                            value={formData.firstName}
+                            onChange={handleChange}
+                            required
+                            disabled
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          />
+                        </div>
 
-                      <form onSubmit={handleSubmit}>
-                        <div className="p-6.5">
-                          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                            <div className="w-full xl:w-1/2">
-                              <label
-                                htmlFor="idCorrecteur"
-                                className="mb-2.5 block text-black dark:text-white"
-                              >
-                                ID Correcteur <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                name="idCorrecteur"
-                                id="idCorrecteur"
-                                placeholder="..."
-                                value={formData.idCorrecteur}
-                                onChange={handleChange}
-                                required
-                                disabled
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              />
-                            </div>
-                            <div className="w-full xl:w-1/2">
-                              <label
-                                htmlFor="immatricule"
-                                className="mb-2.5 block text-black dark:text-white"
-                              >
-                                Numéro immatricule
-                                <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                name="immatricule"
-                                id="immatricule"
-                                placeholder="..."
-                                value={formData.immatricule}
-                                onChange={handleChange}
-                                required
-                                disabled
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              />
-                            </div>
-                          </div>
-                          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                            <div className="w-full xl:w-1/2">
-                              <label
-                                htmlFor="firstName"
-                                className="mb-2.5 block text-black dark:text-white"
-                              >
-                                Prénom <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                name="firstName"
-                                id="firstName"
-                                placeholder="..."
-                                value={formData.firstName}
-                                onChange={handleChange}
-                                required
-                                disabled
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              />
-                            </div>
+                        <div className="w-full xl:w-1/2">
+                          <label
+                            htmlFor="lastName"
+                            className="mb-2.5 block text-black dark:text-white"
+                          >
+                            Nom de famille <span className="text-meta-1">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            name="lastName"
+                            id="lastName"
+                            placeholder="..."
+                            value={formData.lastName}
+                            onChange={handleChange}
+                            required
+                            disabled
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          />
+                        </div>
+                      </div>
 
-                            <div className="w-full xl:w-1/2">
-                              <label
-                                htmlFor="lastName"
-                                className="mb-2.5 block text-black dark:text-white"
-                              >
-                                Nom de famille <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                name="lastName"
-                                id="lastName"
-                                placeholder="..."
-                                value={formData.lastName}
-                                onChange={handleChange}
-                                required
-                                disabled
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              />
-                            </div>
-                          </div>
+                      {/* Ligne pour l'email et le téléphone */}
+                      <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                        <div className="w-full xl:w-1/2">
+                          <label
+                            htmlFor="cin"
+                            className="mb-2.5 block text-black dark:text-white"
+                          >
+                            CIN <span className="text-meta-1">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            name="cin"
+                            id="cin"
+                            placeholder="..."
+                            value={formData.cin}
+                            onChange={handleChange}
+                            onBlur={() => {
+                              if (formData.cin.length !== 14) {
+                                alert('Le numéro CIN doit contenir exactement 14 chiffres.');
+                              }
+                            }}
+                            minLength={14}
+                            maxLength={14}
+                            required
+                            disabled
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          />
+                        </div>
 
-                          {/* Ligne pour l'email et le téléphone */}
-                          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                            <div className="w-full xl:w-1/2">
-                              <label
-                                htmlFor="cin"
-                                className="mb-2.5 block text-black dark:text-white"
-                              >
-                                CIN <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                type="number"
-                                name="cin"
-                                id="cin"
-                                placeholder="..."
-                                value={formData.cin}
-                                onChange={handleChange}
-                                onBlur={() => {
-                                  if (formData.cin.length !== 14) {
-                                    alert('Le numéro CIN doit contenir exactement 14 chiffres.');
-                                  }
-                                }}
-                                minLength={14}
-                                maxLength={14}
-                                required
-                                disabled
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              />
-                            </div>
+                        <div className="w-full xl:w-1/2">
+                          <label
+                            htmlFor="telephone"
+                            className="mb-2.5 block text-black dark:text-white"
+                          >
+                            Téléphone <span className="text-meta-1">*</span>
+                          </label>
+                          <input
+                            type="tel"
+                            name="telephone"
+                            id="telephone"
+                            placeholder="..."
+                            value={formData.telephone}
+                            onChange={handleChange}
+                            required
+                            disabled
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          />
+                        </div>
+                      </div>
 
-                            <div className="w-full xl:w-1/2">
-                              <label
-                                htmlFor="telephone"
-                                className="mb-2.5 block text-black dark:text-white"
-                              >
-                                Téléphone <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                type="tel"
-                                name="telephone"
-                                id="telephone"
-                                placeholder="..."
-                                value={formData.telephone}
-                                onChange={handleChange}
-                                required
-                                disabled
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              />
-                            </div>
-                          </div>
-                          
-                          {/* Ligne pour spécialité et grade */}
-                          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                            <div className="w-full xl:w-1/2">
-                              <label
-                                htmlFor="specialite"
-                                className="mb-2.5 block text-black dark:text-white"
-                              >
-                                Baccalauréat d'enseignement{' '}
-                                <span className="text-meta-1">*</span>
-                              </label>
-                              <select
-                                name="specialite"
-                                id="specialite"
-                                value={formData.specialite}
-                                onChange={handleChange}
-                                required
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              >
-                                <option value="">Sélectionnez un enseignement</option>
-                                {specialites && specialites.length > 0 ? (
-                                  specialites.map((specialite, index) => (
-                                    <option key={index} value={specialite}>
-                                      {specialite}
-                                    </option>
-                                  ))
-                                ) : (
-                                  <option disabled>Chargement...</option>
-                                )}
-                              </select>
-                              {formData.specialite && (
+                      {/* Ligne pour spécialité et grade */}
+                      <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                        <div className="w-full xl:w-1/2">
+                          <label
+                            htmlFor="specialite"
+                            className="mb-2.5 block text-black dark:text-white"
+                          >
+                            Baccalauréat d'enseignement{' '}
+                            <span className="text-meta-1">*</span>
+                          </label>
+                          <select
+                            name="specialite"
+                            id="specialite"
+                            value={formData.specialite}
+                            onChange={handleChange}
+                            required
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          >
+                            <option value="">Sélectionnez un enseignement</option>
+                            {specialites && specialites.length > 0 ? (
+                              specialites.map((specialite, index) => (
+                                <option key={index} value={specialite}>
+                                  {specialite}
+                                </option>
+                              ))
+                            ) : (
+                              <option disabled>Chargement...</option>
+                            )}
+                          </select>
+                        </div>
+
+                        <div className="w-full xl:w-1/2">
+                          <label
+                            htmlFor="secteur"
+                            className="mb-2.5 block text-black dark:text-white"
+                          >
+                            Secteur <span className="text-meta-1">*</span>
+                          </label>
+                          <select
+                            name="secteur"
+                            id="secteur"
+                            value={formData.secteur}
+                            onChange={handleChange}
+                            required
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          >
+                            <option value="">Sélectionnez un secteur</option>
+                            {secteurs && secteurs.length > 0 ? (
+                              secteurs.map((secteur, index) => (
+                                <option key={index} value={secteur}>
+                                  {secteur}
+                                </option>
+                              ))
+                            ) : (
+                              <option disabled>
+                                Veuillez sélectionner une spécialité d'abord
+                              </option>
+                            )}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                        <div className="w-full xl:w-1/2">
+                          <label
+                            htmlFor="option"
+                            className="mb-2.5 block text-black dark:text-white"
+                          >
+                            Option <span className="text-meta-1">*</span>
+                          </label>
+                          <select
+                            name="option"
+                            id="option"
+                            value={formData.option}
+                            onChange={handleChange}
+                            required
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          >
+                            <option value="">Sélectionnez une option</option>
+                            {options && options.length > 0 ? (
+                              options.map((option, index) => (
+                                <option key={index} value={option}>
+                                  {option}
+                                </option>
+                              ))
+                            ) : (
+                              <option disabled>
+                                Veuillez sélectionner un secteur d'abord
+                              </option>
+                            )}
+                          </select>
+                        </div>
+
+                        <div className="w-full xl:w-1/2">
+                          <label
+                            htmlFor="matiere"
+                            className="mb-2.5 block text-black dark:text-white"
+                          >
+                            Matière <span className="text-meta-1">*</span>
+                          </label>
+                          <select
+                            name="matiere"
+                            id="matiere"
+                            value={formData.matiere}
+                            onChange={handleChange}
+                            required
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          >
+                            <option value="">
+                              Sélectionnez une matière
+                              {formData.option && (
                                 <p className="mt-2 text-black dark:text-white">
-                                  Spécialité sélectionnée :{' '}
-                                  <strong>{formData.specialite}</strong>
+                                  selon l'option selectionné :{' '}
+                                  <strong>{formData.option}</strong>
                                 </p>
                               )}
-                            </div>
-
-                            <div className="w-full xl:w-1/2">
-                              <label
-                                htmlFor="secteur"
-                                className="mb-2.5 block text-black dark:text-white"
-                              >
-                                Secteur <span className="text-meta-1">*</span>
-                              </label>
-                              <select
-                                name="secteur"
-                                id="secteur"
-                                value={formData.secteur}
-                                onChange={handleChange}
-                                required
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              >
-                                <option value="">Sélectionnez un secteur</option>
-                                {secteurs && secteurs.length > 0 ? (
-                                  secteurs.map((secteur, index) => (
-                                    <option key={index} value={secteur}>
-                                      {secteur}
-                                    </option>
-                                  ))
-                                ) : (
-                                  <option disabled>
-                                    Veuillez sélectionner une spécialité d'abord
-                                  </option>
-                                )}
-                              </select>
-                            </div>
-                          </div>
-                          
-                          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                            <div className="w-full xl:w-1/2">
-                              <label
-                                htmlFor="option"
-                                className="mb-2.5 block text-black dark:text-white"
-                              >
-                                Option <span className="text-meta-1">*</span>
-                              </label>
-                              <select
-                                name="option"
-                                id="option"
-                                value={formData.option}
-                                onChange={handleChange}
-                                required
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              >
-                                <option value="">Sélectionnez une option</option>
-                                {options && options.length > 0 ? (
-                                  options.map((option, index) => (
-                                    <option key={index} value={option}>
-                                      {option}
-                                    </option>
-                                  ))
-                                ) : (
-                                  <option disabled>
-                                    Veuillez sélectionner un secteur d'abord
-                                  </option>
-                                )}
-                              </select>
-                            </div>
-
-                            <div className="w-full xl:w-1/2">
-                              <label
-                                htmlFor="matiere"
-                                className="mb-2.5 block text-black dark:text-white"
-                              >
-                                Matière <span className="text-meta-1">*</span>
-                              </label>
-                              <select
-                                name="matiere"
-                                id="matiere"
-                                value={formData.matiere}
-                                onChange={handleChange}
-                                required
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              >
-                                <option value="">
-                                  Sélectionnez une matière
-                                  {formData.option && (
-                                    <p className="mt-2 text-black dark:text-white">
-                                      selon l'option selectionné :{' '}
-                                      <strong>{formData.option}</strong>
-                                    </p>
-                                  )}
+                            </option>
+                            {matieres && matieres.length > 0 ? (
+                              matieres.map((matiere, index) => (
+                                <option key={index} value={matiere}>
+                                  {matiere}
                                 </option>
-                                {matieres && matieres.length > 0 ? (
-                                  matieres.map((matiere, index) => (
-                                    <option key={index} value={matiere}>
-                                      {matiere}
-                                    </option>
-                                  ))
-                                ) : (
-                                  <option disabled>
-                                    Veuillez sélectionner une option d'abord
-                                  </option>
-                                )}
-                              </select>
-                            </div>
-                          </div>
+                              ))
+                            ) : (
+                              <option disabled>
+                                Veuillez sélectionner une option d'abord
+                              </option>
+                            )}
+                          </select>
+                        </div>
+                      </div>
 
-                          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                            <div className="w-full xl:w-1/2">
-                              <label
-                                htmlFor="pochette"
-                                className="mb-2.5 block text-black dark:text-white"
-                              >
-                                Pochette <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                name="pochette"
-                                id="pochette"
-                                placeholder="Entrer le code pochette"
-                                value={formData.pochette}
-                                onChange={handleChange}
-                                required
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              />
-                            </div>
-                            <div className="w-full xl:w-1/2">
-                              <label
-                                htmlFor="nbcopie"
-                                className="mb-2.5 block text-black dark:text-white"
-                              >
-                                Nombre des Copies corrigées{' '}
-                                <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                type="number"
-                                name="nbcopie"
-                                id="nbcopie"
-                                placeholder="Entrez le nombre des copies corrigés "
-                                value={formData.nbcopie}
-                                onChange={handleChange}
-                                required
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              />
-                            </div>
-                          </div>
+                      <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                        <div className="w-full xl:w-1/2">
+                          <label
+                            htmlFor="pochette"
+                            className="mb-2.5 block text-black dark:text-white"
+                          >
+                            Pochette <span className="text-meta-1">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            name="pochette"
+                            id="pochette"
+                            placeholder="Entrer le code pochette"
+                            value={formData.pochette}
+                            onChange={handleChange}
+                            required
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          />
+                        </div>
+                        <div className="w-full xl:w-1/2">
+                          <label
+                            htmlFor="nbcopie"
+                            className="mb-2.5 block text-black dark:text-white"
+                          >
+                            Nombre des Copies corrigées{' '}
+                            <span className="text-meta-1">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            name="nbcopie"
+                            id="nbcopie"
+                            placeholder="Entrez le nombre des copies corrigés "
+                            value={formData.nbcopie}
+                            onChange={handleChange}
+                            required
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          />
+                        </div>
+                      </div>
 
-                          <div className="flex justify-end p-6.5 border-t border-stroke dark:border-strokedark">
-                            <button
-                              type="button"
-                              className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                      <div className="flex justify-end p-6.5 border-t border-stroke dark:border-strokedark">
+                        <button
+                          type="button"
+                          className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
                                               border-secondary bg-transparent text-black transition hover:bg-transparent
                                               hover:border-secondary hover:text-secondary dark:border-strokedark 
                                                 dark:bg-transparent dark:text-white dark:hover:border-secondary dark:hover:text-secondary"
-                              style={{ width: '180px' }}
-                              onClick={() => {
-                                setIsModalOpen(false); // Ferme la modale
-                              }}
-                            >
-                              Annuler
-                            </button>
-                            <button
-                              type="submit"
-                              disabled={loading}
-                              className={`mr-3 inline-flex w-40 h-11 items-center justify-center rounded-md border
+                          style={{ width: '180px' }}
+                          onClick={() => {
+                            setIsModalOpen(false); // Ferme la modale
+                          }}
+                        >
+                          Annuler
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className={`mr-3 inline-flex w-40 h-11 items-center justify-center rounded-md border
                                                   border-primary bg-transparent text-black transition hover:bg-transparent
                                                   hover:border-primary hover:text-primary dark:border-strokedark 
-                                                    dark:bg-transparent dark:text-white dark:hover:border-primary dark:hover:text-primary ${
-                                                      loading
-                                                        ? 'cursor-not-allowed opacity-50'
-                                                        : ''
-                                                    }`}
-                            >
-                              {loading ? 'Chargement...' : 'Créer'}
-                            </button>
-                          </div>
-                        </div>
-                      </form>
+                                                    dark:bg-transparent dark:text-white dark:hover:border-primary dark:hover:text-primary ${loading
+                              ? 'cursor-not-allowed opacity-50'
+                              : ''
+                            }`}
+                        >
+                          {loading ? 'Chargement...' : 'Créer'}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  </form>
+                </div>
+              </div>
+            )}
 
 
 
@@ -1487,22 +1403,20 @@ const filteredCorrecteurs = correcteurs.filter((correcteur) => {
         {/* Pagination */}
         <div className="flex justify-center space-x-2 mt-4">
           <button
-            className={`py-2 px-4 rounded ${
-              currentPage === 1
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-primary text-white'
-            }`}
+            className={`py-2 px-4 rounded ${currentPage === 1
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-primary text-white'
+              }`}
             onClick={() => paginate(currentPage - 1)}
             disabled={currentPage === 1}
           >
             Précédent
           </button>
           <button
-            className={`py-2 px-4 rounded ${
-              currentPage === totalPages
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-primary text-white'
-            }`}
+            className={`py-2 px-4 rounded ${currentPage === totalPages
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-primary text-white'
+              }`}
             onClick={() => paginate(currentPage + 1)}
             disabled={currentPage === totalPages}
           >

@@ -84,7 +84,8 @@ const CreateTarif = () => {
       );
 
       if (responseCheck.data.exists) {
-        setOpenVerify(true);
+        // setOpenVerify(true);
+        toast.warning('Ce tarif existe déjà!')
         setLoading(false);
         return; // Ne pas continuer si le tarif existe
       } else {

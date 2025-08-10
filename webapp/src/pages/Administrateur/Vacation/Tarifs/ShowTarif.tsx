@@ -9,6 +9,7 @@ import { TrashIcon } from '@heroicons/react/24/outline';
 import { Tarif } from '../../../../types/tarif';
 import { BsFillFilePlusFill } from 'react-icons/bs';
 import API_TARIF from '../../../../api/tarif';
+import { toast } from 'react-toastify';
 
 const ShowTarif = () => {
     const [tarifs, setTarifs] = useState<Tarif[]>([]);
@@ -77,7 +78,8 @@ const ShowTarif = () => {
         try {
             await axios.delete(`${API_TARIF.avoirIdTarif}/${idTarif}`);
             setTarifs(tarifs.filter((tarif) => tarif.idTarif !== idTarif));
-            setOpen2(true); // Afficher le message de succès
+            // setOpen2(true);
+            toast.success('Tarif supprimé avec succès.');
             setOpen(false);
         } catch (err) {
             alert("Erreur lors de la suppression du tarif.");
@@ -207,17 +209,23 @@ const ShowTarif = () => {
                                                             </div>
                                                             <div className="mt-4 mb-4 flex justify-end">
                                                                 <button
-                                                                    type='button'
-                                                                    onClick={() => confirmDelete(tarif.idTarif)}
-                                                                    className="mr-2 bg-red-500 text-white px-4 py-2 rounded dark:bg-red-600"
+                                                                    onClick={cancelDelete}
+                                                                    className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-secondary bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-secondary hover:text-secondary dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-secondary dark:hover:text-secondary"
                                                                 >
-                                                                    Oui, supprimer
+                                                                    <span className='m-5'>Annuler</span>
                                                                 </button>
                                                                 <button
-                                                                    onClick={cancelDelete}
-                                                                    className="bg-gray-300 text-gray-800 px-4 py-2 rounded dark:bg-gray-600 dark:text-gray-200"
+                                                                    type='button'
+                                                                    onClick={() => confirmDelete(tarif.idTarif)}
+                                                                    className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-danger bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-danger hover:text-danger dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-danger dark:hover:text-danger"
                                                                 >
-                                                                    Annuler
+                                                                    <span className='m-5'>Oui, supprimer</span>
                                                                 </button>
                                                             </div>
                                                         </DialogPanel>

@@ -33,7 +33,7 @@ const DropdownUser = () => {
     dispatch(logout());
     dispatch(setAuthenticationStatus(false));
 
-    navigate('/', {replace: true}); 
+    navigate('/', { replace: true });
   };
 
   const cancelLogout = () => {
@@ -217,16 +217,22 @@ const DropdownUser = () => {
               </div>
               <div className="mt-4 mb-4 flex justify-end">
                 <button
-                  onClick={confirmLogout}
-                  className="mr-2 bg-red-500 text-white px-4 py-2 rounded dark:bg-red-600"
+                  onClick={cancelLogout}
+                  className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                    border-secondary bg-transparent text-black transition hover:bg-transparent
+                    hover:border-secondary hover:text-secondary dark:border-graydark 
+                      dark:bg-transparent dark:text-strokedark dark:hover:border-secondary dark:hover:text-secondary"
                 >
-                  Oui, déconnecter
+                  <span className='m-5'>Annuler</span>
                 </button>
                 <button
-                  onClick={cancelLogout}
-                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded dark:bg-gray-600 dark:text-gray-200"
+                  onClick={confirmLogout}
+                  className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                  border-danger bg-transparent text-black transition hover:bg-transparent
+                  hover:border-danger hover:text-danger dark:border-graydark 
+                  dark:bg-transparent dark:text-strokedark dark:hover:border-danger dark:hover:text-danger"
                 >
-                  Annuler
+                  <span className='m-5'>Oui, déconnecter</span>
                 </button>
               </div>
             </DialogPanel>
@@ -257,80 +263,80 @@ const DropdownUser = () => {
                       Detail de l'Administrateur
                     </DialogTitle>
                     <div className="mt-2">
-                          <div className="mb-2 flex flex-col xl:flex-row gap-6">
-                            <div className="w-full xl:w-1/2">
-                              <label className="mb-2.5 block text-black dark:text-white">
-                                ID <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={utilisateur.idUtilisateur}
-                                disabled
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              />
-                            </div>
+                      <div className="mb-2 flex flex-col xl:flex-row gap-6">
+                        <div className="w-full xl:w-1/2">
+                          <label className="mb-2.5 block text-black dark:text-white">
+                            ID <span className="text-meta-1">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={utilisateur.idUtilisateur}
+                            disabled
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          />
+                        </div>
 
-                            <div className="w-full xl:w-1/2">
-                              <label className="mb-2.5 block text-black dark:text-white">
-                                Nom <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={utilisateur.nom}
-                                disabled
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              />
-                            </div>
-                          </div>
-                          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                            <div className="w-full xl:w-1/2">
-                              <label className="mb-2.5 block text-black dark:text-white">
-                                Prenom <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={utilisateur.prenom}
-                                disabled
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              />
-                            </div>
+                        <div className="w-full xl:w-1/2">
+                          <label className="mb-2.5 block text-black dark:text-white">
+                            Nom <span className="text-meta-1">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={utilisateur.nom}
+                            disabled
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                        <div className="w-full xl:w-1/2">
+                          <label className="mb-2.5 block text-black dark:text-white">
+                            Prenom <span className="text-meta-1">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={utilisateur.prenom}
+                            disabled
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          />
+                        </div>
 
-                            <div className="w-full xl:w-1/2">
-                              <label className="mb-2.5 block text-black dark:text-white">
-                                Téléphone<span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={utilisateur.telephone}
-                                disabled
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              />
-                            </div>
-                          </div>
-                          <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                            <div className="w-full xl:w-1/2">
-                              <label className="mb-2.5 block text-black dark:text-white">
-                                Adresse <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={utilisateur.adresse}
-                                disabled
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              />
-                            </div>
-                            <div className="w-full xl:w-1/2">
-                              <label className="mb-2.5 block text-black dark:text-white">
-                                Email <span className="text-meta-1">*</span>
-                              </label>
-                              <input
-                                type="text"
-                                value={utilisateur.email}
-                                disabled
-                                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                              />
-                            </div>
-                          </div>
+                        <div className="w-full xl:w-1/2">
+                          <label className="mb-2.5 block text-black dark:text-white">
+                            Téléphone<span className="text-meta-1">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={utilisateur.telephone}
+                            disabled
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                        <div className="w-full xl:w-1/2">
+                          <label className="mb-2.5 block text-black dark:text-white">
+                            Adresse <span className="text-meta-1">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={utilisateur.adresse}
+                            disabled
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          />
+                        </div>
+                        <div className="w-full xl:w-1/2">
+                          <label className="mb-2.5 block text-black dark:text-white">
+                            Email <span className="text-meta-1">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={utilisateur.email}
+                            disabled
+                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

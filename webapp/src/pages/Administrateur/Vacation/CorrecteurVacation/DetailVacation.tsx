@@ -284,7 +284,7 @@ const DetailVacation = () => {
       if (err.response) {
         setError(
           err.response.data.message ||
-            'Authentication failed. Please try again.',
+          'Authentication failed. Please try again.',
         );
         setOpenVerifyPayment(true);
       } else {
@@ -457,19 +457,25 @@ const DetailVacation = () => {
                               </div>
                               <div className="mt-4 mb-4 flex justify-end">
                                 <button
+                                  onClick={cancelDelete}
+                                  className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-secondary bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-secondary hover:text-secondary dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-secondary dark:hover:text-secondary"
+                                >
+                                  <span className='m-5'>Annuler</span>
+                                </button>
+                                <button
                                   type="button"
                                   onClick={() =>
                                     confirmDelete(vacation.idVacation)
                                   }
-                                  className="mr-2 bg-red-500 text-white px-4 py-2 rounded dark:bg-red-600"
+                                  className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-danger bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-danger hover:text-danger dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-danger dark:hover:text-danger"
                                 >
-                                  Oui, supprimer
-                                </button>
-                                <button
-                                  onClick={cancelDelete}
-                                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded dark:bg-gray-600 dark:text-gray-200"
-                                >
-                                  Annuler
+                                  <span className='m-5'>Oui, supprimer</span>
                                 </button>
                               </div>
                             </Dialog.Panel>
@@ -528,15 +534,15 @@ const DetailVacation = () => {
                             {openVerify
                               ? 'Des erreurs sont survenues'
                               : openVerifyPayment
-                              ? 'Vérification du paiement'
-                              : 'Succès!'}
+                                ? 'Vérification du paiement'
+                                : 'Succès!'}
                           </h3>
                           <p className="mt-2 text-sm text-gray-500">
                             {openVerify
                               ? 'Veuillez compléter les champs manquants !'
                               : openVerifyPayment
-                              ? 'Ce paiement existe déjà ! Veuillez vérifier vos sources.'
-                              : `Le paiement s'est deroulé avec succès`}
+                                ? 'Ce paiement existe déjà ! Veuillez vérifier vos sources.'
+                                : `Le paiement s'est deroulé avec succès`}
                           </p>
                           <div className="flex justify-end">
                             <button
@@ -916,11 +922,10 @@ const DetailVacation = () => {
                       className={`mr-3 inline-flex w-40 h-11 items-center justify-center rounded-md border
                                              border-primary bg-transparent text-black transition hover:bg-transparent
                                              hover:border-primary hover:text-primary dark:border-strokedark 
-                                              dark:bg-transparent dark:text-primary dark:hover:border-primary dark:hover:text-primary ${
-                                                loading
-                                                  ? 'cursor-not-allowed opacity-50'
-                                                  : ''
-                                              }`}
+                                              dark:bg-transparent dark:text-primary dark:hover:border-primary dark:hover:text-primary ${loading
+                          ? 'cursor-not-allowed opacity-50'
+                          : ''
+                        }`}
                     >
                       {loading ? 'Chargement...' : 'Créer'}
                     </button>
@@ -934,22 +939,20 @@ const DetailVacation = () => {
       {/* Pagination */}
       <div className="flex justify-center space-x-2 mt-4">
         <button
-          className={`py-2 px-4 rounded ${
-            currentPage === 1
+          className={`py-2 px-4 rounded ${currentPage === 1
               ? 'bg-gray-300 cursor-not-allowed'
               : 'bg-primary text-white'
-          }`}
+            }`}
           onClick={() => paginate(currentPage - 1)}
           disabled={currentPage === 1}
         >
           Précédent
         </button>
         <button
-          className={`py-2 px-4 rounded ${
-            currentPage === totalPages
+          className={`py-2 px-4 rounded ${currentPage === totalPages
               ? 'bg-gray-300 cursor-not-allowed'
               : 'bg-primary text-white'
-          }`}
+            }`}
           onClick={() => paginate(currentPage + 1)}
           disabled={currentPage === totalPages}
         >

@@ -21,7 +21,7 @@ const DetailPaymentVacation = () => {
   const [paiements, setPaiements] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [open, setOpen] = useState(false); 
+  const [open, setOpen] = useState(false);
   // const [open1, setOpen1] = useState(false); 
   const [currentPage, setCurrentPage] = useState(1);
   const [paiementsPerPage] = useState(5);
@@ -79,7 +79,7 @@ const DetailPaymentVacation = () => {
     fetchPayment();
   }, [idCorrecteur]);
 
-  
+
   // Calculer le nombre total de pages
   const totalPages = Math.ceil(paiements.length / paiementsPerPage);
   const indexOfLastPaiement = currentPage * paiementsPerPage;
@@ -107,9 +107,9 @@ const DetailPaymentVacation = () => {
       </p>
     );
 
-    const handleView = () => {
-      navigate('/présidence-service-finance/nouveau-paiement');
-    };
+  const handleView = () => {
+    navigate('/présidence-service-finance/nouveau-paiement');
+  };
 
   // Affichage des détails du correcteur
   return (
@@ -185,11 +185,11 @@ const DetailPaymentVacation = () => {
               {currentPaiements.length > 0 ? (
                 currentPaiements.map((paiement) => (
                   <tr key={paiement.idPaiement}>
-                  <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                    <p className="text-black dark:text-white">
-                      {paiement.idPaiement}
-                    </p>
-                  </td>
+                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                      <p className="text-black dark:text-white">
+                        {paiement.idPaiement}
+                      </p>
+                    </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                       <p className="text-black dark:text-white">
                         {paiement.idVacation}
@@ -282,19 +282,25 @@ const DetailPaymentVacation = () => {
                               </div>
                               <div className="mt-4 mb-4 flex justify-end">
                                 <button
+                                  onClick={cancelDelete}
+                                  className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-secondary bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-secondary hover:text-secondary dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-secondary dark:hover:text-secondary"
+                                >
+                                  <span className='m-5'>Annuler</span>
+                                </button>
+                                <button
                                   type="button"
                                   onClick={() =>
                                     confirmDelete(paiement.idPaiement)
                                   }
-                                  className="mr-2 bg-red-500 text-white px-4 py-2 rounded dark:bg-red-600"
+                                  className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-danger bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-danger hover:text-danger dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-danger dark:hover:text-danger"
                                 >
-                                  Oui, supprimer
-                                </button>
-                                <button
-                                  onClick={cancelDelete}
-                                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded dark:bg-gray-600 dark:text-gray-200"
-                                >
-                                  Annuler
+                                  <span className='m-5'>Oui, supprimer</span>
                                 </button>
                               </div>
                             </Dialog.Panel>
@@ -322,22 +328,20 @@ const DetailPaymentVacation = () => {
       {/* Pagination */}
       <div className="flex justify-center space-x-2 mt-4">
         <button
-          className={`py-2 px-4 rounded ${
-            currentPage === 1
+          className={`py-2 px-4 rounded ${currentPage === 1
               ? 'bg-gray-300 cursor-not-allowed'
               : 'bg-primary text-white'
-          }`}
+            }`}
           onClick={() => paginate(currentPage - 1)}
           disabled={currentPage === 1}
         >
           Précédent
         </button>
         <button
-          className={`py-2 px-4 rounded ${
-            currentPage === totalPages
+          className={`py-2 px-4 rounded ${currentPage === totalPages
               ? 'bg-gray-300 cursor-not-allowed'
               : 'bg-primary text-white'
-          }`}
+            }`}
           onClick={() => paginate(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
