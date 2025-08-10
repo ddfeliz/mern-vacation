@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'https://gestion-vacation.onrender.com';
 
 export default BASE_URL;
 export interface APIArchive {
