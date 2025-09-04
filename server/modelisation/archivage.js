@@ -4,29 +4,23 @@ const mongoose = require("mongoose");
 const archivePaiementSchema = new mongoose.Schema(
   {
     idPaiement: {
-      type: String,
-      required: true,
-      unique: true,
+      type: String
     },
     idVacation: {
       type: String,
-      required: true,
-      unique: true,
+      required: true
     },
     idCorrecteur: {
       type: String,
-      required: true
     },
     immatricule: {
         type: String
     },
     nom: {
       type: String,
-      required: true,
     },
     prenom: {
       type: String,
-      required: true,
     },
     cin: {
       type: String,
