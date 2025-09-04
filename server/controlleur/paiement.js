@@ -21,7 +21,6 @@ exports.ajoutPaiement = async (req, res, next) => {
 
     // Créer un nouvel objet correcteur avec les informations fournies
     const newPaiement = new Paiement({
-      idPaiement: `PAYM-${Math.floor(1000 + Math.random() * 9000)}`, // Générer un identifiant unique
       idVacation,
       idCorrecteur,
       immatricule,

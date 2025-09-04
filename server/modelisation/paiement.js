@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
+const Counter = require("./counter");
 
 // Définition du schéma pour le paiement
 const paiementSchema = new mongoose.Schema(
   {
     idPaiement: {
       type: String,
-      required: true
+      unique: true
     },
     idVacation: {
       type: String,
@@ -66,27 +67,28 @@ const paiementSchema = new mongoose.Schema(
   }
 );
 
-// Création du modèle à partir du schéma
-const Paiement = mongoose.model("Paiement", paiementSchema);
 
 // Middleware pour générer automatiquement l'idPaiement avant la sauvegarde
 paiementSchema.pre("save", async function (next) {
   const paiement = this;
 
-  // Si l'idPaiement n'est pas encore défini
-  if (!paiement.idPaiement) {
-    const lastPaiement = await Paiement.findOne().sort({ _id: -1 });
-
-    let newIdNumber = 1;
-    if (lastPaiement && /^PAYM-\d+$/.test(lastPaiement.idPaiement)) {
-      const lastIdNumber = parseInt(lastPaiement.idPaiement.split("-")[1], 10);
-      newIdNumber = lastIdNumber + 1;
+    if (!paiement.idPaiement) {
+        try {
+            const counter = await Counter.findOneAndUpdate(
+                { _id: 'paiementId' },
+                { $inc: { sequence: 1 } },
+                { upsert: true, new: true }
+            );
+            paiement.idPaiement = `NB-PAYM-${counter.sequence.toString().padStart(3, '0')}`;
+        } catch (error) {
+            return next(error);
+        }
     }
-
-    paiement.idPaiement = `PAYM-${newIdNumber.toString().padStart(3, "0")}`;
-  }
 
   next();
 });
+
+
+const Paiement = mongoose.model("Paiement", paiementSchema);
 
 module.exports = Paiement;

@@ -53,7 +53,6 @@ exports.ajoutCorrecteur = async (req, res, next) => {
     }
 
     const newCorrecteur = new Correcteur({
-      idCorrecteur: `COR-${Math.floor(1000 + Math.random() * 9000)}`, 
       nom,
       prenom,
       immatricule,

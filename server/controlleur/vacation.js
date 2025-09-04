@@ -67,7 +67,6 @@ exports.ajoutVacation = async (req, res, next) => {
     }
 
     const newVacation = new Vacation({
-      idVacation: `VAC-${Math.floor(1000 + Math.random() * 9000)}`,
       idCorrecteur,
       immatricule,
       nom,

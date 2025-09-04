@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
+const Counter = require('./counter');
 
 const correcteurSchema = new mongoose.Schema({
     idCorrecteur: {
         type: String,
-        required: true,
         unique: true
     },
     immatricule: {
@@ -32,7 +32,7 @@ const correcteurSchema = new mongoose.Schema({
     },
     telephone: {
         type: String,
-        required: true,
+        required: true
     },
     specialite: {
         type: String,
@@ -51,7 +51,7 @@ const correcteurSchema = new mongoose.Schema({
     statut: {
         type: String,
         enum: ['Actif', 'Non actif'],
-        default: 'Non actif' 
+        default: 'Non actif'
     },
 }, {
     timestamps: true
@@ -61,29 +61,19 @@ correcteurSchema.pre('save', async function(next) {
     const correcteur = this;
 
     if (!correcteur.idCorrecteur) {
-        const lastCorrecteur = await Correcteur.findOne().sort({_id: -1});
-
-        let newIdNumber = 1;
-        if (lastCorrecteur && lastCorrecteur.idCorrecteur) {
-            const lastIdNumber = parseInt(lastCorrecteur.idCorrecteur.split('-')[1], 10);
-            newIdNumber = lastIdNumber + 1;
+        try {
+            const counter = await Counter.findOneAndUpdate(
+                { _id: 'correcteurId' },
+                { $inc: { sequence: 1 } },
+                { upsert: true, new: true }
+            );
+            correcteur.idCorrecteur = `NB-COR-${counter.sequence.toString().padStart(3, '0')}`;
+        } catch (error) {
+            return next(error);
         }
-
-        correcteur.idCorrecteur = `COR-${newIdNumber.toString().padStart(3, '0')}`;
     }
-
-    // if (!correcteur.immatricule) {
-        
-    //     const entier = Math.floor(Math.random() * 900) + 100; 
-    //     const decimal = Math.floor(Math.random() * 900) + 100; 
-    //     const nombreDecimal = `${entier}${decimal}`; 
-
-    //     correcteur.immatricule = nombreDecimal;
-    // }
-
     next();
 });
-
 
 const Correcteur = mongoose.model('Correcteur', correcteurSchema);
 

@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
+const Counter = require('./counter');
 
 const vacationSchema = new mongoose.Schema({
     idVacation: {
         type: String,
-        required: true,
         unique: true
     },
     idCorrecteur: {
@@ -72,17 +72,17 @@ vacationSchema.pre('save', async function(next) {
     const vacation = this;
 
     if (!vacation.idVacation) {
-        const lastVacation = await Vacation.findOne().sort({_id: -1});
-
-        let newIdNumber = 1;
-        if (lastVacation && lastVacation.idVacation) {
-            const lastIdNumber = parseInt(lastVacation.idVacation.split('-')[1], 10);
-            newIdNumber = lastIdNumber + 1;
+        try {
+            const counter = await Counter.findOneAndUpdate(
+                { _id: 'vacationId' },
+                { $inc: { sequence: 1 } },
+                { upsert: true, new: true }
+            );
+            vacation.idVacation = `NB-VAC-${counter.sequence.toString().padStart(3, '0')}`;
+        } catch (error) {
+            return next(error);
         }
-
-        vacation.idVacation = `VAC-${newIdNumber.toString().padStart(3, '0')}`;
     }
-
     next();
 });
 
