@@ -1,5 +1,5 @@
-// const BASE_URL = 'https://gestion-vacation.onrender.com';
-const BASE_URL = 'http://localhost:3001';
+const BASE_URL = 'https://gestion-vacation.onrender.com';
+// const BASE_URL = 'http://localhost:3001';
 
 
 export default BASE_URL;
