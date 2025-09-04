@@ -12,8 +12,8 @@ import ShowTarif from './pages/Administrateur/Vacation/Tarifs/ShowTarif';
 import EditTarif from './pages/Administrateur/Vacation/Tarifs/EditTarif';
 import CreateTarif from './pages/Administrateur/Vacation/Tarifs/CreateTarif';
 import ShowVacation from './pages/Administrateur/Vacation/CorrecteurVacation/ShowVacation';
-import CreateVacation from './pages/Administrateur/Vacation/CorrecteurVacation/CreateVacation';
-import CreatePaymentVacation from './pages/Administrateur/Vacation/CorrecteurVacation/CreatePaymentVacation';
+// import CreateVacation from './pages/Administrateur/Vacation/CorrecteurVacation/CreateVacation';
+// import CreatePaymentVacation from './pages/Administrateur/Vacation/CorrecteurVacation/CreatePaymentVacation';
 import ShowPaymentVacation from './pages/Administrateur/Vacation/CorrecteurVacation/ShowPaymentVacation';
 import ShowArchivePayment from './pages/Administrateur/Vacation/CorrecteurVacation/ShowArchivePayment';
 import DetailVacation from './pages/Administrateur/Vacation/CorrecteurVacation/DetailVacation';
@@ -139,7 +139,7 @@ function Mydash() {
             </>
           }
         />
-        <Route
+        {/* <Route
           path= "/nouveau-vacation"
           element={
             <>
@@ -147,9 +147,9 @@ function Mydash() {
               <CreateVacation />
             </>
           }
-        />
+        /> */}
         <Route
-          path="/vacation/correcteur/:immatricule"
+          path="/vacation/correcteur/:idCorrecteur"
           element={
             <>
               <PageTitle title="Detail-Vacation | Système de vacation des correcteurs du baccalauréat" />
@@ -169,7 +169,7 @@ function Mydash() {
             </>
           }
         />
-        <Route
+        {/* <Route
           path= "/nouveau-paiement"
           element={
             <>
@@ -177,7 +177,7 @@ function Mydash() {
               <CreatePaymentVacation />
             </>
           }
-        />
+        /> */}
         <Route
           path="/paiement/correcteur/:idCorrecteur"
           element={

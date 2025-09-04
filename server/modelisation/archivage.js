@@ -18,8 +18,7 @@ const archivePaiementSchema = new mongoose.Schema(
       required: true
     },
     immatricule: {
-        type: String,
-        required: true
+        type: String
     },
     nom: {
       type: String,

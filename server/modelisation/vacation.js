@@ -12,7 +12,6 @@ const vacationSchema = new mongoose.Schema({
     },
     immatricule: {
         type: String,
-        required: true
     },
     nom: {
         type: String,

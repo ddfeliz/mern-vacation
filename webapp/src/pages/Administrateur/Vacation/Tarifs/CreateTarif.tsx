@@ -106,7 +106,7 @@ const CreateTarif = () => {
         toast.success('Tarif ajouté avec succès.');
         setTimeout(() => {
           navigate('/présidence-service-finance/tarif'); // Naviguer après un délai
-        }, 3000); // Délai de 2 secondes avant de naviguer
+        }, 500); // Délai de 2 secondes avant de naviguer
       }
     } catch (err: any) {
       if (err.response) {

@@ -13,6 +13,7 @@ interface APICorrecteur {
   verifierCINCorrecteur: string;
   modifierCorrecteur: string;
   supprimerCorrecteur: string;
+  genererPDF: string;
 }
 
 const API_CORRECTEUR: APICorrecteur = {
@@ -27,6 +28,7 @@ const API_CORRECTEUR: APICorrecteur = {
   verifierCINCorrecteur: `${BASE_URL}/api/correcteur/verification`,
   modifierCorrecteur: `${BASE_URL}/api/correcteur`,
   supprimerCorrecteur: `${BASE_URL}/api/correcteur`,
+  genererPDF: `${BASE_URL}/api/correcteur/genererPDF`,
 };
 
 export default API_CORRECTEUR;

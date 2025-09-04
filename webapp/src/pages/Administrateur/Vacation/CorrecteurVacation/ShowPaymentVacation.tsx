@@ -17,7 +17,7 @@ import {
   QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 // import { TrashIcon } from '@heroicons/react/24/outline';
-import { BsCashCoin, BsSearch } from 'react-icons/bs';
+import { BsCashCoin, BsFilePdfFill, BsSearch } from 'react-icons/bs';
 import CardDataStats from '../../../../components/CardDataStats';
 // import { PDFDownloadLink } from '@react-pdf/renderer'; BsFilePdfFill,
 // import PaymentPdf from './PaymentPdf';
@@ -173,6 +173,7 @@ const ShowPaymentVacation = () => {
     const isNameMatch =
       payment.nom.toLowerCase().includes(searchItem.toLowerCase()) ||
       payment.prenom.toLowerCase().includes(searchItem.toLowerCase()) ||
+      payment.cin.toLowerCase().includes(searchItem.toLowerCase()) ||
       payment.idCorrecteur.toLowerCase().includes(searchItem.toLowerCase());
 
     return isNameMatch;
@@ -276,7 +277,7 @@ const ShowPaymentVacation = () => {
       setOpenArchive(false);
       setTimeout(() => {
         navigate('/présidence-service-finance/nouveau-paiement');
-      }, 2000); // Délai de 2 secondes avant de naviguer
+      }, 500); // Délai de 2 secondes avant de naviguer
     } catch (error) {
       toast.error('Erreur lors de la réinitialisation des paiements.');
       console.log(error);
@@ -284,6 +285,36 @@ const ShowPaymentVacation = () => {
       setLoading(false);
     }
   };
+
+
+  const handleDownloadPdf = async (idCorrecteur: string, session: number, prenom: string, nom: string) => {
+    try {
+      const response = await axios.get(
+        `${API_PAIEMENT.genererPaiementPDF}/${idCorrecteur}/${session}`,
+        { responseType: "blob" }
+      );
+
+      // Création du lien de téléchargement
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `paiement_${prenom} ${nom}_${session}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success('PDF generé avec succès.')
+    } catch (error) {
+      console.error("Erreur lors du téléchargement du PDF :", error);
+      toast.error("Impossible de générer le PDF du paiement.");
+    }
+  };
+
+
+
+  // Fonction utilitaire pour formater montant
+  const formatMontant = (val: any) =>
+    (val || 0).toLocaleString("fr-FR").replace(/\s/g, " ") + " Ar";
+
 
   return (
     <>
@@ -473,10 +504,10 @@ const ShowPaymentVacation = () => {
             <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg dark:bg-gray-800">
               <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 dark:bg-gray-800">
                 <div className="sm:flex sm:items-start">
-                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10 dark:bg-red-600">
-                    <CheckCircleIcon
+                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 sm:mx-0 sm:h-10 sm:w-10 dark:bg-blue-600">
+                    <QuestionMarkCircleIcon
                       aria-hidden="true"
-                      className="h-6 w-6 text-red-600 dark:text-red-200"
+                      className="h-6 w-6 text-white dark:text-gray-500"
                     />
                   </div>
                   <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
@@ -499,16 +530,22 @@ const ShowPaymentVacation = () => {
               </div>
               <div className="mt-4 mb-4 flex justify-end">
                 <button
-                  onClick={updateStatus}
-                  className="mr-2 bg-blue-500 text-white px-4 py-2 rounded dark:bg-blue-600"
+                  onClick={() => setOpenUpdatePayment(false)}
+                  className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-secondary bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-secondary hover:text-secondary dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-secondary dark:hover:text-secondary"
                 >
-                  Oui
+                  <span className='m-5'>Annuler</span>
                 </button>
                 <button
-                  onClick={() => setOpenUpdatePayment(false)}
-                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded dark:bg-gray-600 dark:text-gray-200"
+                  onClick={updateStatus}
+                  className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-success bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-success hover:text-success dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-success dark:hover:text-success"
                 >
-                  Annuler
+                  <span className='m-5'>Oui, Payé</span>
                 </button>
               </div>
             </DialogPanel>
@@ -558,17 +595,23 @@ const ShowPaymentVacation = () => {
               </div>
               <div className="mt-4 mb-4 flex justify-end">
                 <button
-                  onClick={handleReset}
-                  className="mr-2 bg-red-500 text-white px-4 py-2 rounded dark:bg-red-600"
-                  disabled={loading}
+                  onClick={() => setOpenArchive(false)}
+                  className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-secondary bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-secondary hover:text-secondary dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-secondary dark:hover:text-secondary"
                 >
-                  {loading ? 'archivage en cours...' : 'Oui, archiver'}
+                  <span className='m-5'>Annuler</span>
                 </button>
                 <button
-                  onClick={() => setOpenArchive(false)}
-                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded dark:bg-gray-600 dark:text-gray-200"
+                  onClick={handleReset}
+                  className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-danger bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-danger hover:text-danger dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-danger dark:hover:text-danger"
+                  disabled={loading}
                 >
-                  Annuler
+                  <span className='m-5'>{loading ? 'archivage en cours...' : 'Oui, archiver'}</span>
                 </button>
               </div>
             </DialogPanel>
@@ -666,7 +709,6 @@ const ShowPaymentVacation = () => {
               <option value="">-- Sélectionner une spécialité --</option>
               <option value="Général">Général</option>
               <option value="Professionnel et Technique">Professionnel et Technique</option>
-              <option value="Technologique">Technologique</option>
             </select>
             <button
               onClick={handleExport}
@@ -720,8 +762,8 @@ const ShowPaymentVacation = () => {
             <table className="w-full table-auto">
               <thead>
                 <tr className="bg-gray-2 text-center dark:bg-meta-4">
-                  <th className="min-w-[160px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                    ID Correcteur
+                  <th className="min-w-[80px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
+                    -
                   </th>
                   <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
                     Nom Complet
@@ -748,16 +790,16 @@ const ShowPaymentVacation = () => {
               </thead>
               <tbody>
                 {currentTarifs && currentTarifs.length > 0 ? (
-                  currentTarifs.map((paiement) => (
+                  currentTarifs.map((paiement, index) => (
                     <tr key={paiement.idCorrecteur}>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {paiement.idCorrecteur}
+                          {indexOfFirstPayment + index + 1}
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {paiement.nom} {paiement.prenom}
+                          {paiement.prenom} {paiement.nom}
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
@@ -772,12 +814,17 @@ const ShowPaymentVacation = () => {
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {paiement.nombreVacations}
+                          <Link
+                            to={`/présidence-service-finance/paiement/correcteur/${paiement.idCorrecteur}`}
+                            className="hover:text-primary"
+                          >
+                            {paiement.nombreVacations}
+                          </Link>
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                         <p className="text-black dark:text-white">
-                          {paiement.montantTotal} Ar
+                          {formatMontant(paiement.montantTotal)}
                         </p>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
@@ -801,6 +848,14 @@ const ShowPaymentVacation = () => {
                           >
                             <EyeIcon className="h-auto w-5 text-secondary" />
                           </Link>
+
+                          {/* Nouveau bouton PDF */}
+                          <button
+                            onClick={() => handleDownloadPdf(paiement.idCorrecteur, paiement.session, paiement.prenom, paiement.nom)}
+                            className="hover:text-primary"
+                          >
+                            <BsFilePdfFill className="h-auto w-5 text-red-600" />
+                          </button>
                           {/* <button onClick={handleDeleting}>
                             <TrashIcon className="h-auto w-5 text-danger" />
                           </button> */}
@@ -890,8 +945,8 @@ const ShowPaymentVacation = () => {
         <div className="flex justify-center space-x-2 mt-4">
           <button
             className={`py-2 px-4 rounded ${currentPage === 1
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-primary text-white'
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-primary text-white'
               }`}
             onClick={() => paginate(currentPage - 1)}
             disabled={currentPage === 1}
@@ -900,8 +955,8 @@ const ShowPaymentVacation = () => {
           </button>
           <button
             className={`py-2 px-4 rounded ${currentPage === totalPages
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-primary text-white'
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-primary text-white'
               }`}
             onClick={() => paginate(currentPage + 1)}
             disabled={currentPage === totalPages}

@@ -15,8 +15,15 @@ const ArchiveRoutage = require('./routage/archivage');
 
 const app = express();
 
+const corsOptions = {
+  origin: "*", // ou mets l'URL précise de ton frontend, ex: "http://localhost:5173"
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["Content-Disposition"], // utile pour les téléchargements
+};
+
 // 1) MIDDLEWARE
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // 2) ROUTE DES ACTEURS

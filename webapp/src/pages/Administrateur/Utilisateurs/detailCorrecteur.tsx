@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Correcteur } from '../../../types/correcteur';
 import Breadcrumb from '../../../components/Breadcrumbs/Breadcrumb';
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/react';
-import { ArrowLeftIcon, CheckCircleIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, CheckCircleIcon, PencilSquareIcon, QuestionMarkCircleIcon, TrashIcon } from '@heroicons/react/24/outline';
 import API_CORRECTEUR from '../../../api/correcteur';
 import { toast } from 'react-toastify';
 
@@ -34,20 +34,20 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
 
     // Fonction pour supprimer un correcteur
     const confirmDelete = async (idCorrecteur: string) => {
-            try {
-                // await axios.delete(`http://localhost:3000/api/correcteur/${idCorrecteur}`);
-                await axios.delete(`${API_CORRECTEUR.supprimerCorrecteur}/${idCorrecteur}`);
-                setCorrecteurs(correcteurs.filter((correcteur) => correcteur.idCorrecteur !== idCorrecteur));
-                // setOpen1(true); 
-                toast.success('Suppression de correcteur avec succès.');
-                setTimeout(() => {
-                    navigate('/présidence-service-finance/correcteur'); // Naviguer après un délai
-                }, 3000); // Délai de 2 secondes avant de naviguer
-            } catch (err) {
-                // alert("Erreur lors de la suppression du correcteur.");
-                toast.error('Erreur lors de la suppression du correcteur.')
-            }
-        
+        try {
+            // await axios.delete(`http://localhost:3000/api/correcteur/${idCorrecteur}`);
+            await axios.delete(`${API_CORRECTEUR.supprimerCorrecteur}/${idCorrecteur}`);
+            setCorrecteurs(correcteurs.filter((correcteur) => correcteur.idCorrecteur !== idCorrecteur));
+            // setOpen1(true); 
+            toast.success('Suppression de correcteur avec succès.');
+            setTimeout(() => {
+                navigate('/présidence-service-finance/correcteur'); // Naviguer après un délai
+            }, 500); // Délai de 2 secondes avant de naviguer
+        } catch (err) {
+            // alert("Erreur lors de la suppression du correcteur.");
+            toast.error('Erreur lors de la suppression du correcteur.')
+        }
+
     };
 
     useEffect(() => {
@@ -61,7 +61,7 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
                 setError('Erreur lors de la récupération des détails du correcteur');
                 console.log(error);
                 toast.error(error);
-                
+
             } finally {
                 setLoading(false);
             }
@@ -71,18 +71,18 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
     }, [idCorrecteur]);
 
     // Affichage d'un loader pendant le chargement
-  if (loading)
-    return (
-      <p className="flex h-screen items-center justify-center text-black dark:text-white">
-        Chargement de detail du correcteur...
-      </p>
-    );
-  if (error)
-    return (
-      <p className="flex h-screen items-center justify-center text-black dark:text-white">
-        {error} ou les données a été réinitialisé
-      </p>
-    );
+    if (loading)
+        return (
+            <p className="flex h-screen items-center justify-center text-black dark:text-white">
+                Chargement de detail du correcteur...
+            </p>
+        );
+    if (error)
+        return (
+            <p className="flex h-screen items-center justify-center text-black dark:text-white">
+                {error} ou les données a été réinitialisé
+            </p>
+        );
 
     // Affichage des détails du correcteur
     return (
@@ -95,7 +95,7 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
                         <div className='w-full rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark'>
                             <div className="border-b border-stroke py-4 px-6.5 dark:border-strokedark">
                                 <h3 className="font-medium text-black text-center dark:text-white">
-                                    Numéro immatricule du correcteur : {correcteur.immatricule}
+                                    I.M du correcteur : {correcteur.immatricule}
                                 </h3>
                             </div>
 
@@ -260,7 +260,7 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
                                             style={{ width: '120px' }} // Ajustez la largeur selon vos besoins
                                             onClick={handleRetour}
                                         >
-                                            <ArrowLeftIcon className='h-auto w-5 text-secondary'/>
+                                            <ArrowLeftIcon className='h-auto w-5 text-secondary' />
                                         </button>
                                         <button
                                             type="button"
@@ -271,7 +271,7 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
                                             style={{ width: '120px' }} // Ajustez la largeur selon vos besoins
                                             onClick={handleDeleting}
                                         >
-                                            <TrashIcon className='h-auto w-5 text-danger'/>
+                                            <TrashIcon className='h-auto w-5 text-danger' />
                                         </button>
                                         <Link to={`/présidence-service-finance/modifier-correcteur/${correcteur.idCorrecteur}`}>
                                             <button
@@ -283,7 +283,7 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
                                               dark:bg-transparent dark:text-white dark:hover:border-primary dark:hover:text-primary ${loading ? "cursor-not-allowed opacity-50" : ""
                                                     }`}
                                             >
-                                                {loading ? "Chargement..." : <PencilSquareIcon  className='h-auto w-5 text-primary'/> }
+                                                {loading ? "Chargement..." : <PencilSquareIcon className='h-auto w-5 text-primary' />}
                                             </button>
                                         </Link>
                                     </div>
@@ -296,8 +296,11 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
                                                 <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg dark:bg-gray-800">
                                                     <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 dark:bg-gray-800">
                                                         <div className="sm:flex sm:items-start">
-                                                            <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10 dark:bg-red-600">
-                                                                <CheckCircleIcon aria-hidden="true" className="h-6 w-6 text-red-600 dark:text-red-200" />
+                                                            <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 sm:mx-0 sm:h-10 sm:w-10 dark:bg-blue-600">
+                                                                <QuestionMarkCircleIcon
+                                                                    aria-hidden="true"
+                                                                    className="h-6 w-6 text-white dark:text-gray-500"
+                                                                />
                                                             </div>
                                                             <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
                                                                 <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900 dark:text-gray-100">
@@ -313,17 +316,23 @@ const detailCorrecteur = () => {  // Changement du nom en majuscule
                                                     </div>
                                                     <div className="mt-4 mb-4 flex justify-end">
                                                         <button
-                                                            type='button'
-                                                            onClick={() => confirmDelete(correcteur.idCorrecteur)}
-                                                            className="mr-2 bg-red-500 text-white px-4 py-2 rounded dark:bg-red-600"
+                                                            onClick={cancelDelete}
+                                                            className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-secondary bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-secondary hover:text-secondary dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-secondary dark:hover:text-secondary"
                                                         >
-                                                            Oui, supprimer
+                                                            <span className='m-5'>Annuler</span>
                                                         </button>
                                                         <button
-                                                            onClick={cancelDelete}
-                                                            className="bg-gray-300 text-gray-800 px-4 py-2 rounded dark:bg-gray-600 dark:text-gray-200"
+                                                            type='button'
+                                                            onClick={() => confirmDelete(correcteur.idCorrecteur)}
+                                                            className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-danger bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-danger hover:text-danger dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-danger dark:hover:text-danger"
                                                         >
-                                                            Annuler
+                                                            <span className='m-5'>Oui, supprimer</span>
                                                         </button>
                                                     </div>
                                                 </Dialog.Panel>

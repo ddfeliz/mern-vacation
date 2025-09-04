@@ -14,6 +14,7 @@ import {
   DocumentTextIcon,
   EyeIcon,
   PencilSquareIcon,
+  QuestionMarkCircleIcon,
 } from '@heroicons/react/24/outline';
 import { TrashIcon } from '@heroicons/react/24/outline';
 import CardDataStats from '../../../components/CardDataStats';
@@ -72,8 +73,8 @@ const ShowCorrecteur = () => {
 
   const [filtreSpecialites, setFiltreSpecialites] = useState<string[]>([]);
   const [filtreSecteurs, setFiltreSecteurs] = useState<string[]>([]);
-  const [filtreOptions, setFiltreOptions] = useState<string[]>([]);
-  const [filtreMatieres, setFiltreMatieres] = useState<string[]>([]);
+  // const [filtreOptions, setFiltreOptions] = useState<string[]>([]);
+  // const [filtreMatieres, setFiltreMatieres] = useState<string[]>([]);
 
 
   const [totalCorrecteurs, setTotalCorrecteurs] = useState('0');
@@ -127,14 +128,16 @@ const ShowCorrecteur = () => {
     }
   };
 
+
+  // Met à jour les statuts puis récupère les correcteurs
+  const updateAndFetchCorrecteurs = async () => {
+    const dateCurent = new Date().getFullYear();
+    await updateCorrecteurStatus(dateCurent); // Mise à jour des statuts
+    fetchStats(dateCurent); // Remplace par l'année souhaitée
+    fetchCorrecteurs(); // Récupère les correcteurs après la mise à jour
+  };
+
   useEffect(() => {
-    // Met à jour les statuts puis récupère les correcteurs
-    const updateAndFetchCorrecteurs = async () => {
-      const dateCurent = new Date().getFullYear();
-      await updateCorrecteurStatus(dateCurent); // Mise à jour des statuts
-      fetchStats(dateCurent); // Remplace par l'année souhaitée
-      fetchCorrecteurs(); // Récupère les correcteurs après la mise à jour
-    };
 
     updateAndFetchCorrecteurs();
   }, []); // Le tableau vide [] signifie que cela se déclenche une fois au chargement
@@ -183,31 +186,31 @@ const ShowCorrecteur = () => {
     try {
       const res = await axios.get(`${API_BACC.secteurBacc}?specialite=${specialite}`);
       setFiltreSecteurs(res.data.secteurs || []);
-      setFiltreOptions([]);
-      setFiltreMatieres([]);
+      // setFiltreOptions([]);
+      // setFiltreMatieres([]);
     } catch (err) {
       console.error(err);
     }
   };
 
-  const fetchOptionsFiltre = async (secteur: string) => {
-    try {
-      const res = await axios.get(`${API_BACC.optionBacc}?secteur=${secteur}`);
-      setFiltreOptions(res.data.options || []);
-      setFiltreMatieres([]);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // const fetchOptionsFiltre = async (secteur: string) => {
+  //   try {
+  //     const res = await axios.get(`${API_BACC.optionBacc}?secteur=${secteur}`);
+  //     setFiltreOptions(res.data.options || []);
+  //     setFiltreMatieres([]);
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
-  const fetchMatieresFiltre = async (option: string) => {
-    try {
-      const res = await axios.get(`${API_BACC.matiereBacc}?option=${option}`);
-      setFiltreMatieres(res.data.matieres || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // const fetchMatieresFiltre = async (option: string) => {
+  //   try {
+  //     const res = await axios.get(`${API_BACC.matiereBacc}?option=${option}`);
+  //     setFiltreMatieres(res.data.matieres || []);
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
 
 
@@ -251,21 +254,6 @@ const ShowCorrecteur = () => {
       setMatieres(response.data.matieres); // Mettre à jour les matières
     } catch (err) {
       console.error('Erreur lors de la récupération des matières :', err);
-    }
-  };
-
-  const getGradeStyles = (grade: string) => {
-    switch (grade) {
-      case 'Expert':
-        return 'bg-primary text-success';
-      case 'Senior':
-        return 'bg-success text-primary';
-      case 'Intermédiaire':
-        return 'bg-warning text-warning';
-      case 'Junior':
-        return 'bg-danger text-danger';
-      default:
-        return 'bg-danger text-danger'; // Couleur par défaut si le grade n'est pas reconnu
     }
   };
 
@@ -386,20 +374,20 @@ const ShowCorrecteur = () => {
       fetchSecteursFiltre(value);
       setFiltreData(prev => ({ ...prev, secteur: '', option: '', matiere: '' }));
       setFiltreSecteurs([]);
-      setFiltreOptions([]);
-      setFiltreMatieres([]);
+      // setFiltreOptions([]);
+      // setFiltreMatieres([]);
     }
-    if (name === 'secteur') {
-      fetchOptionsFiltre(value);
-      setFiltreData(prev => ({ ...prev, option: '', matiere: '' }));
-      setFiltreOptions([])
-      setFiltreMatieres([]);
-    }
-    if (name === 'option') {
-      fetchMatieresFiltre(value);
-      setFiltreData(prev => ({ ...prev, matiere: '' }));
-      setFiltreMatieres([])
-    }
+    // if (name === 'secteur') {
+    //   fetchOptionsFiltre(value);
+    //   setFiltreData(prev => ({ ...prev, option: '', matiere: '' }));
+    //   setFiltreOptions([])
+    //   setFiltreMatieres([]);
+    // }
+    // if (name === 'option') {
+    //   fetchMatieresFiltre(value);
+    //   setFiltreData(prev => ({ ...prev, matiere: '' }));
+    //   setFiltreMatieres([])
+    // }
   };
 
   // Fonction pour ouvrir le modal et récupérer les données de vacation
@@ -514,7 +502,7 @@ const ShowCorrecteur = () => {
     const currentSession = new Date().getFullYear(); // Utilisation de l'année actuelle
     const checkResponse = await axios.get(
       // `http://localhost:3000/api/vacation/verification/${currentSession}/${pochette}`,
-      `${API_VACATION.verifierPocheteVacation}/${currentSession}`,
+      `${API_VACATION.verifierPocheteVacation}/${idCorrecteur}/${currentSession}`,
       {
         params: { pochette }  // axios encode automatiquement en query string
       }
@@ -554,6 +542,8 @@ const ShowCorrecteur = () => {
         // setOpenSuccess(true); 
         setIsModalOpen(false); // Fermer le modal
         toast.success('Vacation ajouté avec succès.');
+        updateAndFetchCorrecteurs();
+
       }
     } catch (err: any) {
       if (err.response) {
@@ -691,7 +681,7 @@ const ShowCorrecteur = () => {
               {/* Champ de recherche */}
               <input
                 type="text"
-                placeholder="Entrer le nom ou prenom ou C.I.N ou ID du correcteur..."
+                placeholder="Entrer le nom ou prenom ou C.I.N du correcteur"
                 value={searchItem}
                 onChange={(e) => setSearchItem(e.target.value)}
                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 pl-12 pr-5 outline-none
@@ -733,7 +723,7 @@ const ShowCorrecteur = () => {
           </div>
           <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
             <span className="text-secondary text-sm mt-5">Filtré par:</span>
-            <div className="w-full xl:w-1/4">
+            <div className="w-full xl:w-1/3">
               <label
                 htmlFor="specialite"
                 className="mb-2.5 block text-black dark:text-white"
@@ -774,7 +764,7 @@ const ShowCorrecteur = () => {
                 {filtreSecteurs.map((sec, i) => <option key={i} value={sec}>{sec}</option>)}
               </select>
             </div>
-            <div className="w-full xl:w-1/4">
+            {/* <div className="w-full xl:w-1/4">
               <label
                 htmlFor="option"
                 className="mb-2.5 block text-black dark:text-white"
@@ -820,14 +810,14 @@ const ShowCorrecteur = () => {
 
                 {filtreMatieres.map((mat, i) => <option key={i} value={mat}>{mat}</option>)}
               </select>
-            </div>
+            </div> */}
           </div>
           <div className="max-w-full overflow-x-auto">
             <table className="w-full table-auto">
               <thead>
                 <tr className="bg-gray-2 text-center dark:bg-meta-4">
                   <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                    N° Matricule
+                    I.M
                   </th>
                   <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
                     Nom
@@ -842,26 +832,20 @@ const ShowCorrecteur = () => {
                     Numero Telephone
                   </th>
                   <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
-                    Adresse
-                  </th>
-                  <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
                     Adresse Professionnelle
                   </th>
-                  <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
-                    Grade
-                  </th>
                   <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
-                    Bacc specialité
+                    Bacc
                   </th>
                   <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
-                    Secteur
+                    specialité
                   </th>
-                  <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
+                  {/* <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
                     Option
                   </th>
                   <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
                     Matière specialisé
-                  </th>
+                  </th> */}
                   <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
                     Statut
                   </th>
@@ -881,12 +865,12 @@ const ShowCorrecteur = () => {
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {correcteur.nom}
+                          {correcteur.prenom}
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
-                          {correcteur.prenom}
+                          {correcteur.nom}
                         </h5>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
@@ -901,21 +885,7 @@ const ShowCorrecteur = () => {
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                         <p className="text-black dark:text-white">
-                          {correcteur.adresse}
-                        </p>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                        <p className="text-black dark:text-white">
                           {correcteur.adresseProfession}
-                        </p>
-                      </td>
-                      <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                        <p
-                          className={`inline-flex rounded-full bg-opacity-10 py-1 px-3 text-sm font-medium ${getGradeStyles(
-                            correcteur.grade,
-                          )}`}
-                        >
-                          {correcteur.grade}
                         </p>
                       </td>
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
@@ -928,7 +898,7 @@ const ShowCorrecteur = () => {
                           {correcteur.secteur}
                         </p>
                       </td>
-                      <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                      {/* <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                         <p className="text-black dark:text-white">
                           {correcteur.option}
                         </p>
@@ -937,7 +907,7 @@ const ShowCorrecteur = () => {
                         <p className="text-black dark:text-white">
                           {correcteur.matiere}
                         </p>
-                      </td>
+                      </td> */}
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                         <p className="text-black dark:text-white">
                           {correcteur.statut}
@@ -984,10 +954,10 @@ const ShowCorrecteur = () => {
                               <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg dark:bg-gray-800">
                                 <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 dark:bg-white">
                                   <div className="sm:flex sm:items-start">
-                                    <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10 dark:bg-red-600">
-                                      <CheckCircleIcon
+                                    <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 sm:mx-0 sm:h-10 sm:w-10 dark:bg-blue-600">
+                                      <QuestionMarkCircleIcon
                                         aria-hidden="true"
-                                        className="h-6 w-6 text-red-600 dark:text-red-200"
+                                        className="h-6 w-6 text-white dark:text-gray-500"
                                       />
                                     </div>
                                     <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
@@ -1034,6 +1004,359 @@ const ShowCorrecteur = () => {
                             </div>
                           </div>
                         </Dialog>
+
+
+
+                        {/* Modal */}
+                        {isModalOpen && (
+                          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
+                            <div className="bg-white p-6 rounded-lg w-2/3 max-h-[90vh] overflow-auto shadow-lg dark:bg-meta-4">
+                              <h2 className="font-semibold mb-4 text-center text-title-lg">
+                                Créer un vacation pour {correcteur.prenom} {correcteur.nom}
+                              </h2>
+                              <form onSubmit={handleSubmit}>
+                                <div className="p-6.5">
+                                  <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                                    <div className="w-full xl:w-1/2">
+                                      <label
+                                        htmlFor="idCorrecteur"
+                                        className="mb-2.5 block text-black dark:text-white"
+                                      >
+                                        ID Correcteur <span className="text-meta-1">*</span>
+                                      </label>
+                                      <input
+                                        type="text"
+                                        name="idCorrecteur"
+                                        id="idCorrecteur"
+                                        placeholder="..."
+                                        value={formData.idCorrecteur}
+                                        onChange={handleChange}
+                                        required
+                                        disabled
+                                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                      />
+                                    </div>
+                                    <div className="w-full xl:w-1/2">
+                                      <label
+                                        htmlFor="immatricule"
+                                        className="mb-2.5 block text-black dark:text-white"
+                                      >
+                                        I.M
+                                        <span className="text-meta-1">*</span>
+                                      </label>
+                                      <input
+                                        type="text"
+                                        name="immatricule"
+                                        id="immatricule"
+                                        placeholder="..."
+                                        value={formData.immatricule}
+                                        onChange={handleChange}
+                                        required
+                                        disabled
+                                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                                    <div className="w-full xl:w-1/2">
+                                      <label
+                                        htmlFor="firstName"
+                                        className="mb-2.5 block text-black dark:text-white"
+                                      >
+                                        Prénom <span className="text-meta-1">*</span>
+                                      </label>
+                                      <input
+                                        type="text"
+                                        name="firstName"
+                                        id="firstName"
+                                        placeholder="..."
+                                        value={formData.firstName}
+                                        onChange={handleChange}
+                                        required
+                                        disabled
+                                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                      />
+                                    </div>
+
+                                    <div className="w-full xl:w-1/2">
+                                      <label
+                                        htmlFor="lastName"
+                                        className="mb-2.5 block text-black dark:text-white"
+                                      >
+                                        Nom de famille <span className="text-meta-1">*</span>
+                                      </label>
+                                      <input
+                                        type="text"
+                                        name="lastName"
+                                        id="lastName"
+                                        placeholder="..."
+                                        value={formData.lastName}
+                                        onChange={handleChange}
+                                        required
+                                        disabled
+                                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Ligne pour l'email et le téléphone */}
+                                  <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                                    <div className="w-full xl:w-1/2">
+                                      <label
+                                        htmlFor="cin"
+                                        className="mb-2.5 block text-black dark:text-white"
+                                      >
+                                        CIN <span className="text-meta-1">*</span>
+                                      </label>
+                                      <input
+                                        type="number"
+                                        name="cin"
+                                        id="cin"
+                                        placeholder="..."
+                                        value={formData.cin}
+                                        onChange={handleChange}
+                                        onBlur={() => {
+                                          if (formData.cin.length !== 14) {
+                                            alert('Le numéro CIN doit contenir exactement 14 chiffres.');
+                                          }
+                                        }}
+                                        minLength={14}
+                                        maxLength={14}
+                                        required
+                                        disabled
+                                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                      />
+                                    </div>
+
+                                    <div className="w-full xl:w-1/2">
+                                      <label
+                                        htmlFor="telephone"
+                                        className="mb-2.5 block text-black dark:text-white"
+                                      >
+                                        Téléphone <span className="text-meta-1">*</span>
+                                      </label>
+                                      <input
+                                        type="tel"
+                                        name="telephone"
+                                        id="telephone"
+                                        placeholder="..."
+                                        value={formData.telephone}
+                                        onChange={handleChange}
+                                        required
+                                        disabled
+                                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Ligne pour spécialité et grade */}
+                                  <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                                    <div className="w-full xl:w-1/2">
+                                      <label
+                                        htmlFor="specialite"
+                                        className="mb-2.5 block text-black dark:text-white"
+                                      >
+                                        Baccalauréat d'enseignement{' '}
+                                        <span className="text-meta-1">*</span>
+                                      </label>
+                                      <select
+                                        name="specialite"
+                                        id="specialite"
+                                        value={formData.specialite}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                      >
+                                        <option value="">Sélectionnez un enseignement</option>
+                                        {specialites && specialites.length > 0 ? (
+                                          specialites.map((specialite, index) => (
+                                            <option key={index} value={specialite}>
+                                              {specialite}
+                                            </option>
+                                          ))
+                                        ) : (
+                                          <option disabled>Chargement...</option>
+                                        )}
+                                      </select>
+                                    </div>
+
+                                    <div className="w-full xl:w-1/2">
+                                      <label
+                                        htmlFor="secteur"
+                                        className="mb-2.5 block text-black dark:text-white"
+                                      >
+                                        Secteur <span className="text-meta-1">*</span>
+                                      </label>
+                                      <select
+                                        name="secteur"
+                                        id="secteur"
+                                        value={formData.secteur}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                      >
+                                        <option value="">Sélectionnez un secteur</option>
+                                        {secteurs && secteurs.length > 0 ? (
+                                          secteurs.map((secteur, index) => (
+                                            <option key={index} value={secteur}>
+                                              {secteur}
+                                            </option>
+                                          ))
+                                        ) : (
+                                          <option disabled>
+                                            Veuillez sélectionner une spécialité d'abord
+                                          </option>
+                                        )}
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                                    <div className="w-full xl:w-1/2">
+                                      <label
+                                        htmlFor="option"
+                                        className="mb-2.5 block text-black dark:text-white"
+                                      >
+                                        Option <span className="text-meta-1">*</span>
+                                      </label>
+                                      <select
+                                        name="option"
+                                        id="option"
+                                        value={formData.option}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                      >
+                                        <option value="">Sélectionnez une option</option>
+                                        {options && options.length > 0 ? (
+                                          options.map((option, index) => (
+                                            <option key={index} value={option}>
+                                              {option}
+                                            </option>
+                                          ))
+                                        ) : (
+                                          <option disabled>
+                                            Veuillez sélectionner un secteur d'abord
+                                          </option>
+                                        )}
+                                      </select>
+                                    </div>
+
+                                    <div className="w-full xl:w-1/2">
+                                      <label
+                                        htmlFor="matiere"
+                                        className="mb-2.5 block text-black dark:text-white"
+                                      >
+                                        Matière <span className="text-meta-1">*</span>
+                                      </label>
+                                      <select
+                                        name="matiere"
+                                        id="matiere"
+                                        value={formData.matiere}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                      >
+                                        <option value="">
+                                          Sélectionnez une matière
+                                          {formData.option && (
+                                            <p className="mt-2 text-black dark:text-white">
+                                              selon l'option selectionné :{' '}
+                                              <strong>{formData.option}</strong>
+                                            </p>
+                                          )}
+                                        </option>
+                                        {matieres && matieres.length > 0 ? (
+                                          matieres.map((matiere, index) => (
+                                            <option key={index} value={matiere}>
+                                              {matiere}
+                                            </option>
+                                          ))
+                                        ) : (
+                                          <option disabled>
+                                            Veuillez sélectionner une option d'abord
+                                          </option>
+                                        )}
+                                      </select>
+                                    </div>
+                                  </div>
+
+                                  <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                                    <div className="w-full xl:w-1/2">
+                                      <label
+                                        htmlFor="pochette"
+                                        className="mb-2.5 block text-black dark:text-white"
+                                      >
+                                        Pochette <span className="text-meta-1">*</span>
+                                      </label>
+                                      <input
+                                        type="text"
+                                        name="pochette"
+                                        id="pochette"
+                                        placeholder="Entrer le code pochette"
+                                        value={formData.pochette}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                      />
+                                    </div>
+                                    <div className="w-full xl:w-1/2">
+                                      <label
+                                        htmlFor="nbcopie"
+                                        className="mb-2.5 block text-black dark:text-white"
+                                      >
+                                        Nombre des Copies corrigées{' '}
+                                        <span className="text-meta-1">*</span>
+                                      </label>
+                                      <input
+                                        type="number"
+                                        name="nbcopie"
+                                        id="nbcopie"
+                                        placeholder="Entrez le nombre des copies corrigés "
+                                        value={formData.nbcopie}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="flex justify-end p-6.5 border-t border-stroke dark:border-strokedark">
+                                    <button
+                                      type="button"
+                                      className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                              border-secondary bg-transparent text-black transition hover:bg-transparent
+                                              hover:border-secondary hover:text-secondary dark:border-strokedark 
+                                                dark:bg-transparent dark:text-white dark:hover:border-secondary dark:hover:text-secondary"
+                                      style={{ width: '180px' }}
+                                      onClick={() => {
+                                        setIsModalOpen(false); // Ferme la modale
+                                      }}
+                                    >
+                                      Annuler
+                                    </button>
+                                    <button
+                                      type="submit"
+                                      disabled={loading}
+                                      className={`mr-3 inline-flex w-40 h-11 items-center justify-center rounded-md border
+                                                  border-primary bg-transparent text-black transition hover:bg-transparent
+                                                  hover:border-primary hover:text-primary dark:border-strokedark 
+                                                    dark:bg-transparent dark:text-white dark:hover:border-primary dark:hover:text-primary ${loading
+                                          ? 'cursor-not-allowed opacity-50'
+                                          : ''
+                                        }`}
+                                    >
+                                      {loading ? 'Chargement...' : 'Créer'}
+                                    </button>
+                                  </div>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        )}
+
+
+
                       </td>
                     </tr>
                   ))
@@ -1051,353 +1374,6 @@ const ShowCorrecteur = () => {
             </table>
 
 
-            {/* Modal */}
-            {isModalOpen && (
-              <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
-                <div className="bg-white p-6 rounded-lg w-2/3 max-h-[90vh] overflow-auto shadow-lg dark:bg-meta-4">
-                  <h2 className="font-semibold mb-4 text-center text-title-lg">
-                    Créer un paiement pour un vacation
-                  </h2>
-                  <form onSubmit={handleSubmit}>
-                    <div className="p-6.5">
-                      <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                        <div className="w-full xl:w-1/2">
-                          <label
-                            htmlFor="idCorrecteur"
-                            className="mb-2.5 block text-black dark:text-white"
-                          >
-                            ID Correcteur <span className="text-meta-1">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            name="idCorrecteur"
-                            id="idCorrecteur"
-                            placeholder="..."
-                            value={formData.idCorrecteur}
-                            onChange={handleChange}
-                            required
-                            disabled
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          />
-                        </div>
-                        <div className="w-full xl:w-1/2">
-                          <label
-                            htmlFor="immatricule"
-                            className="mb-2.5 block text-black dark:text-white"
-                          >
-                            Numéro immatricule
-                            <span className="text-meta-1">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            name="immatricule"
-                            id="immatricule"
-                            placeholder="..."
-                            value={formData.immatricule}
-                            onChange={handleChange}
-                            required
-                            disabled
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          />
-                        </div>
-                      </div>
-                      <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                        <div className="w-full xl:w-1/2">
-                          <label
-                            htmlFor="firstName"
-                            className="mb-2.5 block text-black dark:text-white"
-                          >
-                            Prénom <span className="text-meta-1">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            name="firstName"
-                            id="firstName"
-                            placeholder="..."
-                            value={formData.firstName}
-                            onChange={handleChange}
-                            required
-                            disabled
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          />
-                        </div>
-
-                        <div className="w-full xl:w-1/2">
-                          <label
-                            htmlFor="lastName"
-                            className="mb-2.5 block text-black dark:text-white"
-                          >
-                            Nom de famille <span className="text-meta-1">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            name="lastName"
-                            id="lastName"
-                            placeholder="..."
-                            value={formData.lastName}
-                            onChange={handleChange}
-                            required
-                            disabled
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Ligne pour l'email et le téléphone */}
-                      <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                        <div className="w-full xl:w-1/2">
-                          <label
-                            htmlFor="cin"
-                            className="mb-2.5 block text-black dark:text-white"
-                          >
-                            CIN <span className="text-meta-1">*</span>
-                          </label>
-                          <input
-                            type="number"
-                            name="cin"
-                            id="cin"
-                            placeholder="..."
-                            value={formData.cin}
-                            onChange={handleChange}
-                            onBlur={() => {
-                              if (formData.cin.length !== 14) {
-                                alert('Le numéro CIN doit contenir exactement 14 chiffres.');
-                              }
-                            }}
-                            minLength={14}
-                            maxLength={14}
-                            required
-                            disabled
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          />
-                        </div>
-
-                        <div className="w-full xl:w-1/2">
-                          <label
-                            htmlFor="telephone"
-                            className="mb-2.5 block text-black dark:text-white"
-                          >
-                            Téléphone <span className="text-meta-1">*</span>
-                          </label>
-                          <input
-                            type="tel"
-                            name="telephone"
-                            id="telephone"
-                            placeholder="..."
-                            value={formData.telephone}
-                            onChange={handleChange}
-                            required
-                            disabled
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Ligne pour spécialité et grade */}
-                      <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                        <div className="w-full xl:w-1/2">
-                          <label
-                            htmlFor="specialite"
-                            className="mb-2.5 block text-black dark:text-white"
-                          >
-                            Baccalauréat d'enseignement{' '}
-                            <span className="text-meta-1">*</span>
-                          </label>
-                          <select
-                            name="specialite"
-                            id="specialite"
-                            value={formData.specialite}
-                            onChange={handleChange}
-                            required
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          >
-                            <option value="">Sélectionnez un enseignement</option>
-                            {specialites && specialites.length > 0 ? (
-                              specialites.map((specialite, index) => (
-                                <option key={index} value={specialite}>
-                                  {specialite}
-                                </option>
-                              ))
-                            ) : (
-                              <option disabled>Chargement...</option>
-                            )}
-                          </select>
-                        </div>
-
-                        <div className="w-full xl:w-1/2">
-                          <label
-                            htmlFor="secteur"
-                            className="mb-2.5 block text-black dark:text-white"
-                          >
-                            Secteur <span className="text-meta-1">*</span>
-                          </label>
-                          <select
-                            name="secteur"
-                            id="secteur"
-                            value={formData.secteur}
-                            onChange={handleChange}
-                            required
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          >
-                            <option value="">Sélectionnez un secteur</option>
-                            {secteurs && secteurs.length > 0 ? (
-                              secteurs.map((secteur, index) => (
-                                <option key={index} value={secteur}>
-                                  {secteur}
-                                </option>
-                              ))
-                            ) : (
-                              <option disabled>
-                                Veuillez sélectionner une spécialité d'abord
-                              </option>
-                            )}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                        <div className="w-full xl:w-1/2">
-                          <label
-                            htmlFor="option"
-                            className="mb-2.5 block text-black dark:text-white"
-                          >
-                            Option <span className="text-meta-1">*</span>
-                          </label>
-                          <select
-                            name="option"
-                            id="option"
-                            value={formData.option}
-                            onChange={handleChange}
-                            required
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          >
-                            <option value="">Sélectionnez une option</option>
-                            {options && options.length > 0 ? (
-                              options.map((option, index) => (
-                                <option key={index} value={option}>
-                                  {option}
-                                </option>
-                              ))
-                            ) : (
-                              <option disabled>
-                                Veuillez sélectionner un secteur d'abord
-                              </option>
-                            )}
-                          </select>
-                        </div>
-
-                        <div className="w-full xl:w-1/2">
-                          <label
-                            htmlFor="matiere"
-                            className="mb-2.5 block text-black dark:text-white"
-                          >
-                            Matière <span className="text-meta-1">*</span>
-                          </label>
-                          <select
-                            name="matiere"
-                            id="matiere"
-                            value={formData.matiere}
-                            onChange={handleChange}
-                            required
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          >
-                            <option value="">
-                              Sélectionnez une matière
-                              {formData.option && (
-                                <p className="mt-2 text-black dark:text-white">
-                                  selon l'option selectionné :{' '}
-                                  <strong>{formData.option}</strong>
-                                </p>
-                              )}
-                            </option>
-                            {matieres && matieres.length > 0 ? (
-                              matieres.map((matiere, index) => (
-                                <option key={index} value={matiere}>
-                                  {matiere}
-                                </option>
-                              ))
-                            ) : (
-                              <option disabled>
-                                Veuillez sélectionner une option d'abord
-                              </option>
-                            )}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                        <div className="w-full xl:w-1/2">
-                          <label
-                            htmlFor="pochette"
-                            className="mb-2.5 block text-black dark:text-white"
-                          >
-                            Pochette <span className="text-meta-1">*</span>
-                          </label>
-                          <input
-                            type="text"
-                            name="pochette"
-                            id="pochette"
-                            placeholder="Entrer le code pochette"
-                            value={formData.pochette}
-                            onChange={handleChange}
-                            required
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          />
-                        </div>
-                        <div className="w-full xl:w-1/2">
-                          <label
-                            htmlFor="nbcopie"
-                            className="mb-2.5 block text-black dark:text-white"
-                          >
-                            Nombre des Copies corrigées{' '}
-                            <span className="text-meta-1">*</span>
-                          </label>
-                          <input
-                            type="number"
-                            name="nbcopie"
-                            id="nbcopie"
-                            placeholder="Entrez le nombre des copies corrigés "
-                            value={formData.nbcopie}
-                            onChange={handleChange}
-                            required
-                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex justify-end p-6.5 border-t border-stroke dark:border-strokedark">
-                        <button
-                          type="button"
-                          className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
-                                              border-secondary bg-transparent text-black transition hover:bg-transparent
-                                              hover:border-secondary hover:text-secondary dark:border-strokedark 
-                                                dark:bg-transparent dark:text-white dark:hover:border-secondary dark:hover:text-secondary"
-                          style={{ width: '180px' }}
-                          onClick={() => {
-                            setIsModalOpen(false); // Ferme la modale
-                          }}
-                        >
-                          Annuler
-                        </button>
-                        <button
-                          type="submit"
-                          disabled={loading}
-                          className={`mr-3 inline-flex w-40 h-11 items-center justify-center rounded-md border
-                                                  border-primary bg-transparent text-black transition hover:bg-transparent
-                                                  hover:border-primary hover:text-primary dark:border-strokedark 
-                                                    dark:bg-transparent dark:text-white dark:hover:border-primary dark:hover:text-primary ${loading
-                              ? 'cursor-not-allowed opacity-50'
-                              : ''
-                            }`}
-                        >
-                          {loading ? 'Chargement...' : 'Créer'}
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
 
 
 

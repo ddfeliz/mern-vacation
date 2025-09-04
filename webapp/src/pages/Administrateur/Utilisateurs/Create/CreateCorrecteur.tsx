@@ -12,6 +12,7 @@ const CreateCorrecteur = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
+    immatricule:'',
     cin: '',
     adresse: '',
     adresseProfession: '',
@@ -20,19 +21,19 @@ const CreateCorrecteur = () => {
     secteur: '',
     option: '',
     matiere: '',
-    grade: '',
 
   });
   const [loading, setLoading] = useState(false); // État pour gérer le chargement
 
   const [specialites, setSpecialites] = useState<string[]>([]); // État pour stocker les spécialités
   const [secteurs, setSecteurs] = useState<string[]>([]); // État pour stocker les secteurs
-  const [options, setOptions] = useState<string[]>([]); // État pour stocker les options
-  const [matieres, setMatieres] = useState<string[]>([]); // État pour stocker les matières
+  // const [options, setOptions] = useState<string[]>([]); 
+  // const [options1, setOptions1] = useState<string[]>([]); 
+  // const [matieres, setMatieres] = useState<string[]>([]); 
   const [open, setOpen] = useState(false);
   const [openVerify, setOpenVerify] = useState(false);
   const [openCIN, setOpenCIN] = useState(false);
-  const [prefix, setPrefix] = useState("033"); // Préfixe par défaut
+  const [prefix, setPrefix] = useState("034"); // Préfixe par défaut
   const [phoneNumber, setPhoneNumber] = useState(formData.telephone.slice(3));
   const navigate = useNavigate();
 
@@ -61,31 +62,32 @@ const CreateCorrecteur = () => {
       const response = await axios.get(`${API_BACC.secteurBacc}?specialite=${specialite}`);
       setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
       setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
-      setMatieres([]); // Réinitialiser les matières
+      // setMatieres([]); 
     } catch (err) {
       console.error("Erreur lors de la récupération des secteurs :", err);
     }
   };
 
   // Récupérer les options en fonction du secteur sélectionné
-  const fetchOption = async (secteur: string) => {
-    try {
-      const response = await axios.get(`${API_BACC.optionBacc}?secteur=${secteur}`);
-      setOptions(response.data.options); // Mettre à jour les matières
-    } catch (err) {
-      console.error("Erreur lors de la récupération des matières :", err);
-    }
-  };
+  // const fetchOption = async (secteur: string) => {
+  //   try {
+  //     const response = await axios.get(`${API_BACC.optionBacc}?secteur=${secteur}`);
+  //     setOptions(response.data.options); 
+  //     setOptions1(response.data.libelleCourt); 
+  //   } catch (err) {
+  //     console.error("Erreur lors de la récupération des matières :", err);
+  //   }
+  // };
 
   // Récupérer les matières en fonction du secteur sélectionné
-  const fetchMatieres = async (option: string) => {
-    try {
-      const response = await axios.get(`${API_BACC.matiereBacc}?option=${option}`);
-      setMatieres(response.data.matieres); // Mettre à jour les matières
-    } catch (err) {
-      console.error("Erreur lors de la récupération des matières :", err);
-    }
-  };
+  // const fetchMatieres = async (option: string) => {
+  //   try {
+  //     const response = await axios.get(`${API_BACC.matiereBacc}?option=${option}`);
+  //     setMatieres(response.data.matieres); // Mettre à jour les matières
+  //   } catch (err) {
+  //     console.error("Erreur lors de la récupération des matières :", err);
+  //   }
+  // };
 
 
   // Fonction pour gérer le changement du numéro
@@ -127,29 +129,30 @@ const CreateCorrecteur = () => {
         option: '',
         matiere: ''
       }));
-      setOptions([]);
+      // setOptions([]);
     }
 
-    if (name === 'secteur') {
-      fetchOption(value);
-      setFormData((prevData) => ({
-        ...prevData,
-        option: '',
-        matiere: ''
-      }));
-      setMatieres([]);
-    }
+    // if (name === 'secteur') {
+    //   fetchOption(value);
+    //   setFormData((prevData) => ({
+    //     ...prevData,
+    //     option: '',
+    //     matiere: ''
+    //   }));
+    //   setMatieres([]);
+    // }
 
 
-    if (name === 'option') {
-      fetchMatieres(value);
-    }
+    // if (name === 'option') {
+    //   fetchMatieres(value);
+    // }
   };
 
   const handleReset = () => {
     setFormData({
       firstName: '',
       lastName: '',
+      immatricule:'',
       cin: '',
       adresse: '',
       adresseProfession: '',
@@ -157,8 +160,7 @@ const CreateCorrecteur = () => {
       specialite: '',
       secteur: '',
       option: '',
-      matiere: '',
-      grade: '',
+      matiere: ''
     });
   };
 
@@ -171,7 +173,7 @@ const CreateCorrecteur = () => {
     setLoading(true); // Démarrer le chargement
 
     // Préparez les données à envoyer
-    const { firstName, lastName, cin, adresse, adresseProfession, telephone, specialite, secteur, option, matiere, grade } = formData;
+    const { firstName, lastName, immatricule, cin, adresse, adresseProfession, telephone, specialite, secteur, option, matiere } = formData;
 
     try {
 
@@ -194,6 +196,7 @@ const CreateCorrecteur = () => {
       const response = await axios.post(API_CORRECTEUR.ajoutCorrecteur, {
         nom: lastName,
         prenom: firstName,
+        immatricule,
         cin,
         adresse,
         adresseProfession,
@@ -201,8 +204,7 @@ const CreateCorrecteur = () => {
         specialite,
         secteur,
         option,
-        matiere,
-        grade
+        matiere
       });
 
       console.log('Correcteur ajouté avec succès', response.data);
@@ -212,7 +214,7 @@ const CreateCorrecteur = () => {
       toast.success('Correcteur ajouté avec succès ')
       setTimeout(() => {
         navigate('/présidence-service-finance/correcteur'); // Naviguer après un délai
-      }, 3000); // Délai de 2 secondes avant de naviguer
+      }, 500); // Délai de 2 secondes avant de naviguer
 
     }
   } catch (err: any) {
@@ -322,7 +324,7 @@ return (
               <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
                 <div className="w-full xl:w-1/2">
                   <label htmlFor="firstName" className="mb-2.5 block text-black dark:text-white">
-                    Prénom <span className="text-meta-1">*</span>
+                    Nom <span className="text-meta-1">*</span>
                   </label>
                   <input
                     type="text"
@@ -338,7 +340,7 @@ return (
 
                 <div className="w-full xl:w-1/2">
                   <label htmlFor="lastName" className="mb-2.5 block text-black dark:text-white">
-                    Nom de famille <span className="text-meta-1">*</span>
+                    Prenom <span className="text-meta-1">*</span>
                   </label>
                   <input
                     type="text"
@@ -397,10 +399,10 @@ return (
                       }}
                       className="w-60 rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                     >
+                      <option value="034">Telma: 034</option>
+                      <option value="038">Telma: 038</option>
                       <option value="032">Orange: 032</option>
                       <option value="037">Orange: 037</option>
-                      <option value="038">Telma: 038</option>
-                      <option value="034">Telma: 034</option>
                       <option value="033">Airtel: 033</option>
                     </select>
 
@@ -423,7 +425,22 @@ return (
 
               {/* Ligne pour adresse, adresseProssion et grade */}
               <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                <div className="w-full xl:w-1/3">
+                <div className="w-full xl:w-1/2">
+                  <label htmlFor="immatricule" className="mb-2.5 block text-black dark:text-white">
+                    N° Immatricule <span className="text-meta-1">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="immatricule"
+                    id="immatricule"
+                    placeholder="Entrez l'immatricule"
+                    value={formData.immatricule}
+                    onChange={handleChange}
+                    required
+                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                  />
+                </div>
+                <div className="w-full xl:w-1/2">
                   <label htmlFor="adresse" className="mb-2.5 block text-black dark:text-white">
                     Adresse <span className="text-meta-1">*</span>
                   </label>
@@ -439,7 +456,7 @@ return (
                   />
                 </div>
 
-                <div className="w-full xl:w-1/3">
+                <div className="w-full xl:w-1/2">
                   <label htmlFor="adresseProfession" className="mb-2.5 block text-black dark:text-white">
                     Adresse Professionnelle <span className="text-meta-1">*</span>
                   </label>
@@ -453,26 +470,6 @@ return (
                     required
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   />
-                </div>
-
-                <div className="w-full xl:w-1/3">
-                  <label htmlFor="grade" className="mb-2.5 block text-black dark:text-white">
-                    Grade <span className="text-meta-1">*</span>
-                  </label>
-                  <select
-                    name="grade"
-                    id="grade"
-                    value={formData.grade}
-                    onChange={handleChange}
-                    required
-                    className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
-                  >
-                    <option value="">Sélectionnez votre grade</option>
-                    <option value="Junior">Junior</option>
-                    <option value="Intermediate">Intermédiaire</option>
-                    <option value="Senior">Senior</option>
-                    <option value="Expert">Expert</option>
-                  </select>
                 </div>
               </div>
 
@@ -524,7 +521,7 @@ return (
                   </select>
                 </div>
               </div>
-              <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+              {/* <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
                 <div className="w-full xl:w-1/2">
                   <label htmlFor="option" className="mb-2.5 block text-black dark:text-white">
                     Option <span className="text-meta-1">*</span>
@@ -534,13 +531,12 @@ return (
                     id="option"
                     value={formData.option}
                     onChange={handleChange}
-                    required
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   >
                     <option value="">Sélectionnez une option</option>
                     {options && options.length > 0 ? (
                       options.map((option, index) => (
-                        <option key={index} value={option}>{option}</option>
+                        <option key={index} value={option}>{option} - {options1}</option>
                       ))
                     ) : (
                       <option disabled>Veuillez sélectionner un secteur d'abord</option>
@@ -557,7 +553,6 @@ return (
                     id="matiere"
                     value={formData.matiere}
                     onChange={handleChange}
-                    required
                     className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                   >
                     <option value="">Sélectionnez une matière{formData.option && (
@@ -575,7 +570,7 @@ return (
                   </select>
                 </div>
 
-              </div>
+              </div> */}
 
 
               <div className="flex justify-end p-6.5 border-t border-stroke dark:border-strokedark">

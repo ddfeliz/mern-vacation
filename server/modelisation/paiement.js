@@ -5,8 +5,7 @@ const paiementSchema = new mongoose.Schema(
   {
     idPaiement: {
       type: String,
-      required: true,
-      unique: true,
+      required: true
     },
     idVacation: {
       type: String,

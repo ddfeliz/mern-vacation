@@ -15,9 +15,15 @@ router.get('/compte', Controlleur.avoirVacationCompte);
 
 router.get('/compte-vacation', Controlleur.avoirVacationCompteByCorrecteur);
 
-router.get('/correcteur/:immatricule', Controlleur.avoirIdVacation);
+router.get('/compte-correcteur-vacataire', Controlleur.avoirNombreCorrecteursAvecVacations);
 
-router.get('/verification/:session', Controlleur.avoirPochette);
+router.get('/specialites', Controlleur.avoirSpecialites);
+
+router.get('/generer-pdf/:specialite', Controlleur.genererPDFCorrecteursParSpecialite);
+
+router.get('/correcteur/:idCorrecteur', Controlleur.avoirIdVacation);
+
+router.get('/verification/:idCorrecteur/:session', Controlleur.avoirPochette);
 
 router.get('/:idVacation', Controlleur.avoirIMVacation);
 

@@ -1,11 +1,12 @@
 const Paiement = require('../modelisation/paiement');
 const CreateError = require('../utils/appError'); // Import de la fonction CreateError
+const PDFDocument = require("pdfkit-table");
 
 
 // Fonction pour ajouter un nouveau vacation
 exports.ajoutPaiement = async (req, res, next) => {
   try {
-    const {  idVacation, idCorrecteur, immatricule, nom, prenom, cin, specialite, secteur, option, matiere, pochette, nbcopie, optionTarif, montantTotal } = req.body;
+    const { idVacation, idCorrecteur, immatricule, nom, prenom, cin, specialite, secteur, option, matiere, pochette, nbcopie, optionTarif, montantTotal } = req.body;
 
 
     const currentYear = new Date().getFullYear();
@@ -48,23 +49,43 @@ exports.ajoutPaiement = async (req, res, next) => {
   } catch (error) {
     next(new CreateError(500, 'Erreur lors de l\'ajout du paiement du vacation.', error)); // Ajout de 'new'
     console.log(error);
-    
+
+  }
+};
+
+
+exports.existePaiement = async (req, res, next) => { // Ajout de next
+  try {
+    const idVacation = req.params.idVacation;
+    const paiementExist = await Paiement.findOne({ idVacation });
+    if (paiementExist) {
+      return res.json({ exists: true });
+    }
+    res.json({ exists: false });
+  } catch (error) {
+    next(
+      new CreateError(
+        500,
+        "Erreur lors de la récupération de la CIN du correcteur.",
+        error
+      )
+    );
   }
 };
 
 exports.modificationPaiementsToPaid = async (req, res) => {
   try {
-      const { idCorrecteur } = req.params;
-      const result = await Paiement.updateMany(
-          { idCorrecteur, statut: 'Non payé' },
-          { $set: { statut: 'Payé' } }
-      );
-      res.status(200).json({
-          message: 'Tous les paiements ont été mis à jour avec succès.',
-          result,
-      });
+    const { idCorrecteur } = req.params;
+    const result = await Paiement.updateMany(
+      { idCorrecteur, statut: 'Non payé' },
+      { $set: { statut: 'Payé' } }
+    );
+    res.status(200).json({
+      message: 'Tous les paiements ont été mis à jour avec succès.',
+      result,
+    });
   } catch (err) {
-      res.status(500).json({ message: 'Erreur lors de la mise à jour des paiements.', error: err });
+    res.status(500).json({ message: 'Erreur lors de la mise à jour des paiements.', error: err });
   }
 };
 
@@ -98,7 +119,7 @@ exports.regrouperTousLesPaiements = async (req, res, next) => {
     // Regrouper les paiements par idCorrecteur
     const paiementsParCorrecteur = paiements.reduce((acc, paiement) => {
       const { idCorrecteur, montantTotal, session, nom, prenom, cin, statut } = paiement;
-      
+
       if (!acc[idCorrecteur]) {
         acc[idCorrecteur] = {
           idCorrecteur,
@@ -290,36 +311,37 @@ exports.supprimerPaiement = async (req, res, next) => {
 
 const getPaiementsGroupedByCorrecteur = async (specialite) => {
   return await Paiement.aggregate([
-      {
-          $match: {
-              specialite: specialite, // Filtrer par spécialité
-          },
+    {
+      $match: {
+        specialite: specialite, // Filtrer par spécialité
       },
-      {
-          $group: {
-              _id: "$idCorrecteur",
-              correcteurInfo: {
-                  $first: {
-                      nom: "$nom",
-                      prenom: "$prenom",
-                      cin: "$cin",
-                      specialite: "$specialite"
-                  },
-              },
-              vacations: {
-                  $push: {
-                      secteur: "$secteur",
-                      option: "$option", 
-                      matiere: "$matiere",
-                      pochette: "$pochette",
-                      nbcopie: "$nbcopie",
-                      montantTotal: "$montantTotal",
-                  },
-              },
+    },
+    {
+      $group: {
+        _id: "$idCorrecteur",
+        correcteurInfo: {
+          $first: {
+            nom: "$nom",
+            prenom: "$prenom",
+            cin: "$cin",
+            specialite: "$specialite"
           },
+        },
+        vacations: {
+          $push: {
+            secteur: "$secteur",
+            option: "$option",
+            matiere: "$matiere",
+            pochette: "$pochette",
+            nbcopie: "$nbcopie",
+            montantTotal: "$montantTotal",
+          },
+        },
       },
+    },
   ]);
 };
+
 exports.generateExcelForSpeciality = async (req, res) => {
   try {
     const { specialite } = req.query;
@@ -343,6 +365,10 @@ exports.generateExcelForSpeciality = async (req, res) => {
     const sheetName = truncateSheetName(`Paiements - ${specialite}`);
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(sheetName);
+    
+    // Fonction utilitaire pour formater montant
+    const formatMontant = (val) =>
+      (val || 0).toLocaleString("fr-FR").replace(/\s/g, " ") + " Ar";
 
     // 🔹 EN-TÊTE TITRE COMME DANS LE DOCUMENT
     const headerLines = [
@@ -354,9 +380,9 @@ exports.generateExcelForSpeciality = async (req, res) => {
       "----------------------------",
       "UNIVERSITÉ DE TOLIARA",
       "----------------------------",
-      "PRESIDENCE",
+      "OFFICE DU BACCALAUREAT",
       "",
-      `B - VACATION D'ANNEE: - ${new Date().getFullYear()}`,
+      `BACCALAUREAT: - ${new Date().getFullYear()}`,
       `VACATION DES CORRECTEURS - MATIÈRES ${specialite.toUpperCase()}`
     ];
 
@@ -370,10 +396,7 @@ exports.generateExcelForSpeciality = async (req, res) => {
     worksheet.addRow([]);
 
     // 🔹 EN-TÊTE DU TABLEAU
-    // Ligne fusionnée A1:A2 retirée pour éviter conflit
-    // worksheet.mergeCells("A1:A2"); 
-
-    worksheet.addRow(["Nom et Prénom(s)", "Total", "Matières", "Pochettes", "Nb de copies", "Montant", "Total"]);
+    worksheet.addRow(["Nom et Prénom(s)", "Matières", "Spécialité", "Pochettes", "Nb de copies", "Montant", "Total"]);
 
     // Styles d’en-tête
     const headerRow = worksheet.lastRow;
@@ -390,49 +413,62 @@ exports.generateExcelForSpeciality = async (req, res) => {
 
     let grandTotal = 0;
 
-    // 🔹 BOUCLE SUR CHAQUE CORRECTEUR
-    data.forEach((correcteur) => {
+    // 🔹 TRIER LES CORRECTEURS PAR PRÉNOM
+    const sortedData = [...data].sort((a, b) =>
+      a.correcteurInfo.prenom.localeCompare(b.correcteurInfo.prenom)
+    );
+
+    // 🔹 BOUCLE SUR CHAQUE CORRECTEUR (TRIÉ)
+    sortedData.forEach((correcteur) => {
       const { correcteurInfo, vacations } = correcteur;
       const totalCorrecteur = vacations.reduce((sum, v) => sum + v.montantTotal, 0);
       grandTotal += totalCorrecteur;
 
       // Ligne avec nom + total global
       const rowNom = worksheet.addRow([
-        `${correcteurInfo.nom} ${correcteurInfo.prenom}`,
-        totalCorrecteur,
-        "", "", "", "", totalCorrecteur
+        `${correcteurInfo.prenom} ${correcteurInfo.nom}`,
+        "",
+        "",
+        "",
+        "",
+        "",
+        formatMontant(totalCorrecteur)
       ]);
       rowNom.font = { bold: true };
 
       // Matières du correcteur
       vacations.forEach((vac) => {
-        worksheet.addRow([
-          "",
+        const row = worksheet.addRow([
           "",
           vac.matiere,
+          vac.secteur,
           vac.pochette,
-          vac.nbcopie,
-          vac.montantTotal,
+          vac.nbcopie || 0, // Écrire comme nombre, pas comme texte
+          formatMontant(vac.montantTotal),
           ""
         ]);
+        // Alignement à droite pour la colonne "Nb de copies" (colonne E)
+        row.getCell(5).alignment = { horizontal: "left" };
       });
 
       worksheet.addRow([]); // ligne vide entre correcteurs
     });
 
     // 🔹 GRAND TOTAL
-    const rowTotal = worksheet.addRow(["", "", "", "", "", "Grand Total", grandTotal]);
+    const rowTotal = worksheet.addRow(["", "", "", "", "", "Grand Total", formatMontant(grandTotal)]);
     rowTotal.font = { bold: true };
+    rowTotal.getCell(6).alignment = { horizontal: "right" }; // Alignement à droite pour "Grand Total"
+    rowTotal.getCell(7).alignment = { horizontal: "right" }; // Alignement à droite pour le montant total
 
     // Ajuster largeur colonnes
     worksheet.columns = [
       { width: 35 }, // Nom
-      { width: 12 }, // Total global
-      { width: 20 }, // Matière
+      { width: 12 }, // Matières
+      { width: 20 }, // Spécialité
       { width: 25 }, // Pochettes
       { width: 15 }, // Nb copies
       { width: 15 }, // Montant
-      { width: 15 }  // Total répété
+      { width: 15 }  // Total
     ];
 
     // Sauvegarde et téléchargement
@@ -445,6 +481,228 @@ exports.generateExcelForSpeciality = async (req, res) => {
     res.status(500).send("Erreur lors de la génération du fichier Excel");
   }
 };
+
+// Générer un PDF de paiement pour un correcteur
+// exports.generatePaiementPDF = async (req, res, next) => {
+//   try {
+//     const { idCorrecteur, session } = req.params;
+
+//     // Récupérer les paiements du correcteur pour la session donnée
+//     const paiements = await Paiement.find({ idCorrecteur, session });
+
+//     if (!paiements || paiements.length === 0) {
+//       return res.status(404).json({ message: "Aucun paiement trouvé pour ce correcteur." });
+//     }
+
+//     // On suppose que les infos de base du correcteur sont dans le premier paiement
+//     const correcteur = paiements[0];
+//     const totalMontant = paiements.reduce((sum, p) => sum + (p.montantTotal || 0), 0);
+
+//     // Création du PDF
+//     const doc = new PDFDocument({ margin: 50 });
+//     res.setHeader("Content-Type", "application/pdf");
+//     res.setHeader("Content-Disposition", `attachment; filename=paiement_${correcteur.nom}_${correcteur.prenom}.pdf`);
+//     res.setHeader("Access-Control-Expose-Headers", "Content-Disposition"); // <-- ajout important
+//     doc.pipe(res);
+
+//     // === En-tête officiel ===
+//     doc
+//       .fontSize(12)
+//       .text("REPOBILIKAN'I MADAGASIKARA", { align: "center" })
+//       .text("Fitiavana - Tanindrazana - Fandrosoana", { align: "center" })
+//       .text("----------------------------", { align: "center" })
+//       .text("MINISTERE DE L'ENSEIGNEMENT SUPÉRIEUR", { align: "center" })
+//       .text("ET DE LA RECHERCHE SCIENTIFIQUE", { align: "center" })
+//       .text("----------------------------", { align: "center" })
+//       .text("UNIVERSITÉ DE TOLIARA", { align: "center" })
+//       .text("----------------------------", { align: "center" })
+//       .text("PRESIDENCE", { align: "center" })
+//       .moveDown()
+//       .text(`ANNEE : ${new Date().getFullYear()}`, { align: "center" })
+//       .text("VACATION DES CORRECTEURS", { align: "center" })
+//       .moveDown(2);
+
+//     // === Informations correcteur ===
+//     doc.fontSize(11).text(`Nom complet : ${correcteur.nom} ${correcteur.prenom}`);
+//     doc.text(`Immatricule : ${correcteur.immatricule}`);
+//     doc.text(`CIN : ${correcteur.cin}`);
+//     doc.text(`Mode de paiement : DIRECTE`);
+//     doc.moveDown(2);
+
+//     // === Tableau des vacations ===
+//     const tableTop = doc.y;
+//     const itemSpacing = 25;
+
+//     // En-têtes
+//     doc.font("Helvetica-Bold");
+//     doc.text("Matière", 50, tableTop);
+//     doc.text("Spécialité", 150, tableTop);
+//     doc.text("Pochettes", 280, tableTop);
+//     doc.text("Nb copies", 380, tableTop);
+//     doc.text("Montant", 460, tableTop);
+//     doc.font("Helvetica");
+
+//     let y = tableTop + 20;
+//     paiements.forEach((p) => {
+//       doc.text(p.matiere || "-", 50, y);
+//       doc.text(p.specialite || "-", 150, y);
+//       doc.text(p.pochette || "-", 280, y);
+//       doc.text(p.nbcopie?.toString() || "0", 380, y);
+//       doc.text(`${p.montantTotal?.toFixed(2) || "0"} Ar`, 460, y, { align: "left" });
+//       y += itemSpacing;
+//     });
+
+//     // Total
+//     doc.font("Helvetica-Bold");
+//     doc.text("TOTAL", 380, y + 10);
+//     doc.text(`${totalMontant.toFixed(2)} Ar`, 460, y + 10);
+//     doc.font("Helvetica");
+//     doc.moveDown(4);
+
+//     // === Signature ===
+//     doc.text("Signature du correcteur :", 50, y + 80);
+//     doc.text("_________________________", 50, y + 110);
+
+//     doc.end();
+//   } catch (error) {
+//     console.error("Erreur génération PDF:", error);
+//     next(error);
+//   }
+// };
+
+
+// Générer un PDF de paiement pour un correcteur
+exports.generatePaiementPDF = async (req, res, next) => {
+  try {
+    const { idCorrecteur, session } = req.params;
+
+    // Récupérer les paiements du correcteur pour la session donnée
+    const paiements = await Paiement.find({ idCorrecteur, session });
+
+    if (!paiements || paiements.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Aucun paiement trouvé pour ce correcteur." });
+    }
+
+    const correcteur = paiements[0];
+    const totalMontant = paiements.reduce(
+      (sum, p) => sum + (p.montantTotal || 0),
+      0
+    );
+
+    // Fonction utilitaire pour formater montant
+    const formatMontant = (val) =>
+      (val || 0).toLocaleString("fr-FR").replace(/\s/g, " ") + " Ar";
+
+    // Création du PDF
+    const doc = new PDFDocument({ margin: 40, size: "A4" });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=paiement_${correcteur.nom}_${correcteur.prenom}.pdf`
+    );
+    res.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
+    doc.pipe(res);
+
+    // === Logo (en haut à gauche) ===
+    try {
+      doc.image("public/favicon.ico", 30, 40, { width: 65 }); // un peu plus à gauche et plus petit
+    } catch (err) {
+      console.warn("⚠️ Logo introuvable, vérifie le chemin.");
+    }
+
+    // === En-tête officiel ===
+    doc
+      .fontSize(12)
+      .text("UNIVERSITÉ DE TOLIARA", 0, 40, { align: "center" })
+      .text("----------------------------", { align: "center" })
+      .text("OFFICE DU BACCALAUREAT", { align: "center" })
+      .fontSize(13)
+      .text(`BACCALAUREAT : ${new Date().getFullYear()}`, { align: "center" })
+      .text("VACATION DES CORRECTEURS", {
+        align: "center",
+        underline: true,
+      })
+      .moveDown(2);
+
+    // === Informations correcteur (alignées avec logo) ===
+    const infoX = 40; // Décalage vers la droite
+    doc.fontSize(11).text(`Nom complet : ${correcteur.prenom} ${correcteur.nom}`, infoX);
+    doc.text(`I.M : ${correcteur.immatricule}`, infoX);
+    doc.text(`CIN : ${correcteur.cin}`, infoX);
+    doc.text(`Correcteur du baccalauréat : ${correcteur.specialite}`, infoX);
+    doc.text(`Mode de paiement : DIRECTE`, infoX);
+    doc.moveDown(2);
+
+    // === Tableau avec pdfkit-table ===
+    const table = {
+      title: "Détail des vacations",
+      headers: [
+        { label: "Matière", property: "matiere", width: 100, align: "center" },
+        { label: "Spécialité", property: "specialite", width: 100, align: "center" },
+        { label: "Pochette", property: "pochette", width: 100, align: "center" },
+        { label: "Nb copies", property: "nbcopie", width: 80, align: "center" },
+        { label: "Montant", property: "montantTotal", width: 100, align: "center" },
+      ],
+      datas: paiements.map((p) => ({
+        matiere: p.matiere || "-",
+        specialite: p.secteur || "-",
+        pochette: p.pochette || "-",
+        nbcopie: p.nbcopie?.toString() || "0",
+        montantTotal: formatMontant(p.montantTotal),
+      })),
+    };
+
+    await doc.table(table, {
+      prepareHeader: () => doc.font("Helvetica-Bold").fontSize(10),
+      prepareRow: (row, i) => doc.font("Helvetica").fontSize(9),
+      divider: {
+        header: { disabled: false, width: 1, opacity: 0.5 },
+        horizontal: { disabled: false, width: 0.5, opacity: 0.3 },
+      },
+    });
+
+    // === Ligne du total ===
+    doc.moveDown();
+    doc
+      .font("Helvetica-Bold")
+      .fontSize(11)
+      .text(`TOTAL : ${formatMontant(totalMontant)}`, 400);
+
+    // === Date et lieu (vide à remplir manuellement) ===
+    doc.moveDown(3);
+    doc
+      .font("Helvetica-Oblique")
+      .fontSize(11)
+      .text("Fait à Toliara, le ..........................", 350);
+
+    // === Signatures (alignées gauche et droite) ===
+    doc.moveDown(2);
+
+    const y = doc.y;
+    doc.font("Helvetica").fontSize(11);
+
+    // Signature correcteur à gauche
+    doc.text("Signature du correcteur :", 50, y);
+    doc.text("_________________________", 50, y + 40);
+
+    // Signature Office à droite
+    doc.text("Signature Office du Baccalauréat :", 350, y);
+    doc.text("_________________________", 350, y + 40);
+
+    doc.end();
+  } catch (error) {
+    console.error("Erreur génération PDF:", error);
+    next(error);
+  }
+};
+
+
+
+
+
+
 
 
 

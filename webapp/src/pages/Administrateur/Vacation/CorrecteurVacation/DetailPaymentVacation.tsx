@@ -7,7 +7,7 @@ import {
 } from '@headlessui/react';
 import {
   ArrowLeftIcon,
-  CheckCircleIcon,
+  QuestionMarkCircleIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
 import { Payment } from '../../../../types/Payment';
@@ -49,9 +49,9 @@ const DetailPaymentVacation = () => {
       );
       // setOpen1(true); // Afficher le message de succès
       toast.success('Paiement supprimé avec succès !');
-      setTimeout(() => {
-        navigate('/présidence-service-finance/paiement-liste'); // Naviguer après un délai
-      }, 3000); // Délai de 2 secondes avant de naviguer
+      // setTimeout(() => {
+      //   navigate('/présidence-service-finance/paiement-liste'); // Naviguer après un délai
+      // }, 500); // Délai de 2 secondes avant de naviguer
     } catch (err) {
       toast.error('Erreur lors de la suppression du correcteur.');
     }
@@ -110,6 +110,11 @@ const DetailPaymentVacation = () => {
   const handleView = () => {
     navigate('/présidence-service-finance/nouveau-paiement');
   };
+
+
+  // Fonction utilitaire pour formater montant
+  const formatMontant = (val: any) =>
+    (val || 0).toLocaleString("fr-FR").replace(/\s/g, " ") + " Ar";
 
   // Affichage des détails du correcteur
   return (
@@ -227,7 +232,7 @@ const DetailPaymentVacation = () => {
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                       <h5 className="font-medium text-black dark:text-white">
-                        {paiement.montantTotal}
+                        {formatMontant(paiement.montantTotal)}
                       </h5>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
@@ -257,10 +262,10 @@ const DetailPaymentVacation = () => {
                             <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg dark:bg-gray-800">
                               <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 dark:bg-gray-800">
                                 <div className="sm:flex sm:items-start">
-                                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10 dark:bg-red-600">
-                                    <CheckCircleIcon
+                                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 sm:mx-0 sm:h-10 sm:w-10 dark:bg-blue-600">
+                                    <QuestionMarkCircleIcon
                                       aria-hidden="true"
-                                      className="h-6 w-6 text-red-600 dark:text-red-200"
+                                      className="h-6 w-6 text-white dark:text-gray-500"
                                     />
                                   </div>
                                   <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
@@ -329,8 +334,8 @@ const DetailPaymentVacation = () => {
       <div className="flex justify-center space-x-2 mt-4">
         <button
           className={`py-2 px-4 rounded ${currentPage === 1
-              ? 'bg-gray-300 cursor-not-allowed'
-              : 'bg-primary text-white'
+            ? 'bg-gray-300 cursor-not-allowed'
+            : 'bg-primary text-white'
             }`}
           onClick={() => paginate(currentPage - 1)}
           disabled={currentPage === 1}
@@ -339,8 +344,8 @@ const DetailPaymentVacation = () => {
         </button>
         <button
           className={`py-2 px-4 rounded ${currentPage === totalPages
-              ? 'bg-gray-300 cursor-not-allowed'
-              : 'bg-primary text-white'
+            ? 'bg-gray-300 cursor-not-allowed'
+            : 'bg-primary text-white'
             }`}
           onClick={() => paginate(currentPage + 1)}
           disabled={currentPage === totalPages}

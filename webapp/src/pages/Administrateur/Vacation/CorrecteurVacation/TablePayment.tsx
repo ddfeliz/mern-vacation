@@ -160,13 +160,15 @@ const TablePayment = () => {
       await axios.post(API_ARCHIVE.ajoutArchive, {
         session: currentYear,
       });
-      setOpenArchiveSuccess(true);
+      // setOpenArchiveSuccess(true);
+      toast.success('Archivé avec succès.');
       setOpenArchive(false);
       setTimeout(() => {
         navigate('/présidence-service-finance/nouveau-paiement');
-      }, 2000); // Délai de 2 secondes avant de naviguer
+      }, 500); // Délai de 2 secondes avant de naviguer
     } catch (error) {
       console.log(error);
+      toast.error(`Des arreurs sont survenus pendant l'opération`);
     } finally {
       setLoading(false);
     }
@@ -191,10 +193,10 @@ const TablePayment = () => {
             <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg dark:bg-gray-800">
               <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 dark:bg-gray-800">
                 <div className="sm:flex sm:items-start">
-                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10 dark:bg-red-600">
-                    <CheckCircleIcon
+                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 sm:mx-0 sm:h-10 sm:w-10 dark:bg-blue-600">
+                    <QuestionMarkCircleIcon
                       aria-hidden="true"
-                      className="h-6 w-6 text-red-600 dark:text-red-200"
+                      className="h-6 w-6 text-white dark:text-gray-500"
                     />
                   </div>
                   <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
@@ -217,16 +219,22 @@ const TablePayment = () => {
               </div>
               <div className="mt-4 mb-4 flex justify-end">
                 <button
-                  onClick={updateStatus}
-                  className="mr-2 bg-blue-500 text-white px-4 py-2 rounded dark:bg-blue-600"
+                  onClick={() => setOpenUpdatePayment(false)}
+                  className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-secondary bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-secondary hover:text-secondary dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-secondary dark:hover:text-secondary"
                 >
-                  Oui
+                  <span className='m-5'>Annuler</span>
                 </button>
                 <button
-                  onClick={() => setOpenUpdatePayment(false)}
-                  className="bg-gray-300 text-gray-800 px-4 py-2 rounded dark:bg-gray-600 dark:text-gray-200"
+                  onClick={updateStatus}
+                  className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-success bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-success hover:text-success dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-success dark:hover:text-success"
                 >
-                  Annuler
+                  <span className='m-5'>Oui, Payé</span>
                 </button>
               </div>
             </DialogPanel>

@@ -7,6 +7,7 @@ import {
   ArrowLeftIcon,
   CheckCircleIcon,
   DocumentCurrencyDollarIcon,
+  QuestionMarkCircleIcon,
   StopCircleIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
@@ -34,13 +35,16 @@ const DetailVacation = () => {
     optionTarif: '',
     montantTotal: '',
   });
-  const { immatricule } = useParams<{ immatricule: string }>();
+  const { idCorrecteur } = useParams<{ idCorrecteur: string }>();
   const [vacations, setVacations] = useState<Vacation[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [vacationsPerPage] = useState(5);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false); // État pour le Dialog
+
+
+  const [paiementExists, setPaiementExists] = useState<{ [key: string]: boolean }>({});
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tarifs, setTarifs] = useState<Tarif[]>([]);
@@ -51,6 +55,8 @@ const DetailVacation = () => {
   const [optionTarifChoisi, setOptionTarifChoisi] = useState<string | null>(
     null,
   ); // Nouvel état pour afficher l'option tarif choisi
+
+  const [vacationToDelete, setVacationToDelete] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
@@ -78,11 +84,13 @@ const DetailVacation = () => {
     navigate('/présidence-service-finance/nouveau-vacation');
   };
 
-  const handleDeleting = () => {
+  const handleDeleting = (idVacation: string) => {
     setOpen(true);
+    setVacationToDelete(idVacation);
   };
 
   const cancelDelete = () => {
+    setVacationToDelete(null); // Réinitialiser après fermeture
     setOpen(false);
   };
 
@@ -91,12 +99,14 @@ const DetailVacation = () => {
     try {
       await axios.delete(`${API_VACATION.supprimerVacation}/${idVacation}`);
       setVacations(
-        vacations.filter((vacation) => vacation.idVacation !== idVacation),
+        vacations.filter((vacation) => vacation.pochette !== idVacation),
       );
       toast.success('Suppression avec succès.')
-      setTimeout(() => {
-        navigate('/présidence-service-finance/vacation'); // Naviguer après un délai
-      }, 3000); // Délai de 2 secondes avant de naviguer
+      setOpen(false);
+      setVacationToDelete(null); // Réinitialiser l'état
+      // setTimeout(() => {
+      //   navigate('/présidence-service-finance/vacation'); // Naviguer après un délai
+      // }, 500); // Délai de 2 secondes avant de naviguer
     } catch (err) {
       toast.error('Erreur lors de la suppression du correcteur.');
     }
@@ -108,9 +118,22 @@ const DetailVacation = () => {
         // Inclure idCorrecteur dans l'URL de la requête
         const response = await axios.get<Vacation[]>(
           // `http://localhost:3000/api/vacation/correcteur/${immatricule}`,
-          `${API_VACATION.avoirIdVacation}/${immatricule}`,
+          `${API_VACATION.avoirIdVacation}/${idCorrecteur}`,
         );
         setVacations(response.data);
+
+        // Vérifier l'existence des paiements pour chaque vacation
+        const paiementStatus: { [key: string]: boolean } = {};
+        for (const vacation of response.data) {
+          try {
+            const paiementResponse = await axios.get(`${API_PAIEMENT.existePaiement}/${vacation.idVacation}`);
+            paiementStatus[vacation.idVacation] = paiementResponse.data.exists;
+          } catch (err) {
+            console.error(`Erreur lors de la vérification du paiement pour ${vacation.idVacation} :`, err);
+            paiementStatus[vacation.idVacation] = false; // Par défaut, considérer qu'il n'existe pas en cas d'erreur
+          }
+        }
+        setPaiementExists(paiementStatus);
       } catch (err) {
         setError('Erreur lors de la récupération des détails du correcteur');
         console.log(error);
@@ -120,7 +143,7 @@ const DetailVacation = () => {
     };
 
     fetchVacation();
-  }, [immatricule]);
+  }, [idCorrecteur]);
 
   // Calculer le nombre total de pages
   const totalPages = Math.ceil(vacations.length / vacationsPerPage);
@@ -134,22 +157,12 @@ const DetailVacation = () => {
   // Changer de page
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  // Fonction pour ouvrir le modal et récupérer les données de vacation
   const handleOpenModal = async (idVacation: string) => {
-    // Typage du paramètre idVacation
     try {
-      // Appel API pour récupérer les données de la vacation
-      const response = await axios.get(
-        // `http://localhost:3000/api/vacation/${idVacation}`,
-        `${API_VACATION.avoirIMVacation}/${idVacation}`,
-      );
+      const response = await axios.get(`${API_VACATION.avoirIMVacation}/${idVacation}`);
       const fetchedData = response.data;
-      setIsModalOpen(true);
 
-      setMontantTotal(null); // Réinitialiser le montant total
-      setOptionTarifChoisi(null); // Réinitialiser l'option tarif choisi
-
-      // Remplir le formulaire avec les valeurs récupérées
+      // Réinitialiser formData avec les données récupérées
       setFormData({
         idVacation: fetchedData.idVacation || '',
         idCorrecteur: fetchedData.idCorrecteur || '',
@@ -163,54 +176,78 @@ const DetailVacation = () => {
         matiere: fetchedData.matiere || '',
         pochette: fetchedData.pochette || '',
         nbcopie: fetchedData.nbcopie ? fetchedData.nbcopie.toString() : '',
+        // optionTarif: '', // Réinitialiser
+        // montantTotal: '', // Réinitialiser
         optionTarif: optionTarifChoisi || '',
         montantTotal: montantTotal?.toString() || '',
       });
+
+      // Réinitialiser les états liés
+      setMontantTotal(null);
+      setOptionTarifChoisi(null);
+
+      // Ouvrir le modal et calculer immédiatement
+      setIsModalOpen(true);
+      calculatePayement(); // Calculer optionTarif et montantTotal
     } catch (error) {
-      console.error(
-        'Erreur lors de la récupération des données de vacation',
-        error,
-      );
+      console.error('Erreur lors de la récupération des données de vacation', error);
     }
   };
 
   const calculatePayement = () => {
     if (!formData.nbcopie) {
-      // setOpenVerify(true);
+      toast.info('Veuillez cliquer le buton calculer le paiement.');
       return;
-    } else {
-      let montant = 0;
-      let optionTarif = '';
-
-      if (Number(formData.nbcopie) < 50) {
-        const tarifForfetaire = tarifs.find(
-          (tarif) => tarif.optionTarif === 'Par forfaitaire',
-        );
-        montant = tarifForfetaire ? tarifForfetaire.MontantTarif : 0;
-        optionTarif = 'Par forfaitaire';
-      } else {
-        const tarifParNombre = tarifs.find(
-          (tarif) => tarif.optionTarif === 'Par nombre du copie',
-        );
-        montant = tarifParNombre
-          ? tarifParNombre.MontantTarif * Number(formData.nbcopie)
-          : 0;
-        optionTarif = 'Par nombre du copie';
-      }
-
-      setMontantTotal(montant);
-      setOptionTarifChoisi(optionTarif); // Met à jour l'option tarif choisi
-      setFormData({
-        ...formData,
-        optionTarif,
-        montantTotal: montant.toString(),
-      });
     }
+
+    let montant = 0;
+    let optionTarif = '';
+
+    if (Number(formData.nbcopie) < 50) {
+      const tarifForfetaire = tarifs.find(
+        (tarif) => tarif.optionTarif === 'Par forfaitaire',
+      );
+      montant = tarifForfetaire ? tarifForfetaire.MontantTarif : 0;
+      optionTarif = 'Par forfaitaire';
+    } else {
+      const tarifParNombre = tarifs.find(
+        (tarif) => tarif.optionTarif === 'Par nombre du copie',
+      );
+      montant = tarifParNombre
+        ? tarifParNombre.MontantTarif * Number(formData.nbcopie)
+        : 0;
+      optionTarif = 'Par nombre du copie';
+    }
+
+    setMontantTotal(montant);
+    setOptionTarifChoisi(optionTarif);
+    setFormData({
+      ...formData,
+      optionTarif,
+      montantTotal: montant.toString(),
+    });
   };
 
-  // Fonction pour fermer le modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setFormData({
+      idVacation: '',
+      idCorrecteur: '',
+      immatricule: '',
+      firstName: '',
+      lastName: '',
+      cin: '',
+      specialite: '',
+      secteur: '',
+      option: '',
+      matiere: '',
+      pochette: '',
+      nbcopie: '',
+      optionTarif: '',
+      montantTotal: '',
+    });
+    setMontantTotal(null);
+    setOptionTarifChoisi(null);
   };
 
   const handleChange = (e: { target: { name: any; value: any } }) => {
@@ -277,9 +314,17 @@ const DetailVacation = () => {
       console.log('Paiement ajouté avec succès', response.data);
       // Traitez le succès ici, par exemple afficher un message ou rediriger
 
-      setOpenSuccess(true); // Afficher le message de succès
+      // setOpenSuccess(true); 
       toast.success('Paiement ajouté avec succès');
+
+      // Mettre à jour l'état paiementExists après ajout
+      setPaiementExists((prev) => ({
+        ...prev,
+        [idVacation]: true,
+
+      }));
       handleCloseModal(); // Fermer le modal après l'ajout
+
       // setTimeout(() => {
       //   navigate('/présidence-service-finance/paiement-liste'); // Naviguer après un délai
       // }, 3000); // Délai de 2 secondes avant de naviguer
@@ -347,17 +392,14 @@ const DetailVacation = () => {
                 <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
                   ID vacation
                 </th>
-                <th className="min-w-[200px] py-4 px-4 font-medium text-black dark:text-white">
-                  Bacc spécialité
-                </th>
-                <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
-                  Secteur
-                </th>
-                <th className="min-w-[210px] py-4 px-4 font-medium text-black dark:text-white">
-                  Option
+                <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
+                  Matière corrigé
                 </th>
                 <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
-                  Matière spécialisée
+                  Specialité
+                </th>
+                <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
+                  Pochette
                 </th>
                 <th className="min-w-[160px] py-4 px-4 font-medium text-black dark:text-white">
                   Nombre du copie corrigée
@@ -381,7 +423,7 @@ const DetailVacation = () => {
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                       <p className="text-black dark:text-white">
-                        {vacation.specialite}
+                        {vacation.matiere}
                       </p>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
@@ -391,12 +433,7 @@ const DetailVacation = () => {
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                       <p className="text-black dark:text-white">
-                        {vacation.option}
-                      </p>
-                    </td>
-                    <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                      <p className="text-black dark:text-white">
-                        {vacation.matiere}
+                        {vacation.pochette}
                       </p>
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
@@ -411,13 +448,15 @@ const DetailVacation = () => {
                     </td>
                     <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                       <div className="flex items-center justify-center space-x-3.5">
-                        <Link to="#" className="hover:text-primary">
-                          <DocumentCurrencyDollarIcon
-                            className="h-auto w-5 text-success"
-                            onClick={() => handleOpenModal(vacation.idVacation)}
-                          />
-                        </Link>
-                        <button onClick={handleDeleting}>
+                        {!paiementExists[vacation.idVacation] && (
+                          <Link to="#" className="hover:text-primary">
+                            <DocumentCurrencyDollarIcon
+                              className="h-auto w-5 text-success"
+                              onClick={() => handleOpenModal(vacation.idVacation)}
+                            />
+                          </Link>
+                        )}
+                        <button onClick={() => handleDeleting(vacation.idVacation)}>
                           <TrashIcon className="h-auto w-5 text-danger" />
                         </button>
                       </div>
@@ -425,7 +464,10 @@ const DetailVacation = () => {
                       {/* Modal de Confirmation avec Dialog */}
                       <Dialog
                         open={open}
-                        onClose={() => setOpen(false)}
+                        onClose={() => {
+                          setOpen(false)
+                          setVacationToDelete(null); // Réinitialiser après fermeture
+                        }}
                         className="relative z-10"
                       >
                         <div
@@ -437,10 +479,10 @@ const DetailVacation = () => {
                             <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg dark:bg-gray-800">
                               <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 dark:bg-gray-800">
                                 <div className="sm:flex sm:items-start">
-                                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10 dark:bg-red-600">
-                                    <CheckCircleIcon
+                                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 sm:mx-0 sm:h-10 sm:w-10 dark:bg-blue-600">
+                                    <QuestionMarkCircleIcon
                                       aria-hidden="true"
-                                      className="h-6 w-6 text-red-600 dark:text-red-200"
+                                      className="h-6 w-6 text-white dark:text-gray-500"
                                     />
                                   </div>
                                   <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
@@ -454,7 +496,7 @@ const DetailVacation = () => {
                                       <p className="text-sm text-gray-500 dark:text-gray-300">
                                         Voulez-vous vraiment supprimer ce
                                         correcteur dont l'ID est :{' '}
-                                        {vacation.idVacation} ?
+                                        {vacationToDelete} ?
                                       </p>
                                     </div>
                                   </div>
@@ -473,7 +515,8 @@ const DetailVacation = () => {
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    confirmDelete(vacation.idVacation)
+                                    vacationToDelete &&
+                                    confirmDelete(vacationToDelete)
                                   }
                                   className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
                                                                         border-danger bg-transparent text-black transition hover:bg-transparent
@@ -945,8 +988,8 @@ const DetailVacation = () => {
       <div className="flex justify-center space-x-2 mt-4">
         <button
           className={`py-2 px-4 rounded ${currentPage === 1
-              ? 'bg-gray-300 cursor-not-allowed'
-              : 'bg-primary text-white'
+            ? 'bg-gray-300 cursor-not-allowed'
+            : 'bg-primary text-white'
             }`}
           onClick={() => paginate(currentPage - 1)}
           disabled={currentPage === 1}
@@ -955,8 +998,8 @@ const DetailVacation = () => {
         </button>
         <button
           className={`py-2 px-4 rounded ${currentPage === totalPages
-              ? 'bg-gray-300 cursor-not-allowed'
-              : 'bg-primary text-white'
+            ? 'bg-gray-300 cursor-not-allowed'
+            : 'bg-primary text-white'
             }`}
           onClick={() => paginate(currentPage + 1)}
           disabled={currentPage === totalPages}

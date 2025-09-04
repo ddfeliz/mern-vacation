@@ -9,12 +9,14 @@ interface APIPaiement {
   compterPaiement: string;
   regouperPaiement: string;
   genererExcelPaiement: string;
+  genererPaiementPDF: string;
   modifierToPayerPaiement: string;
 
   avoirIdCorrecteurPaiement: string;
   avoirIdPaiement: string;
   modifierPaiement: string;
   supprimerPaiement: string;
+  existePaiement: string;
 }
 
 const API_PAIEMENT: APIPaiement = {
@@ -25,12 +27,14 @@ const API_PAIEMENT: APIPaiement = {
   compterPaiement: `${BASE_URL}/api/paiement/compter`,
   regouperPaiement: `${BASE_URL}/api/paiement/regroupement`,
   genererExcelPaiement: `${BASE_URL}/api/paiement/generer-excel`,
+  genererPaiementPDF: `${BASE_URL}/api/paiement/export-pdf`,
   modifierToPayerPaiement: `${BASE_URL}/api/paiement/statut-modification`,
 
   avoirIdCorrecteurPaiement: `${BASE_URL}/api/paiement/correcteur`,
   avoirIdPaiement: `${BASE_URL}/api/paiement`,
   modifierPaiement: `${BASE_URL}/api/paiement`,
   supprimerPaiement: `${BASE_URL}/api/paiement`,
+  existePaiement: `${BASE_URL}/api/paiement/verification`,
 };
 
 export default API_PAIEMENT;

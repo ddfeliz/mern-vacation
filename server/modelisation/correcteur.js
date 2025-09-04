@@ -7,8 +7,7 @@ const correcteurSchema = new mongoose.Schema({
         unique: true
     },
     immatricule: {
-        type: String,
-        unique: true
+        type: String
     },
     nom: {
         type: String,
@@ -45,15 +44,9 @@ const correcteurSchema = new mongoose.Schema({
     },
     option: {
         type: String,
-        required: true,
     },
     matiere: {
         type: String,
-        required: true,
-    },
-    grade: {
-        type: String,
-        required: true,
     },
     statut: {
         type: String,
@@ -79,14 +72,14 @@ correcteurSchema.pre('save', async function(next) {
         correcteur.idCorrecteur = `COR-${newIdNumber.toString().padStart(3, '0')}`;
     }
 
-    if (!correcteur.immatricule) {
+    // if (!correcteur.immatricule) {
         
-        const entier = Math.floor(Math.random() * 900) + 100; 
-        const decimal = Math.floor(Math.random() * 900) + 100; 
-        const nombreDecimal = `${entier}.${decimal}`; 
+    //     const entier = Math.floor(Math.random() * 900) + 100; 
+    //     const decimal = Math.floor(Math.random() * 900) + 100; 
+    //     const nombreDecimal = `${entier}${decimal}`; 
 
-        correcteur.immatricule = nombreDecimal;
-    }
+    //     correcteur.immatricule = nombreDecimal;
+    // }
 
     next();
 });

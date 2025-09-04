@@ -230,7 +230,7 @@ const CreatePaymentVacation = () => {
       toast.success('Sauvegardé avec succès.');
       setTimeout(() => {
         navigate('/présidence-service-finance/paiement-liste'); // Naviguer après un délai
-      }, 3000); // Délai de 2 secondes avant de naviguer
+      }, 500); // Délai de 2 secondes avant de naviguer
     } catch (err: any) {
       if (err.response) {
         setError(

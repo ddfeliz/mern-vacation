@@ -1,6 +1,11 @@
 const Vacation = require("../modelisation/vacation");
 const CreateError = require("../utils/appError");
 
+const pdfMake = require('pdfmake/build/pdfmake');
+const pdfFonts = require('pdfmake/build/vfs_fonts');
+pdfMake.vfs = pdfFonts.vfs;
+
+
 exports.ajoutVacation = async (req, res, next) => {
   try {
     const {
@@ -49,6 +54,7 @@ exports.ajoutVacation = async (req, res, next) => {
       secteur,
       option,
       matiere,
+      pochette,
       session: currentYear,
     });
     if (vacationExist) {
@@ -128,8 +134,9 @@ exports.avoirTousVacations = async (req, res, next) => {
 exports.avoirPochette = async (req, res) => {
   try {
     const session = req.params.session;
+    const idCorrecteur = req.params.idCorrecteur;
     const pochette = req.query.pochette;
-    const vacation = await Vacation.findOne({ pochette, session });
+    const vacation = await Vacation.findOne({ pochette, session, idCorrecteur });
 
     if (vacation) {
       return res.json({ exists: true });
@@ -210,9 +217,9 @@ exports.avoirTotalesCopiesEnAnnee = async (req, res, next) => {
 
 exports.avoirIdVacation = async (req, res, next) => {
   try {
-    const { immatricule } = req.params;
+    const { idCorrecteur } = req.params;
 
-    const vacation = await Vacation.find({ immatricule });
+    const vacation = await Vacation.find({ idCorrecteur });
     if (!vacation.length) {
       return next(new CreateError(404, "Vacation non trouvé."));
     }
@@ -288,8 +295,10 @@ exports.avoirVacationCompteByCorrecteur = async (req, res, next) => {
         $group: {
           _id: "$idCorrecteur", // Regroupe par ID du correcteur
           immatricule: {$first: "$immatricule"},
+          idCorrecteur: {$first: "$idCorrecteur"},
           nom: {$first: "$nom"},
           prenom: {$first: "$prenom"},
+          cin: {$first: "$cin"},
           totalVacations: { $sum: 1 }, // Compte le nombre de vacations pour chaque correcteur
           idVacations: {$first: "$idVacation"},
         },
@@ -298,8 +307,10 @@ exports.avoirVacationCompteByCorrecteur = async (req, res, next) => {
         $project: {
           _id: 0,
           immatricule: 1,
+          idCorrecteur:1,
           nom: 1,
           prenom: 1,
+          cin: 1,
           totalVacations: 1, 
           idVacations: 1,
         },
@@ -336,3 +347,181 @@ exports.suppressionVacation = async (req, res, next) => {
     );
   }
 };
+
+exports.avoirNombreCorrecteursAvecVacations = async (req, res, next) => {
+  try {
+    const result = await Vacation.aggregate([
+      {
+        $group: {
+          _id: "$idCorrecteur", // Grouper par idCorrecteur unique (seuls ceux avec au moins une vacation)
+        },
+      },
+      {
+        $count: "totalCorrecteurs", // Compter le nombre de groupes (correcteurs uniques)
+      },
+    ]);
+
+    const totalCorrecteurs = result.length > 0 ? result[0].totalCorrecteurs : 0;
+
+    res.status(200).json({
+      message: "Nombre de correcteurs ayant des vacations calculé avec succès.",
+      totalCorrecteurs,
+    });
+  } catch (error) {
+    next(
+      new CreateError(500, "Erreur lors du comptage des correcteurs avec vacations.", error)
+    );
+  }
+};
+
+
+
+exports.genererPDFCorrecteursParSpecialite = async (req, res, next) => {
+  try {
+    const { specialite } = req.params;
+
+    if (!specialite) {
+      return next(new CreateError(400, "La spécialité est requise."));
+    }
+
+    const vacations = await Vacation.find({ specialite });
+
+    if (!vacations || vacations.length === 0) {
+      return next(new CreateError(404, "Aucun correcteur trouvé pour cette spécialité."));
+    }
+
+    // Calculate total unique correctors for the specialty
+    const totalCorrecteurs = [...new Set(vacations.map(vac => vac.idCorrecteur))].length;
+
+    // Group by secteur and idCorrecteur, aggregating relevant fields
+    const groupedBySecteur = vacations.reduce((acc, vac) => {
+      if (!acc[vac.secteur]) {
+        acc[vac.secteur] = {};
+      }
+
+      const corrKey = vac.idCorrecteur;
+      if (!acc[vac.secteur][corrKey]) {
+        acc[vac.secteur][corrKey] = {
+          immatricule: vac.immatricule,
+          nom: vac.nom,
+          prenom: vac.prenom,
+          cin: vac.cin,
+          telephone: vac.telephone,
+          pochette: vac.pochette,
+          option: vac.option,
+          matiere: vac.matiere,
+          session: vac.session,
+          totalCopies: 0,
+        };
+      }
+
+      acc[vac.secteur][corrKey].totalCopies += vac.nbcopie;
+
+      return acc;
+    }, {});
+
+    // Define PDF document with A4 page size
+    const docDefinition = {
+      pageSize: 'A4',
+      pageMargins: [40, 60, 40, 60],
+      content: [
+        { text: `Liste des correcteurs pour la spécialité: ${specialite}`, style: 'title' },
+        { text: `Nombre total de correcteurs: ${totalCorrecteurs}`, style: 'subtitle' },
+        { text: '', margin: [0, 10, 0, 10] }, // Spacer
+      ],
+      styles: {
+        title: { fontSize: 20, bold: true, margin: [0, 0, 0, 10], alignment: 'center' },
+        subtitle: { fontSize: 14, bold: true, margin: [0, 5, 0, 10], alignment: 'center' },
+        header: { fontSize: 16, bold: true, margin: [0, 20, 0, 10], alignment: 'left' },
+        subheader: { fontSize: 12, bold: true, margin: [0, 5, 0, 10], alignment: 'left' },
+        tableHeader: { bold: true, fontSize: 12, color: 'black', alignment: 'center' },
+        tableCell: { fontSize: 10, alignment: 'center' },
+      },
+      defaultStyle: { fontSize: 10 },
+    };
+
+    // Add tables for each secteur
+    for (const [secteur, correcteurs] of Object.entries(groupedBySecteur)) {
+      // Calculate total correctors for this sector
+      const sectorCorrecteursCount = Object.keys(correcteurs).length;
+
+      docDefinition.content.push({ text: `Secteur: ${secteur}`, style: 'header' });
+
+      const tableBody = [
+        [
+          { text: 'Immatricule', style: 'tableHeader' },
+          { text: 'Nom', style: 'tableHeader' },
+          { text: 'Prénom', style: 'tableHeader' },
+          { text: 'CIN', style: 'tableHeader' },
+          { text: 'Téléphone', style: 'tableHeader' },
+          { text: 'Option', style: 'tableHeader' },
+          { text: 'Matière', style: 'tableHeader' },
+        ],
+      ];
+
+      Object.values(correcteurs).forEach((c) => {
+        tableBody.push([
+          { text: c.immatricule, style: 'tableCell' },
+          { text: c.nom, style: 'tableCell' },
+          { text: c.prenom, style: 'tableCell' },
+          { text: c.cin, style: 'tableCell' },
+          { text: c.telephone, style: 'tableCell' },
+          { text: c.option, style: 'tableCell' },
+          { text: c.matiere, style: 'tableCell' }
+        ]);
+      });
+
+      docDefinition.content.push({
+        table: {
+          headerRows: 1,
+          widths: [60, 60, 60, 60, 60, 50, 50,],
+          body: tableBody,
+          dontBreakRows: true,
+        },
+        layout: {
+          hLineWidth: () => 0.5,
+          vLineWidth: () => 0.5,
+          hLineColor: () => '#aaa',
+          vLineColor: () => '#aaa',
+          paddingLeft: () => 4,
+          paddingRight: () => 4,
+          paddingTop: () => 2,
+          paddingBottom: () => 2,
+          fillColor: (rowIndex) => (rowIndex === 0 ? '#f0f0f0' : null),
+        },
+      });
+
+      docDefinition.content.push({
+        text: `Nombre de correcteurs dans ce secteur: ${sectorCorrecteursCount}`,
+        style: 'subheader',
+      });
+    }
+
+    const pdfDoc = pdfMake.createPdf(docDefinition);
+
+    pdfDoc.getBuffer((buffer) => {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=correcteurs_${specialite}.pdf`);
+      res.end(buffer);
+    });
+  } catch (error) {
+    next(new CreateError(500, "Erreur lors de la génération du PDF.", error));
+  }
+};
+
+
+exports.avoirSpecialites = async (req, res, next) => {
+  try {
+    const specialites = await Vacation.distinct("specialite");
+    if (!specialites || specialites.length === 0) {
+      return next(new CreateError(404, "Aucune spécialité trouvée."));
+    }
+    res.status(200).json({ specialites });
+  } catch (error) {
+    next(
+      new CreateError(500, "Erreur lors de la récupération des spécialités.", error)
+    );
+  }
+};
+
+

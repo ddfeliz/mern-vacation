@@ -101,7 +101,7 @@ const EditTarif = () => {
       toast.success('modification effectué avec succès.')
       setTimeout(() => {
         navigate('/présidence-service-finance/tarif'); // Naviguer après un délai
-      }, 3000); // Délai de 3 secondes avant de naviguer
+      }, 500); // Délai de 3 secondes avant de naviguer
     } catch (error) {
       setError('Erreur lors de la mise à jour du tarif.');
       toast.error('Erreur lors de la mise à jour du tarif.');

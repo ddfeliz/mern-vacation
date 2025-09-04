@@ -386,7 +386,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               Vue ensemble
                             </NavLink>
                           </li>
-                          <li>
+                          {/* <li>
                             <NavLink
                               to="nouveau-vacation"
                               className={({ isActive }) =>
@@ -396,7 +396,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             >
                               Nouveau
                             </NavLink>
-                          </li>
+                          </li> */}
                         </ul>
                       </div>
                       {/* <!-- Dropdown Menu End --> */}
@@ -465,7 +465,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                               Vue ensemble
                             </NavLink>
                           </li>
-                          <li>
+                          {/* <li>
                             <NavLink
                               to="nouveau-paiement"
                               className={({ isActive }) =>
@@ -475,7 +475,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                             >
                               Nouveau
                             </NavLink>
-                          </li>
+                          </li> */}
                           <li>
                             <NavLink
                               to="archivage-paiement"

@@ -175,7 +175,7 @@ exports.avoirSecteurs = async (req, res, next) => {
 
     try {
         
-        const secteurs = await Baccalaureat.find({ libelleSpecialite: specialite }).distinct('libelleSecteur');
+        const secteurs = await Baccalaureat.find({ libelleSpecialite: specialite }).distinct('libelleCourt');
         res.status(200).json({
             message: `Secteurs pour la spécialité ${specialite} récupérés avec succès.`,
             secteurs
@@ -195,7 +195,7 @@ exports.avoirLibelleOption = async (req, res, next) => {
 
     try {
         
-        const options = await Baccalaureat.find({ libelleSecteur: secteur }).distinct('libelleOption');
+        const options = await Baccalaureat.find({ libelleCourt: secteur }).distinct('libelleOption');
         res.status(200).json({
             message: `Matières pour le secteur ${secteur} récupérées avec succès.`,
             options

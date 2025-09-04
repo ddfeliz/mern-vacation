@@ -20,6 +20,7 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import ArchivePdf from './ArchivePdf';
 import API_ARCHIVE from '../../../../api/archivage';
 import API_BACC from '../../../../api/baccalaureat';
+import { toast } from 'react-toastify';
 
 const ShowArchivePayment = () => {
   const [formData, setFormData] = useState({
@@ -171,17 +172,18 @@ const ShowArchivePayment = () => {
   const confirmDelete = async (idPaiement: string) => {
     try {
       // Suppression du paiement par son identifiant MongoDB (_id)
-      await axios.delete(`${API_ARCHIVE.supprimerArchive}`);
+      await axios.delete(`${API_ARCHIVE.supprimerArchive}/${idPaiement}`);
 
       // Mettre à jour l'état en supprimant le paiement localement de la liste
       setArchives(
         archives.filter((archive) => archive.idPaiement !== idPaiement),
       );
 
-      setOpen2(true); // Afficher le message de succès
+      // setOpen2(true);
+      toast.success('Suppression avec succès.')
       setOpen(false);
     } catch (err) {
-      alert('Erreur lors de la suppression du paiement.');
+      toast.error('Erreur lors de la suppression du paiement.');
     }
   };
 
@@ -297,15 +299,15 @@ const ShowArchivePayment = () => {
                 </option>
               </select>
             </div>
-              <PDFDownloadLink
-                document={<ArchivePdf archives={combinedArchive} />}
-                fileName="arhives.pdf"
-                className="rounded border-[1.5px] border-primary bg-transparent py-4 px-10 text-black outline-none transition hover:border-primary hover:text-primary focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-primary dark:bg-form-input dark:text-white dark:focus:border-primary dark:hover:border-primary dark:hover:text-primary"
-              >
-                <span className="flex flex-wrap items-center justify-center">
-                  <BsFilePdfFill className="w-8 h-5" /> Créer en PDF
-                </span>
-              </PDFDownloadLink>
+            <PDFDownloadLink
+              document={<ArchivePdf archives={combinedArchive} />}
+              fileName="arhives.pdf"
+              className="rounded border-[1.5px] border-primary bg-transparent py-4 px-10 text-black outline-none transition hover:border-primary hover:text-primary focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-primary dark:bg-form-input dark:text-white dark:focus:border-primary dark:hover:border-primary dark:hover:text-primary"
+            >
+              <span className="flex flex-wrap items-center justify-center">
+                <BsFilePdfFill className="w-8 h-5" /> Créer en PDF
+              </span>
+            </PDFDownloadLink>
           </div>
           <div className="mb-2 flex flex-wrap gap-5 xl:gap-7.5 justify-end">
             <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
@@ -615,19 +617,25 @@ const ShowArchivePayment = () => {
                                 </div>
                                 <div className="mt-4 mb-4 flex justify-end">
                                   <button
+                                    onClick={cancelDelete}
+                                    className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-secondary bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-secondary hover:text-secondary dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-secondary dark:hover:text-secondary"
+                                  >
+                                    <span className='m-5'>Annuler</span>
+                                  </button>
+                                  <button
                                     type="button"
                                     onClick={() =>
                                       confirmDelete(payment.idPaiement)
                                     }
-                                    className="mr-2 bg-red-500 text-white px-4 py-2 rounded dark:bg-red-600"
+                                    className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-danger bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-danger hover:text-danger dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-danger dark:hover:text-danger"
                                   >
-                                    Oui, supprimer
-                                  </button>
-                                  <button
-                                    onClick={cancelDelete}
-                                    className="bg-gray-300 text-gray-800 px-4 py-2 rounded dark:bg-gray-600 dark:text-gray-200"
-                                  >
-                                    Annuler
+                                    <span className='m-5'>Oui, supprimer</span>
                                   </button>
                                 </div>
                               </DialogPanel>
@@ -655,22 +663,20 @@ const ShowArchivePayment = () => {
         {/* Pagination */}
         <div className="flex justify-center space-x-2 mt-4">
           <button
-            className={`py-2 px-4 rounded ${
-              currentPage === 1
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-primary text-white'
-            }`}
+            className={`py-2 px-4 rounded ${currentPage === 1
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-primary text-white'
+              }`}
             onClick={() => paginate(currentPage - 1)}
             disabled={currentPage === 1}
           >
             Précédent
           </button>
           <button
-            className={`py-2 px-4 rounded ${
-              currentPage === totalPages
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-primary text-white'
-            }`}
+            className={`py-2 px-4 rounded ${currentPage === totalPages
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-primary text-white'
+              }`}
             onClick={() => paginate(currentPage + 1)}
             disabled={currentPage === totalPages}
           >

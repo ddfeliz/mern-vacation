@@ -12,6 +12,7 @@ import {
 import {
   ArrowLeftIcon,
   CheckCircleIcon,
+  QuestionMarkCircleIcon,
   TrashIcon,
 } from '@heroicons/react/24/outline';
 import { Tarif } from '../../../../types/tarif';
@@ -52,7 +53,7 @@ const DetailTarif = () => {
       setOpen(false);
       setTimeout(() => {
         navigate('/présidence-service-finance/tarif'); // Naviguer après un délai
-      }, 3000); // Délai de 2 secondes avant de naviguer
+      }, 500); // Délai de 2 secondes avant de naviguer
     } catch (err) {
       toast.error('Erreur lors de la suppression du correcteur.');
     }
@@ -217,11 +218,10 @@ const DetailTarif = () => {
                       className={`mr-3 inline-flex w-60 h-11 items-center justify-center rounded-md border
                                              border-danger bg-transparent text-black transition hover:bg-transparent
                                              hover:border-danger hover:text-danger dark:border-danger 
-                                              dark:bg-transparent dark:text-white dark:hover:border-danger dark:hover:text-danger ${
-                                                loading
-                                                  ? 'cursor-not-allowed opacity-50'
-                                                  : ''
-                                              }`}
+                                              dark:bg-transparent dark:text-white dark:hover:border-danger dark:hover:text-danger ${loading
+                          ? 'cursor-not-allowed opacity-50'
+                          : ''
+                        }`}
                     >
                       {loading ? (
                         'Mise à jour en cours...'
@@ -248,10 +248,10 @@ const DetailTarif = () => {
                     <DialogPanel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg dark:bg-gray-800">
                       <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4 dark:bg-gray-800">
                         <div className="sm:flex sm:items-start">
-                          <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10 dark:bg-red-600">
-                            <CheckCircleIcon
+                          <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-500 sm:mx-0 sm:h-10 sm:w-10 dark:bg-blue-600">
+                            <QuestionMarkCircleIcon
                               aria-hidden="true"
-                              className="h-6 w-6 text-red-600 dark:text-red-200"
+                              className="h-6 w-6 text-white dark:text-gray-500"
                             />
                           </div>
                           <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
@@ -272,17 +272,23 @@ const DetailTarif = () => {
                       </div>
                       <div className="mt-4 mb-4 flex justify-end">
                         <button
-                          type="button"
-                          onClick={() => confirmDelete(tarif.idTarif)}
-                          className="mr-2 bg-red-500 text-white px-4 py-2 rounded dark:bg-red-600"
+                          onClick={cancelDelete}
+                          className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-secondary bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-secondary hover:text-secondary dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-secondary dark:hover:text-secondary"
                         >
-                          Oui, supprimer
+                          <span className='m-5'>Annuler</span>
                         </button>
                         <button
-                          onClick={cancelDelete}
-                          className="bg-gray-300 text-gray-800 px-4 py-2 rounded dark:bg-gray-600 dark:text-gray-200"
+                          type="button"
+                          onClick={() => confirmDelete(tarif.idTarif)}
+                          className="mr-3 ml-3 inline-flex h-11 items-center justify-center rounded-md border
+                                                                        border-danger bg-transparent text-black transition hover:bg-transparent
+                                                                        hover:border-danger hover:text-danger dark:border-graydark 
+                                                                        dark:bg-transparent dark:text-strokedark dark:hover:border-danger dark:hover:text-danger"
                         >
-                          Annuler
+                          <span className='m-5'>Oui, supprimer</span>
                         </button>
                       </div>
                     </DialogPanel>

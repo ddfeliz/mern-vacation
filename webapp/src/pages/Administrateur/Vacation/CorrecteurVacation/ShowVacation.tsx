@@ -18,6 +18,7 @@ import CardDataStats from '../../../../components/CardDataStats';
 import { BsSearch } from 'react-icons/bs';
 import { VacationGroupe } from '../../../../types/vacationGroupe';
 import API_VACATION from '../../../../api/vacation';
+import { toast } from 'react-toastify';
 // import { toast } from 'react-toastify';
 // import API_VACATION from '../../../../api/vacation';
 
@@ -31,10 +32,64 @@ const ShowVacation: React.FC = () => {
   const [selectedYear, setSelectedYear] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalVacations, setTotalVacations] = useState('0');
-  const [vacationsPerPage] = useState(5); 
+  const [vacationsPerPage] = useState(5);
   const [searchItem, setSearchItem] = useState('');
+  const [totalCorrecteurs, setTotalCorrecteurs] = useState('0');
 
-  // Utiliser useEffect pour faire la requête à l'API au chargement du composant
+  
+  const [specialites, setSpecialites] = useState<string[]>([]); // NEW: State for specialties
+  const [selectedSpecialite, setSelectedSpecialite] = useState<string>(''); // NEW: State for selected specialty
+
+
+
+  // NEW: Fetch unique specialties
+  const fetchSpecialites = async () => {
+    try {
+      const response = await axios.get(`${API_VACATION.avoirSpecialite}`); // Assumes endpoint exists
+      setSpecialites(response.data.specialites || []);
+    } catch (err) {
+      console.log('Erreur lors de la récupération des spécialités:', err);
+      toast.error('Veuillez sélectionner une spécialité.');
+
+    }
+  };
+
+  // NEW: Function to generate and download PDF
+  const handleGeneratePDF = async () => {
+    if (!selectedSpecialite) {
+      toast.info('Veuillez sélectionner une spécialité.');
+      return;
+    }
+    try {
+      const response = await axios.get(
+        `${API_VACATION.genererPDF}/${selectedSpecialite}`,
+        { responseType: 'blob' } // Important for handling binary data
+      );
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `correcteurs_${selectedSpecialite}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.log('Erreur lors de la génération du PDF:', err);
+    }
+  };
+
+
+
+  const fetchTotalCorrecteurs = async () => {
+    try {
+      const response = await axios.get(
+        API_VACATION.avoirNombreCorrecteursAvecVacations // Ensure this is defined in API_VACATION
+      );
+      setTotalCorrecteurs(response.data.totalCorrecteurs.toString());
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const fetchTotalCopies = async () => {
     try {
@@ -66,6 +121,8 @@ const ShowVacation: React.FC = () => {
   useEffect(() => {
     fetchTotalCopies();
     fetchVacationCount();
+    fetchTotalCorrecteurs();
+    fetchSpecialites(); // NEW: Fetch specialties on mount
   }, []); // Le tableau vide [] signifie que le useEffect se déclenche une seule fois au chargement du composant
 
   useEffect(() => {
@@ -87,10 +144,24 @@ const ShowVacation: React.FC = () => {
   }, []);
 
 
+  // Fonction pour filtrer les paiements par statut et par critères spécifiques
+  const combinedFilteredPayments = vacations.filter((vacation) => {
+    const AAAAA = vacation.cin.toLowerCase().includes(searchItem.toLowerCase());
+    const BBBBB = vacation.nom.toLowerCase().includes(searchItem.toLowerCase());
+    const CCCCC = vacation.prenom.toLowerCase().includes(searchItem.toLowerCase());
+
+    return (
+      AAAAA ||
+      BBBBB ||
+      CCCCC
+    );
+  });
+
+
   // Calculer les indices de début et de fin pour les correcteurs affichés
   const indexOfLastVacation = currentPage * vacationsPerPage;
   const indexOfFirstVacation = indexOfLastVacation - vacationsPerPage;
-  const currentVacations = vacations.slice(
+  const currentVacations = combinedFilteredPayments.slice(
     indexOfFirstVacation,
     indexOfLastVacation,
   );
@@ -106,14 +177,41 @@ const ShowVacation: React.FC = () => {
     );
 
   // Calculer le nombre total de pages
-  const totalPages = Math.ceil(vacations.length / vacationsPerPage);
+  const totalPages = Math.ceil(combinedFilteredPayments.length / vacationsPerPage);
 
   return (
     <>
       <Breadcrumb pageName="Vacations" />
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5 mb-4">
         <CardDataStats
-          title="Total des correcteurs vacataires"
+          title="Totale des correcteurs avec vacations"
+          titleColor="#007BFF"
+          total={totalCorrecteurs}
+        >
+          <svg
+            className="fill-primary dark:fill-white"
+            width="22"
+            height="18"
+            viewBox="0 0 22 18"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M7.18418 8.03751C9.31543 8.03751 11.0686 6.35313 11.0686 4.25626C11.0686 2.15938 9.31543 0.475006 7.18418 0.475006C5.05293 0.475006 3.2998 2.15938 3.2998 4.25626C3.2998 6.35313 5.05293 8.03751 7.18418 8.03751ZM7.18418 2.05626C8.45605 2.05626 9.52168 3.05313 9.52168 4.29063C9.52168 5.52813 8.49043 6.52501 7.18418 6.52501C5.87793 6.52501 4.84668 5.52813 4.84668 4.29063C4.84668 3.05313 5.9123 2.05626 7.18418 2.05626Z"
+              fill=""
+            />
+            <path
+              d="M15.8124 9.6875C17.6687 9.6875 19.1468 8.24375 19.1468 6.42188C19.1468 4.6 17.6343 3.15625 15.8124 3.15625C13.9905 3.15625 12.478 4.6 12.478 6.42188C12.478 8.24375 13.9905 9.6875 15.8124 9.6875ZM15.8124 4.7375C16.8093 4.7375 17.5999 5.49375 17.5999 6.45625C17.5999 7.41875 16.8093 8.175 15.8124 8.175C14.8155 8.175 14.0249 7.41875 14.0249 6.45625C14.0249 5.49375 14.8155 4.7375 15.8124 4.7375Z"
+              fill=""
+            />
+            <path
+              d="M15.9843 10.0313H15.6749C14.6437 10.0313 13.6468 10.3406 12.7874 10.8563C11.8593 9.61876 10.3812 8.79376 8.73115 8.79376H5.67178C2.85303 8.82814 0.618652 11.0625 0.618652 13.8469V16.3219C0.618652 16.975 1.13428 17.4906 1.7874 17.4906H20.2468C20.8999 17.4906 21.4499 16.9406 21.4499 16.2875V15.4625C21.4155 12.4719 18.9749 10.0313 15.9843 10.0313ZM2.16553 15.9438V13.8469C2.16553 11.9219 3.74678 10.3406 5.67178 10.3406H8.73115C10.6562 10.3406 12.2374 11.9219 12.2374 13.8469V15.9438H2.16553V15.9438ZM19.8687 15.9438H13.7499V13.8469C13.7499 13.2969 13.6468 12.7469 13.4749 12.2313C14.0937 11.7844 14.8499 11.5781 15.6405 11.5781H15.9499C18.0812 11.5781 19.8343 13.3313 19.8343 15.4625V15.9438H19.8687Z"
+              fill=""
+            />
+          </svg>
+        </CardDataStats>
+        <CardDataStats
+          title="Total des vacations"
           titleColor="#007BFF"
           total={totalVacations}
         >
@@ -268,17 +366,48 @@ const ShowVacation: React.FC = () => {
                 </option>
               </select>
             </div>
+            {/* NEW: Specialty selector and PDF button */}
+            <div className="w-full md:w-1/2 xl:w-1/3 flex gap-2 items-center">
+              <select
+                value={selectedSpecialite}
+                onChange={(e) => setSelectedSpecialite(e.target.value)}
+                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none 
+                transition focus:border-primary active:border-primary disabled:cursor-default 
+                disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+              >
+                <option value="">Sélectionner une spécialité...</option>
+                {specialites.map((spec) => (
+                  <option key={spec} value={spec}>
+                    {spec}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleGeneratePDF}
+                className="inline-flex items-center justify-center gap-2.5 rounded-md bg-primary py-3 px-5 text-center font-medium text-white hover:bg-opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                disabled={!selectedSpecialite}
+              >
+                Générer PDF
+              </button>
+            </div>
+            
           </div>
 
           <div className="max-w-full overflow-x-auto">
             <table className="w-full table-auto">
               <thead>
                 <tr className="bg-gray text-center dark:bg-meta-4">
+                  <th className="min-w-[80px] py-4 px-4 font-medium text-black dark:text-white">
+                    -
+                  </th>
                   <th className="min-w-[180px] py-4 px-4 font-medium text-black dark:text-white">
-                    N° immatricule
+                    I.M
                   </th>
                   <th className="min-w-[300px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
                     Nom complet
+                  </th>
+                  <th className="min-w-[300px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
+                    CIN
                   </th>
                   <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white">
                     Nombre des vacations
@@ -293,8 +422,13 @@ const ShowVacation: React.FC = () => {
               </thead>
               <tbody>
                 {currentVacations.length > 0 ? (
-                  currentVacations.map((vacation) => (
-                    <tr key={vacation.immatricule} className='text-center'>
+                  currentVacations.map((vacation, index) => (
+                    <tr key={vacation.idCorrecteur} className='text-center'>
+                      <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
+                        <p className="text-black dark:text-white">
+                          {indexOfFirstVacation + index + 1}
+                        </p>
+                      </td>
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark xl:pl-11">
                         <h5 className="font-medium text-black dark:text-white">
                           {vacation.immatricule}
@@ -305,10 +439,15 @@ const ShowVacation: React.FC = () => {
                           {vacation.nom} {vacation.prenom}
                         </h5>
                       </td>
+                      <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark xl:pl-11">
+                        <h5 className="font-medium text-black dark:text-white">
+                          {vacation.cin}
+                        </h5>
+                      </td>
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                         <p className="text-black dark:text-white">
                           <Link
-                            to={`/présidence-service-finance/vacation/correcteur/${vacation.immatricule}`}
+                            to={`/présidence-service-finance/vacation/correcteur/${vacation.idCorrecteur}`}
                             className="hover:text-primary"
                           >
                             {vacation.totalVacations}
@@ -323,7 +462,7 @@ const ShowVacation: React.FC = () => {
                       <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
                         <div className="flex items-center justify-center space-x-3.5">
                           <Link
-                            to={`/présidence-service-finance/vacation/correcteur/${vacation.immatricule}`}
+                            to={`/présidence-service-finance/vacation/correcteur/${vacation.idCorrecteur}`}
                             className="hover:text-primary"
                           >
                             <EyeIcon className="h-auto w-5 text-secondary" />
@@ -353,22 +492,20 @@ const ShowVacation: React.FC = () => {
         {/* Pagination */}
         <div className="flex justify-center space-x-2 mt-4">
           <button
-            className={`py-2 px-4 rounded ${
-              currentPage === 1
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-primary text-white'
-            }`}
+            className={`py-2 px-4 rounded ${currentPage === 1
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-primary text-white'
+              }`}
             onClick={() => paginate(currentPage - 1)}
             disabled={currentPage === 1}
           >
             Précédent
           </button>
           <button
-            className={`py-2 px-4 rounded ${
-              currentPage === totalPages
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-primary text-white'
-            }`}
+            className={`py-2 px-4 rounded ${currentPage === totalPages
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-primary text-white'
+              }`}
             onClick={() => paginate(currentPage + 1)}
             disabled={currentPage === totalPages}
           >

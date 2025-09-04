@@ -6,6 +6,7 @@ import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from "@headlessui/re
 import { ArrowLeftIcon, CheckCircleIcon, ExclamationTriangleIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import API_CORRECTEUR from "../../../api/correcteur";
 import { toast } from "react-toastify";
+import API_BACC from "../../../api/baccalaureat";
 
 const EditCorrecteur = () => {
     const { idCorrecteur } = useParams<{ idCorrecteur: string }>(); // Récupérer l'ID du correcteur depuis l'URL
@@ -17,12 +18,47 @@ const EditCorrecteur = () => {
         adresse: '',
         adresseProfession: '',
         telephone: '',
-        grade: ''
+        specialite: '',
+        secteur: ''
     });
     const [loading, setLoading] = useState(false); // État pour gérer le chargement
     const [error, setError] = useState<string | null>(null); // État pour gérer les erreurs
     const [open, setOpen] = useState(false);
     const [openCIN, setOpenCIN] = useState(false);
+
+    const [specialites, setSpecialites] = useState<string[]>([]); // État pour stocker les spécialités
+    const [secteurs, setSecteurs] = useState<string[]>([]); // État pour stocker les secteurs
+
+    // Récupérer les spécialités depuis le backend au montage du composant
+    useEffect(() => {
+        console.log("Fetching specialites...");
+        const fetchSpecialites = async () => {
+            try {
+                // const response = await axios.get('http://localhost:3000/api/matiere-bacc/specialiste');
+                const response = await axios.get(API_BACC.specialisteBacc);
+                const fetchedSpecialites = response.data.specialites;
+                console.log("Specialites fetched:", fetchedSpecialites);
+                setSpecialites(fetchedSpecialites); // Mettre à jour les spécialités avec la réponse de l'API
+            } catch (err) {
+                console.error("Erreur lors de la récupération des spécialités :", err);
+            }
+        };
+
+        fetchSpecialites();
+    }, []);
+
+    // Récupérer les secteurs en fonction de la spécialité sélectionnée
+    const fetchSecteurs = async (specialite: string) => {
+        try {
+            const response = await axios.get(`${API_BACC.secteurBacc}?specialite=${specialite}`);
+            setSecteurs(response.data.secteurs); // Mettre à jour les secteurs
+            // setFormData((prevData) => ({ ...prevData, secteur: '', matiere: '' })); // Réinitialiser secteur et matière
+            // setMatieres([]); 
+        } catch (err) {
+            console.error("Erreur lors de la récupération des secteurs :", err);
+        }
+    };
+
 
     useEffect(() => {
         // Récupération des informations du correcteur à partir de l'API
@@ -33,6 +69,11 @@ const EditCorrecteur = () => {
                 const response = await axios.get(`${API_CORRECTEUR.avoirIdCorrecteur}/${idCorrecteur}`);
                 const correcteur = response.data;
 
+                // Charger d'abord les secteurs liés à la spécialité du correcteur
+                if (correcteur.specialite) {
+                    await fetchSecteurs(correcteur.specialite);
+                }
+
                 setFormData({
                     firstName: correcteur.prenom,
                     lastName: correcteur.nom,
@@ -40,7 +81,8 @@ const EditCorrecteur = () => {
                     adresse: correcteur.adresse,
                     adresseProfession: correcteur.adresseProfession,
                     telephone: correcteur.telephone,
-                    grade: correcteur.grade
+                    specialite: correcteur.specialite,
+                    secteur: correcteur.secteur
                 });
             } catch (err) {
                 setError("Erreur lors de la récupération des informations du correcteur.");
@@ -56,6 +98,14 @@ const EditCorrecteur = () => {
     const handleChange = (e: { target: { name: any; value: any; }; }) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+
+        if (name === 'specialite') {
+            fetchSecteurs(value);
+            setFormData((prevData) => ({
+                ...prevData,
+                secteur: ''
+            }));
+        }
     };
 
     const handleRetour = () => {
@@ -67,21 +117,22 @@ const EditCorrecteur = () => {
         setLoading(true);
 
         // Préparez les données à envoyer
-        const { firstName, lastName, cin, adresse, adresseProfession, telephone, grade } = formData;
+        const { firstName, lastName, cin, adresse, adresseProfession, telephone, specialite, secteur } = formData;
 
         try {
             const response = await axios.put(
                 // `http://localhost:3000/api/correcteur/${idCorrecteur}`, 
                 `${API_CORRECTEUR.modifierCorrecteur}/${idCorrecteur}`,
                 {
-                nom: lastName,
-                prenom: firstName,
-                cin,
-                adresse,
-                adresseProfession,
-                telephone,
-                grade
-            });
+                    nom: lastName,
+                    prenom: firstName,
+                    cin,
+                    adresse,
+                    adresseProfession,
+                    telephone,
+                    specialite,
+                    secteur
+                });
 
             console.log('Correcteur mis à jour avec succès', response.data);
 
@@ -89,7 +140,7 @@ const EditCorrecteur = () => {
             toast.success('Correcteur mis à jour avec succès.');
             setTimeout(() => {
                 navigate('/présidence-service-finance/correcteur'); // Naviguer après un délai
-            }, 3000); // Délai de 2 secondes avant de naviguer
+            }, 500); // Délai de 2 secondes avant de naviguer
 
         } catch (error) {
             setError('Erreur lors de la mise à jour du correcteur.');
@@ -244,7 +295,7 @@ const EditCorrecteur = () => {
 
                                 {/* Ligne pour adresse, adresseProssion et grade */}
                                 <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
-                                    <div className="w-full xl:w-1/3">
+                                    <div className="w-full xl:w-1/2">
                                         <label htmlFor="adresse" className="mb-2.5 block text-black dark:text-white">
                                             Adresse <span className="text-meta-1">*</span>
                                         </label>
@@ -260,7 +311,7 @@ const EditCorrecteur = () => {
                                         />
                                     </div>
 
-                                    <div className="w-full xl:w-1/3">
+                                    <div className="w-full xl:w-1/2">
                                         <label htmlFor="adresseProfession" className="mb-2.5 block text-black dark:text-white">
                                             Adresse Professionnelle <span className="text-meta-1">*</span>
                                         </label>
@@ -275,24 +326,52 @@ const EditCorrecteur = () => {
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         />
                                     </div>
+                                </div>
 
-                                    <div className="w-full xl:w-1/3">
-                                        <label htmlFor="grade" className="mb-2.5 block text-black dark:text-white">
-                                            Grade <span className="text-meta-1">*</span>
+                                <div className="mb-4.5 flex flex-col xl:flex-row gap-6">
+                                    <div className="w-full xl:w-1/2">
+                                        <label htmlFor="specialite" className="mb-2.5 block text-black dark:text-white">
+                                            Baccalauréat d'enseignement <span className="text-meta-1">*</span>
                                         </label>
                                         <select
-                                            name="grade"
-                                            id="grade"
-                                            value={formData.grade}
+                                            name="specialite"
+                                            id="specialite"
+                                            value={formData.specialite}
                                             onChange={handleChange}
                                             required
                                             className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
                                         >
-                                            <option value="">Sélectionnez votre grade</option>
-                                            <option value="Junior">Junior</option>
-                                            <option value="Intermediate">Intermédiaire</option>
-                                            <option value="Senior">Senior</option>
-                                            <option value="Expert">Expert</option>
+                                            <option value="">Sélectionnez un enseignement</option>
+                                            {specialites && specialites.length > 0 ? (
+                                                specialites.map((specialite, index) => (
+                                                    <option key={index} value={specialite}>{specialite}</option>
+                                                ))
+                                            ) : (
+                                                <option disabled>Chargement...</option>
+                                            )}
+                                        </select>
+                                    </div>
+
+                                    <div className="w-full xl:w-1/2">
+                                        <label htmlFor="secteur" className="mb-2.5 block text-black dark:text-white">
+                                            Secteur <span className="text-meta-1">*</span>
+                                        </label>
+                                        <select
+                                            name="secteur"
+                                            id="secteur"
+                                            value={formData.secteur}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full rounded border-[1.5px] border-stroke bg-transparent py-3 px-5 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                                        >
+                                            <option value="">Sélectionnez un secteur</option>
+                                            {secteurs && secteurs.length > 0 ? (
+                                                secteurs.map((secteur, index) => (
+                                                    <option key={index} value={secteur}>{secteur}</option>
+                                                ))
+                                            ) : (
+                                                <option disabled>Veuillez sélectionner une spécialité d'abord</option>
+                                            )}
                                         </select>
                                     </div>
                                 </div>

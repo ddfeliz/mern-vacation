@@ -17,6 +17,10 @@ router.get('/regroupement', Controlleur.regrouperTousLesPaiements);
 
 router.get('/generer-excel', Controlleur.generateExcelForSpeciality);
 
+router.get('/verification/:idVacation', Controlleur.existePaiement);
+
+router.get("/export-pdf/:idCorrecteur/:session", Controlleur.generatePaiementPDF);
+
 router.get('/:idPaiement', Controlleur.avoirIdPaiement);
 
 router.get('/correcteur/:idCorrecteur', Controlleur.avoirIdCorPaiement);
